@@ -1,12 +1,13 @@
 /**
  * Sadachar / AccessEd UI/UX Core Engine
- * Implements 14 Screens, 3 Roles, Speech Synthesis, Live Accessibility & API Hooks
+ * Implements accessible portal navigation, account-aware UI, speech synthesis, and API hooks
  */
 
 // Global State
 const AccessEdState = {
-    currentRole: 'student', // 'student' | 'teacher' | 'admin' | 'public'
+    currentRole: 'public',
     currentScreen: 'screen-landing',
+    currentUser: null,
     accessibility: {
         fontSize: 100,
         fontFamily: 'default', // 'default' | 'dyslexia' | 'mono'
@@ -37,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSpeechSynthesis();
     initKanbanBoard();
     initApiInteractions();
+    loadCurrentAccount();
 });
 
 /* ==========================================================================
@@ -62,12 +64,6 @@ function navigateToScreen(screenId) {
             }
         });
 
-        // Update Demo bar select
-        const demoSelect = document.getElementById('sih-screen-select');
-        if (demoSelect) {
-            demoSelect.value = screenId;
-        }
-
         // Announce for screen readers
         const announcement = document.getElementById('screen-announcer');
         if (announcement) {
@@ -77,60 +73,97 @@ function navigateToScreen(screenId) {
     }
 }
 
-function switchRole(role) {
-    AccessEdState.currentRole = role;
-    document.body.setAttribute('data-role', role);
-
-    // Update role select in demo bar
-    const roleSelect = document.getElementById('sih-role-select');
-    if (roleSelect) roleSelect.value = role;
-
-    // Filter sidebar navigation according to role
-    document.querySelectorAll('.sidebar-nav-item').forEach(item => {
-        const itemRoles = item.getAttribute('data-roles')?.split(',') || [];
-        if (itemRoles.includes(role) || itemRoles.includes('all')) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
+async function loadCurrentAccount() {
+    try {
+        const response = await fetch('/api/account/me', { credentials: 'same-origin' });
+        if (response.status === 401) {
+            applyCurrentAccount(null);
+            return;
         }
-    });
+        if (!response.ok) {
+            throw new Error(`Account lookup failed with HTTP ${response.status}`);
+        }
 
-    // Update User Pill in sidebar
-    const userPillName = document.getElementById('sidebar-user-name');
-    const userPillRole = document.getElementById('sidebar-user-role');
-    const userPillAvatar = document.getElementById('sidebar-user-avatar');
-
-    if (role === 'student') {
-        if (userPillName) userPillName.innerText = "Aarav Sharma";
-        if (userPillRole) userPillRole.innerText = "Student • Low Vision";
-        if (userPillAvatar) userPillAvatar.innerText = "AS";
-        navigateToScreen('screen-student-dash');
-    } else if (role === 'teacher') {
-        if (userPillName) userPillName.innerText = "Dr. Meera Iyer";
-        if (userPillRole) userPillRole.innerText = "Computer Science Faculty";
-        if (userPillAvatar) userPillAvatar.innerText = "MI";
-        navigateToScreen('screen-teacher-dash');
-    } else if (role === 'admin') {
-        if (userPillName) userPillName.innerText = "Rohan Kapoor";
-        if (userPillRole) userPillRole.innerText = "Ombudsman & Compliance Officer";
-        if (userPillAvatar) userPillAvatar.innerText = "RK";
-        navigateToScreen('screen-admin-dash');
-    } else {
-        navigateToScreen('screen-landing');
+        applyCurrentAccount(await response.json());
+    } catch (error) {
+        console.error('Could not load the signed-in account.', error);
+        const accountLink = document.getElementById('account-nav-link');
+        if (accountLink) {
+            accountLink.textContent = 'Account unavailable';
+            accountLink.removeAttribute('href');
+        }
     }
 }
 
+function applyCurrentAccount(user) {
+    AccessEdState.currentUser = user;
+
+    const roleMap = {
+        Student: 'student',
+        Educator: 'teacher',
+        Admin: 'admin',
+        Auditor: 'admin'
+    };
+    const role = user ? roleMap[user.role] : 'public';
+    if (!role) {
+        console.error('The signed-in account has an unsupported role.');
+        return;
+    }
+
+    AccessEdState.currentRole = role;
+    document.body.setAttribute('data-role', role);
+
+    document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+        const roles = item.getAttribute('data-roles')?.split(',') || [];
+        item.style.display = roles.includes(role) || (role !== 'public' && roles.includes('all')) ? 'block' : 'none';
+    });
+
+    const displayName = user?.fullName || 'Guest';
+    const initials = displayName
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part[0].toLocaleUpperCase())
+        .join('') || 'G';
+    const roleLabel = user ? user.role : 'Not signed in';
+
+    const nameElement = document.getElementById('sidebar-user-name');
+    const roleElement = document.getElementById('sidebar-user-role');
+    const avatarElement = document.getElementById('sidebar-user-avatar');
+    if (nameElement) nameElement.textContent = displayName;
+    if (roleElement) roleElement.textContent = roleLabel;
+    if (avatarElement) avatarElement.textContent = initials;
+
+    const profileName = document.getElementById('profile-display-name');
+    const profileRole = document.getElementById('profile-display-role');
+    const profileAvatar = document.getElementById('profile-avatar');
+    const profileDisability = document.getElementById('profile-disability');
+    const profileNameInput = document.getElementById('prof-name');
+    const profileEmailInput = document.getElementById('prof-email');
+    if (profileName) profileName.textContent = displayName;
+    if (profileRole) profileRole.textContent = roleLabel;
+    if (profileAvatar) profileAvatar.textContent = initials;
+    if (profileDisability) profileDisability.textContent = user ? user.disability : 'Accessibility needs not set';
+    if (profileNameInput) profileNameInput.value = user?.fullName || '';
+    if (profileEmailInput) profileEmailInput.value = user?.email || '';
+
+    const dashboardHeading = document.getElementById('screen3-heading');
+    if (dashboardHeading && user && role === 'student') {
+        dashboardHeading.textContent = `Welcome, ${displayName}`;
+    }
+
+    const accountLink = document.getElementById('account-nav-link');
+    if (accountLink) {
+        accountLink.textContent = user ? `${displayName} · My account` : 'Sign in';
+        accountLink.href = user ? '/Account/Profile' : '/Account/Login';
+    }
+
+    navigateToScreen(user
+        ? ({ student: 'screen-student-dash', teacher: 'screen-teacher-dash', admin: 'screen-admin-dash' })[role]
+        : 'screen-landing');
+}
+
 function initScreenNavigation() {
-    // Top Demo Bar screen switcher
-    document.getElementById('sih-screen-select')?.addEventListener('change', (e) => {
-        navigateToScreen(e.target.value);
-    });
-
-    // Top Demo Bar role switcher
-    document.getElementById('sih-role-select')?.addEventListener('change', (e) => {
-        switchRole(e.target.value);
-    });
-
     // Sidebar navigation clicks
     document.querySelectorAll('.sidebar-nav-item button, .sidebar-nav-item a').forEach(el => {
         el.addEventListener('click', (e) => {
@@ -494,7 +527,6 @@ function initApiInteractions() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        studentId: 'STU-2026-0891',
                         issueDescription: fullDesc
                     })
                 });

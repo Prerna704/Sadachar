@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using SakshamGovernance.Core.Entities;
 using SakshamGovernance.Core.Enums;
 using SakshamGovernance.Core.Interfaces;
 using SakshamGovernance.Infrastructure.Data;
 using SakshamGovernance.Infrastructure.Repositories;
 using SakshamGovernance.Infrastructure.Services;
+using SakshamGovernance.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,14 +37,44 @@ else
 // 2. ASP.NET Core Identity with Custom User & Roles
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
-        options.Password.RequireDigit = false;
-        options.Password.RequiredLength = 6;
+        options.Password.RequireDigit = true;
+        options.Password.RequiredLength = 8;
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequireUppercase = false;
-        options.User.RequireUniqueEmail = false;
+        options.User.RequireUniqueEmail = true;
+        options.Lockout.AllowedForNewUsers = true;
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Events.OnRedirectToLogin = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api"))
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        }
+
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api"))
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return Task.CompletedTask;
+        }
+
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+});
 
 // 3. Register Domain Repositories & Services
 builder.Services.AddScoped<IComplianceRepository, ComplianceRepository>();
@@ -86,7 +118,14 @@ using (var scope = app.Services.CreateScope())
     var context = services.GetRequiredService<ApplicationDbContext>();
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-    context.Database.EnsureCreated();
+    if (useInMemory)
+    {
+        await context.Database.EnsureCreatedAsync();
+    }
+    else
+    {
+        await context.Database.MigrateAsync();
+    }
 
     // Seed Sample Student User if not present
     var sampleStudent = await userManager.FindByIdAsync("STU-2026-0891");

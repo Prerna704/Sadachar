@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SakshamGovernance.Core.Entities;
 using SakshamGovernance.Core.Interfaces;
@@ -5,6 +6,7 @@ using SakshamGovernance.Web.DTOs;
 
 namespace SakshamGovernance.Web.Controllers;
 
+[Authorize(Roles = "Educator,Admin,Auditor")]
 [ApiController]
 [Route("api/[controller]")]
 public class ComplianceController : ControllerBase
@@ -110,4 +112,3 @@ public class ComplianceController : ControllerBase
         return Ok(response);
     }
 }
-

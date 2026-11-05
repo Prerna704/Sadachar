@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SakshamGovernance.Core.Entities;
 using SakshamGovernance.Core.Enums;
@@ -6,6 +8,7 @@ using SakshamGovernance.Web.DTOs;
 
 namespace SakshamGovernance.Web.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class GovernanceController : ControllerBase
@@ -25,6 +28,7 @@ public class GovernanceController : ControllerBase
     /// Logs a new grievance ticket for a specially-abled student, initializing a strict 72-Hour SLA clock.
     /// </summary>
     [HttpPost("grievance")]
+    [Authorize(Roles = "Student")]
     [ProducesResponseType(typeof(GrievanceResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateGrievanceTicket(
@@ -36,9 +40,15 @@ public class GovernanceController : ControllerBase
             return BadRequest(ModelState);
         }
 
+        var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(studentId))
+        {
+            return Unauthorized();
+        }
+
         var newTicket = new GrievanceTicket
         {
-            StudentId = request.StudentId,
+            StudentId = studentId,
             IssueDescription = request.IssueDescription,
             Status = TicketStatus.Open,
             CreatedAt = DateTime.UtcNow
@@ -75,6 +85,13 @@ public class GovernanceController : ControllerBase
             return NotFound(new { Message = $"Grievance ticket with ID '{ticketId}' not found." });
         }
 
+        if (!User.IsInRole(nameof(UserRole.Admin))
+            && !User.IsInRole(nameof(UserRole.Auditor))
+            && ticket.StudentId != User.FindFirstValue(ClaimTypes.NameIdentifier))
+        {
+            return Forbid();
+        }
+
         // Real-time SLA breach validation upon lookup
         if ((ticket.Status == TicketStatus.Open || ticket.Status == TicketStatus.InProgress) 
             && DateTime.UtcNow > ticket.SLAExpiryDateTime)
@@ -101,11 +118,18 @@ public class GovernanceController : ControllerBase
     /// <summary>
     /// Returns all registered grievance tickets and their current SLA status.
     /// </summary>
+    [Authorize(Roles = "Student,Admin,Auditor")]
     [HttpGet("grievances")]
     [ProducesResponseType(typeof(IEnumerable<GrievanceResponseDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllGrievances(CancellationToken cancellationToken)
     {
         var tickets = await _grievanceRepository.GetAllTicketsAsync(cancellationToken);
+        if (User.IsInRole(nameof(UserRole.Student)))
+        {
+            var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            tickets = tickets.Where(ticket => ticket.StudentId == studentId).ToList();
+        }
+
         var currentUtc = DateTime.UtcNow;
 
         var response = tickets.Select(ticket => new GrievanceResponseDto(
@@ -125,6 +149,7 @@ public class GovernanceController : ControllerBase
     /// <summary>
     /// Manually triggers the statutory 72-Hour SLA escalation service scan across all active tickets.
     /// </summary>
+    [Authorize(Roles = "Admin,Auditor")]
     [HttpPost("grievance/trigger-sla-check")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> TriggerSlaCheck(CancellationToken cancellationToken)
@@ -138,4 +163,3 @@ public class GovernanceController : ControllerBase
         });
     }
 }
-

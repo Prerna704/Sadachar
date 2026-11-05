@@ -13,7 +13,7 @@
     <!-- AccessEd / Sadachar Design Tokens & Styles -->
     <link rel="stylesheet" href="/css/accessed.css">
 </head>
-<body data-role="student">
+<body data-role="public">
 
     <!-- Screen Reader Announcer -->
     <div id="screen-announcer" class="visually-hidden" aria-live="polite"></div>
@@ -21,55 +21,11 @@
     <!-- Skip Link (WCAG 2.2 Bypass Blocks) -->
     <a href="#main-app-content" class="skip-to-content">Skip to main content</a>
 
-    <!-- ======================================================================
-         Top SIH Demonstration Control Bar (Quick Switch Between All 14 Screens)
-         ====================================================================== -->
     <header class="demo-control-bar" role="banner">
         <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-warning text-dark fw-bold px-2 py-1">SIH 2026 DEMO</span>
             <strong>Sadachar: Education Without Barriers.</strong>
-            <span class="text-white-50 d-none d-md-inline">| UI/UX Design System v1.0 (14 Screens)</span>
         </div>
-        <div class="d-flex align-items-center gap-3">
-            <div class="d-flex align-items-center gap-1">
-                <label for="sih-role-select" class="text-white-50 small fw-semibold">Role:</label>
-                <select id="sih-role-select" aria-label="Switch User Role">
-                    <option value="student">Student (Aarav)</option>
-                    <option value="teacher">Teacher (Dr. Iyer)</option>
-                    <option value="admin">Admin (Ombudsman)</option>
-                    <option value="public">Public (Landing / Login)</option>
-                </select>
-            </div>
-            <div class="d-flex align-items-center gap-1">
-                <label for="sih-screen-select" class="text-white-50 small fw-semibold">Screen:</label>
-                <select id="sih-screen-select" aria-label="Navigate Directly to any of the 14 Screens">
-                    <optgroup label="Public Screens">
-                        <option value="screen-landing">1. Landing Page</option>
-                        <option value="screen-login">2. Login & Register</option>
-                    </optgroup>
-                    <optgroup label="Student Screens">
-                        <option value="screen-student-dash">3. Student Dashboard</option>
-                        <option value="screen-resources">4. Accessible Learning Resources</option>
-                        <option value="screen-course-details">5. Course & Material Details</option>
-                        <option value="screen-accessibility-settings">6. Accessibility Settings</option>
-                        <option value="screen-tts-reader">7. Text-to-Speech Controls</option>
-                        <option value="screen-support">8. Support & Complaint Portal (72h SLA)</option>
-                    </optgroup>
-                    <optgroup label="Teacher Screens">
-                        <option value="screen-teacher-dash">9. Teacher Dashboard</option>
-                    </optgroup>
-                    <optgroup label="Administrator Screens">
-                        <option value="screen-admin-dash">10. Admin Dashboard</option>
-                        <option value="screen-compliance">11. Compliance Monitoring (RPwD/WCAG)</option>
-                        <option value="screen-kanban">12. Issue Tracking (Kanban Board)</option>
-                        <option value="screen-reports">13. Reports & Audits (CSV Export)</option>
-                    </optgroup>
-                    <optgroup label="All Roles">
-                        <option value="screen-profile">14. Profile & Privacy Settings</option>
-                    </optgroup>
-                </select>
-            </div>
-        </div>
+        <a id="account-nav-link" class="text-white" href="/Account/Login">Sign in</a>
     </header>
 
     <!-- ======================================================================
@@ -94,7 +50,10 @@
                     <li class="sidebar-nav-item" data-screen="screen-landing" data-roles="public,all">
                         <button><i class="bi bi-house-door" aria-hidden="true"></i> <span>Home</span></button>
                     </li>
-                    <li class="sidebar-nav-item active" data-screen="screen-student-dash" data-roles="student">
+                    <li class="sidebar-nav-item" data-screen="screen-login" data-roles="public">
+                        <a href="/Account/Login"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> <span>Sign in</span></a>
+                    </li>
+                    <li class="sidebar-nav-item" data-screen="screen-student-dash" data-roles="student">
                         <button><i class="bi bi-speedometer2" aria-hidden="true"></i> <span>Dashboard</span></button>
                     </li>
                     <li class="sidebar-nav-item" data-screen="screen-resources" data-roles="student,teacher">
@@ -127,7 +86,7 @@
                     <li class="sidebar-nav-item" data-screen="screen-reports" data-roles="admin">
                         <button><i class="bi bi-bar-chart-line" aria-hidden="true"></i> <span>Reports</span></button>
                     </li>
-                    <li class="sidebar-nav-item" data-screen="screen-profile" data-roles="student,teacher,admin,all">
+                    <li class="sidebar-nav-item" data-screen="screen-profile" data-roles="student,teacher,admin">
                         <button><i class="bi bi-person-gear" aria-hidden="true"></i> <span>Profile</span></button>
                     </li>
                 </ul>
@@ -135,10 +94,10 @@
 
             <!-- User Status Pill -->
             <div class="sidebar-user-pill">
-                <div class="user-avatar" id="sidebar-user-avatar">AS</div>
+                <div class="user-avatar" id="sidebar-user-avatar">G</div>
                 <div class="user-info" style="line-height: 1.2;">
-                    <strong class="d-block" id="sidebar-user-name" style="font-size: 0.85rem;">Aarav Sharma</strong>
-                    <small class="text-muted" id="sidebar-user-role" style="font-size: 0.72rem;">Student • Low vision</small>
+                    <strong class="d-block" id="sidebar-user-name" style="font-size: 0.85rem;">Guest</strong>
+                    <small class="text-muted" id="sidebar-user-role" style="font-size: 0.72rem;">Not signed in</small>
                 </div>
             </div>
         </aside>
@@ -187,9 +146,9 @@
                                 <strong>Sadachar</strong> brings accessible learning resources, real-time assistive speech tools, and transparent statutory governance together in one unified platform for specially-abled students and institutions.
                             </p>
                             <div class="d-flex flex-wrap gap-3 mb-4">
-                                <button class="btn-accessed-primary" onclick="switchRole('student')">
+                                <a class="btn-accessed-primary" href="/Account/Login">
                                     Start Learning <i class="bi bi-arrow-right"></i>
-                                </button>
+                                </a>
                                 <button class="btn-accessed-secondary" onclick="navigateToScreen('screen-course-details')">
                                     <i class="bi bi-play-circle"></i> Watch Overview
                                 </button>
@@ -301,35 +260,11 @@
 
                         <div class="col-lg-5 col-md-6">
                             <div class="accessed-card bg-white">
-                                <div class="d-flex gap-2 mb-3 pb-2 border-bottom">
-                                    <button class="btn-accessed-primary flex-fill">Sign In</button>
-                                    <button class="btn-accessed-secondary flex-fill">Register</button>
-                                </div>
-
-                                <form onsubmit="event.preventDefault(); switchRole('student');">
-                                    <div class="mb-3">
-                                        <label for="login-email" class="form-label small fw-bold">Email Address</label>
-                                        <input type="email" id="login-email" class="accessed-input" value="aarav.sharma@college.edu" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="login-pass" class="form-label small fw-bold">Password</label>
-                                        <input type="password" id="login-pass" class="accessed-input" value="SecurePassword123" required>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <label class="small"><input type="checkbox" checked> Remember me</label>
-                                        <a href="#" class="small text-decoration-none">Forgot password?</a>
-                                    </div>
-                                    <button type="submit" class="btn-accessed-primary w-100 py-2 mb-3">Sign In</button>
-                                </form>
-
-                                <div class="pt-2 text-center border-top">
-                                    <small class="text-muted d-block mb-2">Or quick-switch profile:</small>
-                                    <div class="btn-group w-100">
-                                        <button class="btn btn-outline-dark btn-sm fw-bold" onclick="switchRole('student')">Student</button>
-                                        <button class="btn btn-outline-dark btn-sm fw-bold" onclick="switchRole('teacher')">Teacher</button>
-                                        <button class="btn btn-outline-dark btn-sm fw-bold" onclick="switchRole('admin')">Admin</button>
-                                    </div>
-                                </div>
+                                <h3 class="h5 fw-bold mb-2">Sign in to Sadachar</h3>
+                                <p class="text-muted small">Accounts are securely checked against the application database. Access level comes from your account, not the demo role switcher.</p>
+                                <a href="/Account/Login?returnUrl=%2F" class="btn-accessed-primary w-100 mb-3">Sign in</a>
+                                <a href="/Account/Register" class="btn-accessed-secondary w-100">Create a student account</a>
+                                <p class="small text-muted mt-3 mb-0">Educator accounts are provisioned by an administrator.</p>
                             </div>
                         </div>
                     </div>
@@ -341,7 +276,7 @@
                 <section id="screen-student-dash" class="screen-view" aria-labelledby="screen3-heading">
                     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
                         <div>
-                            <h1 id="screen3-heading" class="h3 fw-bold mb-1">Good morning, Aarav</h1>
+                            <h1 id="screen3-heading" class="h3 fw-bold mb-1">Your learning dashboard</h1>
                             <p class="text-muted mb-0 small">Wednesday • 3 active accessible courses this term</p>
                         </div>
                         <button class="btn-accessed-secondary btn-sm" onclick="navigateToScreen('screen-resources')">
@@ -1038,7 +973,7 @@
                                 <h3 class="h5 fw-bold mb-3"><i class="bi bi-person-heart me-1"></i> Students Who May Need Support</h3>
                                 <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
                                     <div>
-                                        <strong class="d-block small">Aarav Sharma</strong>
+                                        <strong class="d-block small">Student requesting support</strong>
                                         <small class="text-muted">Requested large print format for Module 4</small>
                                     </div>
                                     <span class="status-chip in-review">Pending</span>
@@ -1493,10 +1428,10 @@
                     <div class="row g-4">
                         <div class="col-lg-4">
                             <div class="accessed-card bg-white text-center">
-                                <div class="user-avatar mx-auto mb-3" style="width: 72px; height: 72px; font-size: 1.8rem;">AS</div>
-                                <h3 class="h5 fw-bold mb-1">Aarav Sharma</h3>
-                                <p class="text-muted small mb-2">Student • BCA Semester 5</p>
-                                <span class="status-chip in-review">Low vision</span>
+                                <div class="user-avatar mx-auto mb-3" id="profile-avatar" style="width: 72px; height: 72px; font-size: 1.8rem;">G</div>
+                                <h3 class="h5 fw-bold mb-1" id="profile-display-name">Guest</h3>
+                                <p class="text-muted small mb-2" id="profile-display-role">Not signed in</p>
+                                <span class="status-chip in-review" id="profile-disability">Accessibility needs not set</span>
                             </div>
                         </div>
 
@@ -1506,11 +1441,11 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label for="prof-name" class="form-label small fw-bold">Full Name</label>
-                                        <input type="text" id="prof-name" class="accessed-input" value="Aarav Sharma">
+                                        <input type="text" id="prof-name" class="accessed-input" readonly>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="prof-email" class="form-label small fw-bold">Email Address</label>
-                                        <input type="email" id="prof-email" class="accessed-input" value="aarav@college.edu">
+                                        <input type="email" id="prof-email" class="accessed-input" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -1603,6 +1538,6 @@
     </nav>
 
     <!-- Core Interactive Script -->
-    <script src="/js/accessed.js"></script>
+    <script src="/js/accessed.js?v=account-session-1"></script>
 </body>
 </html>

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SakshamGovernance.Core.Entities;
 using SakshamGovernance.Core.Interfaces;
@@ -7,6 +8,7 @@ using System.Text;
 
 namespace SakshamGovernance.Web.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class ConductController : ControllerBase
@@ -69,6 +71,7 @@ public class ConductController : ControllerBase
     /// <summary>
     /// Returns all flagged conduct incidents for ombudsman audit without exposing personal identifying data.
     /// </summary>
+    [Authorize(Roles = "Admin,Auditor")]
     [HttpGet("incidents")]
     [ProducesResponseType(typeof(IEnumerable<ConductIncidentResponseDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetIncidents(CancellationToken cancellationToken)
@@ -91,6 +94,7 @@ public class ConductController : ControllerBase
     /// <summary>
     /// Enforces DPDP Act 2023 Storage Limitation: purges incidents exceeding the data retention window.
     /// </summary>
+    [Authorize(Roles = "Admin")]
     [HttpPost("purge-expired")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> PurgeExpiredIncidents(CancellationToken cancellationToken)
@@ -128,4 +132,3 @@ public class ConductController : ControllerBase
         return sanitized.Length > 500 ? sanitized[..500] : sanitized;
     }
 }
-

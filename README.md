@@ -87,11 +87,36 @@ dotnet run --project src/SakshamGovernance.Web/SakshamGovernance.Web.csproj
 ```
 
 Once running:
-- **Interactive Accessible Portal**: Open `https://localhost:5001` or `http://localhost:5000` in your browser.
-- **Swagger OpenAPI Documentation**: Open `https://localhost:5001/swagger`.
-- **ASP.NET Core MVC / Razor example**: Open `https://localhost:5001/Home/Index` or `http://localhost:5024/Home/Index`.
+- **Interactive Accessible Portal**: Open `http://localhost:5024` in your browser.
+- **Swagger OpenAPI Documentation**: Open `http://localhost:5024/swagger`.
+- **ASP.NET Core MVC / Razor example**: Open `https://localhost:7053/Home/Index` or `http://localhost:5024/Home/Index`.
+- **Sign in / student registration**: Open `http://localhost:5024/Account/Login` or `/Account/Register`.
 
-The existing API controllers remain available under `/api`. The configured default is an in-memory database for easy demos; set `UseInMemoryDatabase` to `false` and configure `ConnectionStrings:DefaultConnection` to use SQL Server.
+The existing API controllers remain available under `/api`. SQL Server LocalDB is configured by default for persistent local development. Set `UseInMemoryDatabase` to `true` only when you want temporary demo data.
+
+### Local SQL Server database and accounts
+
+The Development configuration uses SQL Server LocalDB with Windows authentication. Start/inspect LocalDB with `sqllocaldb info MSSQLLocalDB`; the connection string is in `appsettings.json` and does not contain a password. On first run, EF Core applies the checked-in migrations and creates the database and Identity tables.
+
+```powershell
+# From the repository root; install the EF command once if it is not already installed
+dotnet tool install --global dotnet-ef --version 10.0.0
+dotnet ef database update --project src/SakshamGovernance.Infrastructure/SakshamGovernance.Infrastructure.csproj --startup-project src/SakshamGovernance.Web/SakshamGovernance.Web.csproj
+dotnet run --project src/SakshamGovernance.Web/SakshamGovernance.Web.csproj
+```
+
+Sign in at `/Account/Login`; create a student account at `/Account/Register`. Passwords are hashed by ASP.NET Core Identity and are never stored as plain text. New self-registered accounts have student access only; an administrator must provision educator accounts. The seeded showcase student has no demo password—register an account to test sign-in.
+
+The login cookie protects the account profile and APIs. Students can create and view only their own grievances; educator, administrator, and auditor access is checked from the account role stored in `AspNetUsers`.
+
+For a different local database, keep connection strings out of source control and use .NET User Secrets:
+
+```powershell
+dotnet user-secrets init --project src/SakshamGovernance.Web/SakshamGovernance.Web.csproj
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "YOUR_LOCAL_SQL_SERVER_CONNECTION_STRING" --project src/SakshamGovernance.Web/SakshamGovernance.Web.csproj
+```
+
+Do not post database passwords or secret connection strings in chat or commit them to GitHub.
 
 ---
 
