@@ -1,7 +1,7 @@
 # Sadachar (सदाचार) — Education Without Barriers.
 
 <p align="center">
-  <img src="src/Sadachar.Web/wwwroot/images/logo.jpg" alt="Sadachar: Inclusive Education Ecosystem - Education Without Barriers" width="460" />
+ar   <img src="src/Sadachar.Web/wwwroot/images/logo.jpg" alt="Sadachar: Inclusive Education Ecosystem - Education Without Barriers" width="460" />
 </p>
 
 > **Inclusive Education Ecosystem for Specially-Abled Students**  
