@@ -1,8 +1,8 @@
-using SakshamGovernance.Core.Enums;
+using Sadachar.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SakshamGovernance.Core.Entities;
+namespace Sadachar.Core.Entities;
 
 public class GrievanceTicket
 {

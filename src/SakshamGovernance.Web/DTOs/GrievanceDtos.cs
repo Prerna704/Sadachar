@@ -1,7 +1,7 @@
-using SakshamGovernance.Core.Enums;
+using Sadachar.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace SakshamGovernance.Web.DTOs;
+namespace Sadachar.Web.DTOs;
 
 public record GrievanceCreateDto(
     [Required][MaxLength(2000)] string IssueDescription

@@ -1,4 +1,4 @@
-namespace SakshamGovernance.Core.Interfaces;
+namespace Sadachar.Core.Interfaces;
 
 public interface ISlaEscalationService
 {

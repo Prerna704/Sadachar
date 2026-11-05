@@ -1,6 +1,6 @@
-using SakshamGovernance.Core.Entities;
+using Sadachar.Core.Entities;
 
-namespace SakshamGovernance.Core.Interfaces;
+namespace Sadachar.Core.Interfaces;
 
 public interface IComplianceRepository
 {

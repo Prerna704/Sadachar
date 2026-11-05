@@ -1,9 +1,9 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using SakshamGovernance.Core.Entities;
+using Sadachar.Core.Entities;
 
-namespace SakshamGovernance.Web.Services;
+namespace Sadachar.Web.Services;
 
 public class ApplicationUserClaimsPrincipalFactory
     : UserClaimsPrincipalFactory<ApplicationUser, IdentityRole>

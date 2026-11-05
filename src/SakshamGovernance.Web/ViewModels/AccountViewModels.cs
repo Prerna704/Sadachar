@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using SakshamGovernance.Core.Enums;
+using Sadachar.Core.Enums;
 
-namespace SakshamGovernance.Web.ViewModels;
+namespace Sadachar.Web.ViewModels;
 
 public class LoginViewModel
 {

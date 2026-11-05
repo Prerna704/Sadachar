@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SakshamGovernance.Infrastructure.Data;
+using Sadachar.Infrastructure.Data;
 
 #nullable disable
 
-namespace SakshamGovernance.Infrastructure.Data.Migrations
+namespace Sadachar.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -155,7 +155,7 @@ namespace SakshamGovernance.Infrastructure.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("SakshamGovernance.Core.Entities.ApplicationUser", b =>
+            modelBuilder.Entity("Sadachar.Core.Entities.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -237,7 +237,7 @@ namespace SakshamGovernance.Infrastructure.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("SakshamGovernance.Core.Entities.ComplianceLog", b =>
+            modelBuilder.Entity("Sadachar.Core.Entities.ComplianceLog", b =>
                 {
                     b.Property<Guid>("LogId")
                         .ValueGeneratedOnAdd()
@@ -282,7 +282,7 @@ namespace SakshamGovernance.Infrastructure.Data.Migrations
                     b.ToTable("ComplianceLogs");
                 });
 
-            modelBuilder.Entity("SakshamGovernance.Core.Entities.ConductLog", b =>
+            modelBuilder.Entity("Sadachar.Core.Entities.ConductLog", b =>
                 {
                     b.Property<Guid>("IncidentId")
                         .ValueGeneratedOnAdd()
@@ -323,7 +323,7 @@ namespace SakshamGovernance.Infrastructure.Data.Migrations
                     b.ToTable("ConductLogs");
                 });
 
-            modelBuilder.Entity("SakshamGovernance.Core.Entities.GrievanceTicket", b =>
+            modelBuilder.Entity("Sadachar.Core.Entities.GrievanceTicket", b =>
                 {
                     b.Property<Guid>("TicketId")
                         .ValueGeneratedOnAdd()
@@ -379,7 +379,7 @@ namespace SakshamGovernance.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("SakshamGovernance.Core.Entities.ApplicationUser", null)
+                    b.HasOne("Sadachar.Core.Entities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -388,7 +388,7 @@ namespace SakshamGovernance.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("SakshamGovernance.Core.Entities.ApplicationUser", null)
+                    b.HasOne("Sadachar.Core.Entities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -403,7 +403,7 @@ namespace SakshamGovernance.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SakshamGovernance.Core.Entities.ApplicationUser", null)
+                    b.HasOne("Sadachar.Core.Entities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -412,25 +412,25 @@ namespace SakshamGovernance.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("SakshamGovernance.Core.Entities.ApplicationUser", null)
+                    b.HasOne("Sadachar.Core.Entities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SakshamGovernance.Core.Entities.ComplianceLog", b =>
+            modelBuilder.Entity("Sadachar.Core.Entities.ComplianceLog", b =>
                 {
-                    b.HasOne("SakshamGovernance.Core.Entities.ApplicationUser", "AuditorUser")
+                    b.HasOne("Sadachar.Core.Entities.ApplicationUser", "AuditorUser")
                         .WithMany("AuditedComplianceLogs")
                         .HasForeignKey("AuditorUserId");
 
                     b.Navigation("AuditorUser");
                 });
 
-            modelBuilder.Entity("SakshamGovernance.Core.Entities.GrievanceTicket", b =>
+            modelBuilder.Entity("Sadachar.Core.Entities.GrievanceTicket", b =>
                 {
-                    b.HasOne("SakshamGovernance.Core.Entities.ApplicationUser", "Student")
+                    b.HasOne("Sadachar.Core.Entities.ApplicationUser", "Student")
                         .WithMany("GrievanceTickets")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -439,7 +439,7 @@ namespace SakshamGovernance.Infrastructure.Data.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("SakshamGovernance.Core.Entities.ApplicationUser", b =>
+            modelBuilder.Entity("Sadachar.Core.Entities.ApplicationUser", b =>
                 {
                     b.Navigation("AuditedComplianceLogs");
 

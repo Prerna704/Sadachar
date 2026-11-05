@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
-using SakshamGovernance.Core.Interfaces;
+using Sadachar.Core.Interfaces;
 
-namespace SakshamGovernance.Infrastructure.Services;
+namespace Sadachar.Infrastructure.Services;
 
 public class SlaEscalationService : ISlaEscalationService
 {

@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
-using SakshamGovernance.Core.Enums;
+using Sadachar.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace SakshamGovernance.Core.Entities;
+namespace Sadachar.Core.Entities;
 
 public class ApplicationUser : IdentityUser
 {

@@ -1,12 +1,12 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SakshamGovernance.Core.Entities;
-using SakshamGovernance.Core.Enums;
-using SakshamGovernance.Core.Interfaces;
-using SakshamGovernance.Web.DTOs;
+using Sadachar.Core.Entities;
+using Sadachar.Core.Enums;
+using Sadachar.Core.Interfaces;
+using Sadachar.Web.DTOs;
 
-namespace SakshamGovernance.Web.Controllers;
+namespace Sadachar.Web.Controllers;
 
 [Authorize]
 [ApiController]

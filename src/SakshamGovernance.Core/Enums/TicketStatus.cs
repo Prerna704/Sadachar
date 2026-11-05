@@ -1,4 +1,4 @@
-namespace SakshamGovernance.Core.Enums;
+namespace Sadachar.Core.Enums;
 
 public enum TicketStatus
 {

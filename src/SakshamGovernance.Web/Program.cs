@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using SakshamGovernance.Core.Entities;
-using SakshamGovernance.Core.Enums;
-using SakshamGovernance.Core.Interfaces;
-using SakshamGovernance.Infrastructure.Data;
-using SakshamGovernance.Infrastructure.Repositories;
-using SakshamGovernance.Infrastructure.Services;
-using SakshamGovernance.Web.Services;
+using Sadachar.Core.Entities;
+using Sadachar.Core.Enums;
+using Sadachar.Core.Interfaces;
+using Sadachar.Infrastructure.Data;
+using Sadachar.Infrastructure.Repositories;
+using Sadachar.Infrastructure.Services;
+using Sadachar.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,12 +17,12 @@ var useInMemory = builder.Configuration.GetValue<bool>("UseInMemoryDatabase", tr
 if (useInMemory)
 {
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseInMemoryDatabase("SakshamGovernanceDb"));
+        options.UseInMemoryDatabase("SadacharDb"));
 }
 else
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-        ?? "Server=(localdb)\\mssqllocaldb;Database=SakshamGovernanceDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+        ?? "Server=(localdb)\\mssqllocaldb;Database=SadacharDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
 
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(connectionString, sqlOptions =>

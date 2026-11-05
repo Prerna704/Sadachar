@@ -1,9 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using SakshamGovernance.Core.Interfaces;
+using Sadachar.Core.Interfaces;
 
-namespace SakshamGovernance.Infrastructure.Services;
+namespace Sadachar.Infrastructure.Services;
 
 public class SlaEscalationBackgroundService : BackgroundService
 {

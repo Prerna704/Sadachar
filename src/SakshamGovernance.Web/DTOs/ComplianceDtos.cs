@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SakshamGovernance.Web.DTOs;
+namespace Sadachar.Web.DTOs;
 
 public record ComplianceEvaluationRequestDto(
     [Required] string MaterialId,

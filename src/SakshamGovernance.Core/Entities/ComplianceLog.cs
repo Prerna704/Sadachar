@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SakshamGovernance.Core.Entities;
+namespace Sadachar.Core.Entities;
 
 public class ComplianceLog
 {

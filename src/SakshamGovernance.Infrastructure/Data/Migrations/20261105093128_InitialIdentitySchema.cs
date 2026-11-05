@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace SakshamGovernance.Infrastructure.Data.Migrations
+namespace Sadachar.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
     public partial class InitialIdentitySchema : Migration

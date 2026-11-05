@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using SakshamGovernance.Core.Entities;
+using Sadachar.Core.Entities;
 
-namespace SakshamGovernance.Infrastructure.Data;
+namespace Sadachar.Infrastructure.Data;
 
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {

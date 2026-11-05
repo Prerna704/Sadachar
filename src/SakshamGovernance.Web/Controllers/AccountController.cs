@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SakshamGovernance.Core.Entities;
-using SakshamGovernance.Core.Enums;
-using SakshamGovernance.Web.ViewModels;
+using Sadachar.Core.Entities;
+using Sadachar.Core.Enums;
+using Sadachar.Web.ViewModels;
 
-namespace SakshamGovernance.Web.Controllers;
+namespace Sadachar.Web.Controllers;
 
 [Route("[controller]/[action]")]
 [AutoValidateAntiforgeryToken]

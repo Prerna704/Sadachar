@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using SakshamGovernance.Core.Entities;
-using SakshamGovernance.Core.Enums;
-using SakshamGovernance.Core.Interfaces;
-using SakshamGovernance.Infrastructure.Data;
+using Sadachar.Core.Entities;
+using Sadachar.Core.Enums;
+using Sadachar.Core.Interfaces;
+using Sadachar.Infrastructure.Data;
 
-namespace SakshamGovernance.Infrastructure.Repositories;
+namespace Sadachar.Infrastructure.Repositories;
 
 public class GrievanceRepository : IGrievanceRepository
 {

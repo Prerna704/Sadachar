@@ -23,8 +23,8 @@ Educational institutions frequently struggle with three systemic governance gaps
 ## 🏗️ Architecture & Tech Stack
 
 ```text
-SakshamGovernance/
-├── SakshamGovernance.slnx
+Sadachar/
+├── Sadachar.slnx
 └── src/
     ├── SakshamGovernance.Core/            # Domain Entities, Enums, Interfaces
     │   ├── Entities/                      # ApplicationUser, ComplianceLog, GrievanceTicket, ConductLog
@@ -39,6 +39,8 @@ SakshamGovernance/
         ├── DTOs/                          # Strictly-typed API Request & Response Contracts
         └── wwwroot/                       # Accessible Web Portal (High Contrast, Font Resizing, WCAG 2.2 AAA)
 ```
+
+The solution, C# namespaces, output assemblies, and database are named **Sadachar**. The source folder and `.csproj` filenames retain their legacy `SakshamGovernance` names; the compiled assemblies and application namespaces use Sadachar.
 
 - **Backend**: C# 14, .NET 10 / ASP.NET Core MVC and Web API, Entity Framework Core 10.
 - **Database**: Microsoft SQL Server / LocalDB.
@@ -80,7 +82,7 @@ SakshamGovernance/
 
 ```bash
 # 1. Restore & Build Solution
-dotnet build SakshamGovernance.slnx
+dotnet build Sadachar.slnx
 
 # 2. Run the Web Application
 dotnet run --project src/SakshamGovernance.Web/SakshamGovernance.Web.csproj
@@ -96,7 +98,15 @@ The existing API controllers remain available under `/api`. SQL Server LocalDB i
 
 ### Local SQL Server database and accounts
 
-The Development configuration uses SQL Server LocalDB with Windows authentication. Start/inspect LocalDB with `sqllocaldb info MSSQLLocalDB`; the connection string is in `appsettings.json` and does not contain a password. On first run, EF Core applies the checked-in migrations and creates the database and Identity tables.
+The Development configuration uses SQL Server LocalDB with Windows authentication and the database name `SadacharDb`. `Trusted_Connection=True` connects as the Windows user running the app; no separate SQL password is stored. Start/inspect LocalDB with `sqllocaldb info MSSQLLocalDB`; the connection string is in `appsettings.json`. On first run, EF Core applies the checked-in migrations and creates the database and Identity tables.
+
+To confirm which Windows account SQL Server is using and that the Sadachar database exists:
+
+```powershell
+sqlcmd -S "(localdb)\MSSQLLocalDB" -E -Q "SELECT SUSER_SNAME() AS WindowsLogin, DB_NAME() AS CurrentDatabase; SELECT name, state_desc FROM sys.databases WHERE name = 'SadacharDb';"
+```
+
+In SQL Server Management Studio, connect to `(localdb)\MSSQLLocalDB` using **Windows Authentication** under the Windows account you use to run the app, then expand **Databases > SadacharDb > Tables**. The `AspNetUsers` table contains application sign-in accounts; use `/Account/Login` to sign in with the email and password you registered there. These are separate from the Windows account used to connect to LocalDB.
 
 ```powershell
 # From the repository root; install the EF command once if it is not already installed

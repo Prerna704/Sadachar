@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace SakshamGovernance.Web.Controllers;
+namespace Sadachar.Web.Controllers;
 
 public class HomeController : Controller
 {
