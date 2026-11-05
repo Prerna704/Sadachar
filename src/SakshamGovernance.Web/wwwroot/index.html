@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- AccessEd / Sadachar Design Tokens & Styles -->
-    <link rel="stylesheet" href="/css/accessed.css">
+    <link rel="stylesheet" href="/css/accessed.css?v=dashboard-redesign-1">
 </head>
 <body data-role="public">
 
@@ -20,13 +20,6 @@
 
     <!-- Skip Link (WCAG 2.2 Bypass Blocks) -->
     <a href="#main-app-content" class="skip-to-content">Skip to main content</a>
-
-    <header class="demo-control-bar" role="banner">
-        <div class="d-flex align-items-center gap-2">
-            <strong>Sadachar: Education Without Barriers.</strong>
-        </div>
-        <a id="account-nav-link" class="text-white" href="/Account/Login">Sign in</a>
-    </header>
 
     <!-- ======================================================================
          Main App Layout: Fixed 240px Sidebar + Header Topbar + Content
@@ -107,22 +100,28 @@
 
             <!-- Topbar Header -->
             <header class="app-topbar" role="region" aria-label="Header Utilities">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="status-chip forest d-none d-sm-inline-flex">
-                        <i class="bi bi-check-circle-fill"></i> RPwD 2016 & WCAG 2.2 AA
-                    </span>
-                    <span class="text-muted d-none d-lg-inline small">Education Without Barriers.</span>
+                <div class="topbar-context">
+                    <span class="topbar-program"><i class="bi bi-calendar3"></i> RPwD 2016 & WCAG 2.2 AA</span>
+                    <span class="topbar-divider" aria-hidden="true"></span>
+                    <span class="topbar-motto">Education Without Barriers</span>
                 </div>
 
                 <!-- Accessibility Quick Toggles -->
-                <div class="d-flex align-items-center gap-2">
-                    <button class="btn-accessed-secondary py-1 px-2" id="quick-contrast-btn" aria-label="Toggle dark theme" title="Dark mode">
-                        <i class="bi bi-moon-stars"></i> <span class="d-none d-md-inline ms-1">Dark mode</span>
+                <div class="topbar-actions">
+                    <button class="theme-toggle" id="quick-contrast-btn" aria-label="Switch to dark mode" title="Switch to dark mode">
+                        <i class="bi bi-moon-stars"></i>
                     </button>
-                    <button class="btn-accessed-secondary py-1 px-2" id="quick-font-increase" aria-label="Increase Text Size" title="Font Larger">A+</button>
-                    <button class="btn-accessed-secondary py-1 px-2" id="quick-font-reset" aria-label="Reset Text Size" title="Reset Font">A</button>
-                    <a href="/swagger" target="_blank" class="btn-accessed-primary py-1 px-3" style="font-size: 0.85rem;">
-                        <i class="bi bi-journal-code"></i> <span class="d-none d-sm-inline">API Docs</span>
+                    <div class="font-controls" aria-label="Text size controls">
+                        <button id="quick-font-decrease" aria-label="Decrease text size" title="Decrease text size">A-</button>
+                        <button id="quick-font-reset" aria-label="Reset text size" title="Reset text size">A</button>
+                        <button id="quick-font-increase" aria-label="Increase text size" title="Increase text size">A+</button>
+                    </div>
+                    <span class="notification-button" role="img" aria-label="Notifications">
+                        <i class="bi bi-bell"></i><span class="notification-dot" aria-hidden="true"></span>
+                    </span>
+                    <a id="account-nav-link" class="account-avatar" href="/Account/Login" aria-label="Sign in">G</a>
+                    <a href="/swagger" target="_blank" class="api-docs-link">
+                        <i class="bi bi-journal-code"></i><span>API</span>
                     </a>
                 </div>
             </header>
@@ -274,153 +273,106 @@
                      SCREEN 3: STUDENT DASHBOARD
                      ============================================================== -->
                 <section id="screen-student-dash" class="screen-view" aria-labelledby="screen3-heading">
-                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-                        <div>
-                            <h1 id="screen3-heading" class="h3 fw-bold mb-1">Your learning dashboard</h1>
-                            <p class="text-muted mb-0 small">Wednesday • 3 active accessible courses this term</p>
+                    <section class="dashboard-hero" aria-labelledby="screen3-heading">
+                        <div class="hero-copy">
+                            <span class="hero-eyebrow">YOUR ACCESSIBLE LEARNING SPACE</span>
+                            <h1 id="screen3-heading">Your learning dashboard</h1>
+                            <p>Let’s make learning easier, accessible and smarter together.</p>
+                            <button class="hero-cta" onclick="navigateToScreen('screen-resources')">
+                                Explore Resources <i class="bi bi-arrow-right"></i>
+                            </button>
                         </div>
-                        <button class="btn-accessed-secondary btn-sm" onclick="navigateToScreen('screen-resources')">
-                            <i class="bi bi-search"></i> Search Catalog
-                        </button>
+                        <div class="hero-art" aria-hidden="true">
+                            <div class="hero-quote">Because<br>Education<br>is a Right for Everyone<span></span></div>
+                            <i class="bi bi-universal-access hero-access-icon"></i>
+                            <div class="hero-books"><i class="bi bi-globe-americas"></i><span></span><span></span><span></span></div>
+                            <i class="bi bi-stars hero-spark hero-spark-one"></i>
+                            <i class="bi bi-stars hero-spark hero-spark-two"></i>
+                        </div>
+                    </section>
+
+                    <div class="dashboard-metrics" aria-label="Learning overview">
+                        <article class="metric-card metric-blue">
+                            <span class="metric-icon"><i class="bi bi-book-half"></i></span>
+                            <div><strong>4</strong><span>Enrolled Courses</span></div>
+                            <i class="bi bi-arrow-right metric-arrow"></i>
+                        </article>
+                        <article class="metric-card metric-green">
+                            <span class="metric-icon"><i class="bi bi-star-fill"></i></span>
+                            <div><strong>28</strong><span>Accessible Resources</span></div>
+                            <i class="bi bi-arrow-right metric-arrow"></i>
+                        </article>
+                        <article class="metric-card metric-orange">
+                            <span class="metric-icon"><i class="bi bi-calendar2-week"></i></span>
+                            <div><strong>6 days</strong><span>Reading Streak</span></div>
+                            <i class="bi bi-arrow-right metric-arrow"></i>
+                        </article>
+                        <article class="metric-card metric-pink">
+                            <span class="metric-icon"><i class="bi bi-ticket-perforated-fill"></i></span>
+                            <div><strong>1</strong><span>Open Support Ticket</span></div>
+                            <i class="bi bi-arrow-right metric-arrow"></i>
+                        </article>
                     </div>
 
-                    <!-- 4 Metric Cards -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-6 col-lg-3">
-                            <div class="accessed-card p-3 mb-0 text-center">
-                                <div class="display-6 fw-bold text-primary">4</div>
-                                <div class="small fw-semibold text-muted">Enrolled Courses</div>
+                    <div class="dashboard-grid">
+                        <section class="dashboard-panel continue-panel" aria-labelledby="continue-heading">
+                            <div class="panel-heading">
+                                <h2 id="continue-heading"><i class="bi bi-bar-chart-fill"></i> Continue Learning</h2>
+                                <button class="panel-link" onclick="navigateToScreen('screen-resources')">View All <i class="bi bi-arrow-right"></i></button>
                             </div>
-                        </div>
-                        <div class="col-6 col-lg-3">
-                            <div class="accessed-card p-3 mb-0 text-center">
-                                <div class="display-6 fw-bold text-success">28</div>
-                                <div class="small fw-semibold text-muted">Accessible Resources</div>
+                            <div class="featured-course">
+                                <div class="course-progress" role="img" aria-label="68 percent complete"><span>68%</span></div>
+                                <div class="featured-course-copy">
+                                    <h3>Data Structures: Linked Lists</h3>
+                                    <p>Module 3 • Arrays & Linked List Fundamentals</p>
+                                    <div class="course-actions">
+                                        <button class="hero-cta" onclick="navigateToScreen('screen-course-details')"><i class="bi bi-play-fill"></i> Resume</button>
+                                        <button class="course-secondary" onclick="navigateToScreen('screen-tts-reader')"><i class="bi bi-volume-up"></i> Listen</button>
+                                    </div>
+                                </div>
+                                <div class="course-art" aria-hidden="true"><i class="bi bi-laptop"></i><i class="bi bi-code-slash"></i><i class="bi bi-book-half"></i></div>
                             </div>
-                        </div>
-                        <div class="col-6 col-lg-3">
-                            <div class="accessed-card p-3 mb-0 text-center">
-                                <div class="display-6 fw-bold text-warning">6 days</div>
-                                <div class="small fw-semibold text-muted">Reading Streak</div>
+                            <div class="course-list-row">
+                                <span class="course-mini-icon mini-green"><i class="bi bi-universal-access"></i></span>
+                                <div><strong>Digital Literacy • Week 5 Video</strong><small>Captions + Interactive Transcript</small></div>
+                                <span class="course-status status-ready">Ready</span>
                             </div>
-                        </div>
-                        <div class="col-6 col-lg-3">
-                            <div class="accessed-card p-3 mb-0 text-center">
-                                <div class="display-6 fw-bold text-danger">1</div>
-                                <div class="small fw-semibold text-muted">Open Support Ticket</div>
+                            <div class="course-list-row">
+                                <span class="course-mini-icon mini-blue"><i class="bi bi-journal-bookmark-fill"></i></span>
+                                <div><strong>Assistive Tech Basics • Reading</strong><small>Easy-read tactile format</small></div>
+                                <span class="course-status status-new">New</span>
                             </div>
-                        </div>
-                    </div>
+                            <div class="quick-access">
+                                <strong><i class="bi bi-lightning-charge-fill"></i> Quick Access</strong>
+                                <button onclick="navigateToScreen('screen-resources')"><i class="bi bi-display"></i> Digital Literacy</button>
+                                <button onclick="navigateToScreen('screen-accessibility-settings')"><i class="bi bi-universal-access"></i> Assistive Tools</button>
+                                <button onclick="navigateToScreen('screen-resources')"><i class="bi bi-folder2-open"></i> Resources Hub</button>
+                            </div>
+                        </section>
 
-                    <div class="row g-4">
-                        <!-- Left Column: Continue Learning & Schedule -->
-                        <div class="col-lg-8">
-                            <!-- Continue Learning Card -->
-                            <div class="accessed-card mb-4 bg-white">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h3 class="h5 fw-bold mb-0">Continue Learning</h3>
-                                    <button class="btn-accessed-secondary py-1 px-3 btn-sm" onclick="navigateToScreen('screen-resources')">View All</button>
-                                </div>
-                                <div class="progress-stat-pill mb-3">
-                                    <div class="d-flex align-items-center justify-content-center bg-light border border-2 border-dark rounded-circle" style="width: 58px; height: 58px;">
-                                        <span class="fw-bold fs-5 text-primary">68%</span>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h4 class="h6 fw-bold mb-1">Data Structures: Linked Lists</h4>
-                                        <small class="text-muted d-block mb-2">Module 3 • Audio + Large Print Available</small>
-                                        <div class="d-flex gap-2">
-                                            <button class="btn-accessed-primary py-1 px-3 btn-sm" onclick="navigateToScreen('screen-course-details')">Resume</button>
-                                            <button class="btn-accessed-secondary py-1 px-3 btn-sm" onclick="navigateToScreen('screen-tts-reader')"><i class="bi bi-volume-up"></i> Listen</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="list-group list-group-flush">
-                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-bottom">
-                                        <div>
-                                            <span class="fw-bold d-block small">Digital Literacy • Week 5 Video</span>
-                                            <small class="text-muted">Captions + Interactive Transcript</small>
-                                        </div>
-                                        <span class="status-chip ready">Ready</span>
-                                    </div>
-                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
-                                        <div>
-                                            <span class="fw-bold d-block small">Assistive Tech Basics • Reading</span>
-                                            <small class="text-muted">Easy-read tactile format</small>
-                                        </div>
-                                        <span class="status-chip new-badge">New</span>
-                                    </div>
-                                </div>
+                        <aside class="dashboard-panel profile-panel" aria-labelledby="accessibility-profile-heading">
+                            <div class="panel-heading">
+                                <h2 id="accessibility-profile-heading"><i class="bi bi-person-heart"></i> My Accessibility Profile</h2>
+                                <button class="panel-link panel-icon-link" aria-label="Open profile details" onclick="navigateToScreen('screen-profile')"><i class="bi bi-arrow-up-right"></i></button>
                             </div>
+                            <div class="profile-setting-row"><span class="setting-icon"><i class="bi bi-type"></i></span><span>Dyslexia-friendly font</span><label class="accessed-toggle"><input type="checkbox" aria-label="Dyslexia-friendly font" onchange="AccessEdState.accessibility.fontFamily = this.checked ? 'dyslexia' : 'default'; applyAccessibilitySettings();"><span class="toggle-slider"></span></label></div>
+                            <div class="profile-setting-row"><span class="setting-icon"><i class="bi bi-sun"></i></span><span>High contrast mode</span><label class="accessed-toggle"><input type="checkbox" aria-label="High contrast mode" onchange="AccessEdState.accessibility.theme = this.checked ? 'high-contrast' : 'paper'; applyAccessibilitySettings();"><span class="toggle-slider"></span></label></div>
+                            <div class="profile-setting-row"><span class="setting-icon"><i class="bi bi-volume-up"></i></span><span>Read aloud tool</span><label class="accessed-toggle"><input type="checkbox" aria-label="Read aloud tool" checked onchange="AccessEdState.accessibility.readAloud = this.checked;"><span class="toggle-slider"></span></label></div>
+                            <div class="profile-setting-row"><span class="setting-icon"><i class="bi bi-stars"></i></span><span>Reduce motion</span><label class="accessed-toggle"><input type="checkbox" aria-label="Reduce motion" onchange="AccessEdState.accessibility.reduceMotion = this.checked; applyAccessibilitySettings();"><span class="toggle-slider"></span></label></div>
+                            <button class="profile-settings-button" onclick="navigateToScreen('screen-accessibility-settings')"><i class="bi bi-gear-fill"></i> Open Settings</button>
+                        </aside>
 
-                            <!-- Schedule with Access Notes -->
-                            <div class="accessed-card bg-white">
-                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-calendar-event me-2"></i> This Week (With Access Notes)</h3>
-                                <div class="p-3 mb-2 rounded border border-2 border-dark d-flex justify-content-between align-items-center" style="background: var(--paper);">
-                                    <div>
-                                        <strong class="d-block">Lab: Linked List Practice</strong>
-                                        <small class="text-muted">Thu 10:00 • Room 204 • Ramp access confirmed</small>
-                                    </div>
-                                    <span class="badge bg-dark">Thu</span>
-                                </div>
-                                <div class="p-3 rounded border border-2 border-dark d-flex justify-content-between align-items-center" style="background: var(--paper);">
-                                    <div>
-                                        <strong class="d-block">Quiz: Digital Literacy</strong>
-                                        <small class="text-muted">Fri • Extra time approved: +25% accommodation</small>
-                                    </div>
-                                    <span class="badge bg-warning text-dark">+25%</span>
-                                </div>
-                            </div>
-                        </div>
+                        <section class="dashboard-panel schedule-panel" aria-labelledby="schedule-heading">
+                            <div class="panel-heading"><h2 id="schedule-heading"><i class="bi bi-calendar2-week"></i> This Week (With Access Notes)</h2><span class="panel-link">This Week <i class="bi bi-chevron-down"></i></span></div>
+                            <div class="schedule-row"><span class="schedule-date">MON<strong>27</strong></span><div><strong>Lab: Linked List Practice</strong><small><i class="bi bi-clock"></i> 10:00 AM – 11:00 AM • Topic: Practice Problems</small></div><span class="course-status status-ready"><i class="bi bi-check-circle-fill"></i> On Track</span></div>
+                            <div class="schedule-row"><span class="schedule-date">TUE<strong>28</strong></span><div><strong>Quiz: Digital Literacy</strong><small><i class="bi bi-clock"></i> 02:00 PM – 03:00 PM • MCQ Based Quiz</small></div><span class="course-status status-upcoming"><i class="bi bi-clock-fill"></i> Upcoming</span></div>
+                        </section>
 
-                        <!-- Right Column: Quick Profile Toggles & Announcements -->
-                        <div class="col-lg-4">
-                            <div class="accessed-card mb-4 bg-white">
-                                <h3 class="h6 fw-bold mb-3"><i class="bi bi-toggles me-1"></i> My Accessibility Profile</h3>
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="small fw-semibold">Dyslexia-friendly font</span>
-                                    <label class="accessed-toggle">
-                                        <input type="checkbox" onchange="AccessEdState.accessibility.fontFamily = this.checked ? 'dyslexia' : 'default'; applyAccessibilitySettings();">
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="small fw-semibold">High contrast</span>
-                                    <label class="accessed-toggle">
-                                        <input type="checkbox" onchange="AccessEdState.accessibility.theme = this.checked ? 'high-contrast' : 'paper'; applyAccessibilitySettings();">
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="small fw-semibold">Read aloud tool</span>
-                                    <label class="accessed-toggle">
-                                        <input type="checkbox" checked onchange="AccessEdState.accessibility.readAloud = this.checked;">
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="small fw-semibold">Reduce motion</span>
-                                    <label class="accessed-toggle">
-                                        <input type="checkbox" onchange="AccessEdState.accessibility.reduceMotion = this.checked; applyAccessibilitySettings();">
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                <button class="btn-accessed-secondary w-100 btn-sm" onclick="navigateToScreen('screen-accessibility-settings')">Open Settings</button>
-                            </div>
-
-                            <!-- Announcements -->
-                            <div class="accessed-card bg-white">
-                                <h3 class="h6 fw-bold mb-3"><i class="bi bi-bell me-1"></i> Announcements</h3>
-                                <div class="mb-3 pb-2 border-bottom">
-                                    <strong class="d-block small">Captioned lecture archive updated</strong>
-                                    <small class="text-muted">Computer Science • 2h ago</small>
-                                </div>
-                                <div>
-                                    <strong class="d-block small">Accessibility audit published</strong>
-                                    <small class="text-muted">Administration • Yesterday</small>
-                                </div>
-                            </div>
-                        </div>
+                        <section class="dashboard-panel announcements-panel" aria-labelledby="announcements-heading">
+                            <div class="panel-heading"><h2 id="announcements-heading"><i class="bi bi-megaphone-fill"></i> Announcements</h2><span class="panel-link">View All <i class="bi bi-arrow-right"></i></span></div>
+                            <div class="announcement-row"><span class="announcement-dot"></span><div><strong>Updated lecture notes available!</strong><small>2 hours ago</small></div></div>
+                            <div class="announcement-row"><span class="announcement-dot"></span><div><strong>Accessibility guide has been enhanced.</strong><small>1 day ago</small></div></div>
+                        </section>
                     </div>
                 </section>
 
@@ -1538,6 +1490,6 @@
     </nav>
 
     <!-- Core Interactive Script -->
-    <script src="/js/accessed.js?v=account-session-1"></script>
+    <script src="/js/accessed.js?v=dashboard-redesign-1"></script>
 </body>
 </html>

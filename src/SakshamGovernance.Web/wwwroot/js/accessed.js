@@ -154,7 +154,9 @@ function applyCurrentAccount(user) {
 
     const accountLink = document.getElementById('account-nav-link');
     if (accountLink) {
-        accountLink.textContent = user ? `${displayName} · My account` : 'Sign in';
+        accountLink.textContent = initials;
+        accountLink.setAttribute('aria-label', user ? `${displayName} · My account` : 'Sign in');
+        accountLink.title = user ? `${displayName} · My account` : 'Sign in';
         accountLink.href = user ? '/Account/Profile' : '/Account/Login';
     }
 
@@ -208,6 +210,13 @@ function applyAccessibilitySettings() {
     if (a.theme === 'light') document.body.classList.add('theme-light');
     if (a.theme === 'dark') document.body.classList.add('theme-dark');
     if (a.theme === 'high-contrast') document.body.classList.add('theme-high-contrast');
+    const themeToggle = document.getElementById('quick-contrast-btn');
+    if (themeToggle) {
+        const isDark = a.theme === 'dark';
+        themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        themeToggle.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+        themeToggle.innerHTML = `<i class="bi ${isDark ? 'bi-sun' : 'bi-moon-stars'}" aria-hidden="true"></i>`;
+    }
     document.querySelectorAll('[data-theme-name]').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-theme-name') === a.theme);
     });
@@ -306,6 +315,11 @@ function initAccessibilityControls() {
     });
 
     // Quick Font Size Buttons
+    document.getElementById('quick-font-decrease')?.addEventListener('click', () => {
+        AccessEdState.accessibility.fontSize = Math.max(80, AccessEdState.accessibility.fontSize - 10);
+        applyAccessibilitySettings();
+    });
+
     document.getElementById('quick-font-increase')?.addEventListener('click', () => {
         AccessEdState.accessibility.fontSize = Math.min(150, AccessEdState.accessibility.fontSize + 10);
         applyAccessibilitySettings();
