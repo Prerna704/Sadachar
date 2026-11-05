@@ -1,7 +1,7 @@
 # Sadachar (सदाचार) — Education Without Barriers.
 
 <p align="center">
-  <img src="src/SakshamGovernance.Web/wwwroot/images/logo.jpg" alt="Sadachar: Inclusive Education Ecosystem - Education Without Barriers" width="460" />
+  <img src="src/Sadachar.Web/wwwroot/images/logo.jpg" alt="Sadachar: Inclusive Education Ecosystem - Education Without Barriers" width="460" />
 </p>
 
 > **Inclusive Education Ecosystem for Specially-Abled Students**  
@@ -26,21 +26,21 @@ Educational institutions frequently struggle with three systemic governance gaps
 Sadachar/
 ├── Sadachar.slnx
 └── src/
-    ├── SakshamGovernance.Core/            # Domain Entities, Enums, Interfaces
+    ├── Sadachar.Core/                     # Domain Entities, Enums, Interfaces
     │   ├── Entities/                      # ApplicationUser, ComplianceLog, GrievanceTicket, ConductLog
     │   ├── Enums/                         # UserRole, DisabilityType, TicketStatus, IncidentType
     │   └── Interfaces/                    # IComplianceRepository, IGrievanceRepository, ISlaEscalationService, ...
-    ├── SakshamGovernance.Infrastructure/  # EF Core, SQL Server, Repositories, Background Daemon
+    ├── Sadachar.Infrastructure/           # EF Core, SQL Server, Repositories, Background Daemon
     │   ├── Data/                          # ApplicationDbContext
     │   ├── Repositories/                  # ComplianceRepository, GrievanceRepository, ConductRepository
     │   └── Services/                      # SlaEscalationService, SlaEscalationBackgroundService
-    └── SakshamGovernance.Web/             # ASP.NET Core Web API + Accessible Frontend
+    └── Sadachar.Web/                      # ASP.NET Core Web API + Accessible Frontend
         ├── Controllers/                   # ComplianceController, GovernanceController, ConductController
         ├── DTOs/                          # Strictly-typed API Request & Response Contracts
         └── wwwroot/                       # Accessible Web Portal (High Contrast, Font Resizing, WCAG 2.2 AAA)
 ```
 
-The solution, C# namespaces, output assemblies, and database are named **Sadachar**. The source folder and `.csproj` filenames retain their legacy `SakshamGovernance` names; the compiled assemblies and application namespaces use Sadachar.
+The solution, source folders, project files, C# namespaces, output assemblies, and database use the **Sadachar** name.
 
 - **Backend**: C# 14, .NET 10 / ASP.NET Core MVC and Web API, Entity Framework Core 10.
 - **Database**: Microsoft SQL Server / LocalDB.
@@ -85,7 +85,7 @@ The solution, C# namespaces, output assemblies, and database are named **Sadacha
 dotnet build Sadachar.slnx
 
 # 2. Run the Web Application
-dotnet run --project src/SakshamGovernance.Web/SakshamGovernance.Web.csproj
+dotnet run --project src/Sadachar.Web/Sadachar.Web.csproj
 ```
 
 Once running:
@@ -111,8 +111,8 @@ In SQL Server Management Studio, connect to `(localdb)\MSSQLLocalDB` using **Win
 ```powershell
 # From the repository root; install the EF command once if it is not already installed
 dotnet tool install --global dotnet-ef --version 10.0.0
-dotnet ef database update --project src/SakshamGovernance.Infrastructure/SakshamGovernance.Infrastructure.csproj --startup-project src/SakshamGovernance.Web/SakshamGovernance.Web.csproj
-dotnet run --project src/SakshamGovernance.Web/SakshamGovernance.Web.csproj
+dotnet ef database update --project src/Sadachar.Infrastructure/Sadachar.Infrastructure.csproj --startup-project src/Sadachar.Web/Sadachar.Web.csproj
+dotnet run --project src/Sadachar.Web/Sadachar.Web.csproj
 ```
 
 Sign in at `/Account/Login`; create a student account at `/Account/Register`. Passwords are hashed by ASP.NET Core Identity and are never stored as plain text. New self-registered accounts have student access only; an administrator must provision educator accounts. The seeded showcase student has no demo password—register an account to test sign-in.
@@ -122,8 +122,8 @@ The login cookie protects the account profile and APIs. Students can create and 
 For a different local database, keep connection strings out of source control and use .NET User Secrets:
 
 ```powershell
-dotnet user-secrets init --project src/SakshamGovernance.Web/SakshamGovernance.Web.csproj
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "YOUR_LOCAL_SQL_SERVER_CONNECTION_STRING" --project src/SakshamGovernance.Web/SakshamGovernance.Web.csproj
+dotnet user-secrets init --project src/Sadachar.Web/Sadachar.Web.csproj
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "YOUR_LOCAL_SQL_SERVER_CONNECTION_STRING" --project src/Sadachar.Web/Sadachar.Web.csproj
 ```
 
 Do not post database passwords or secret connection strings in chat or commit them to GitHub.

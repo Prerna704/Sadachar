@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SakshamGovernance.Core\SakshamGovernance.Core.csproj" />
-    <ProjectReference Include="..\SakshamGovernance.Infrastructure\SakshamGovernance.Infrastructure.csproj" />
+    <ProjectReference Include="..\Sadachar.Core\Sadachar.Core.csproj" />
+    <ProjectReference Include="..\Sadachar.Infrastructure\Sadachar.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SakshamGovernance.Core\SakshamGovernance.Core.csproj" />
+    <ProjectReference Include="..\Sadachar.Core\Sadachar.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

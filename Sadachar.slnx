@@ -1,7 +1,7 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/SakshamGovernance.Core/SakshamGovernance.Core.csproj" />
-    <Project Path="src/SakshamGovernance.Infrastructure/SakshamGovernance.Infrastructure.csproj" />
-    <Project Path="src/SakshamGovernance.Web/SakshamGovernance.Web.csproj" />
+    <Project Path="src/Sadachar.Core/Sadachar.Core.csproj" />
+    <Project Path="src/Sadachar.Infrastructure/Sadachar.Infrastructure.csproj" />
+    <Project Path="src/Sadachar.Web/Sadachar.Web.csproj" />
   </Folder>
 </Solution>
