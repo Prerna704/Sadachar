@@ -1,0 +1,778 @@
+/* ==========================================================================
+   Sadachar / AccessEd Design System v1.0
+   Design tokens: Paper, Ink & Earth
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Color Palette */
+    --paper: #F6EEDF;
+    --paper-card: #FFF8EA;
+    --ink: #2A2320;
+    --terracotta: #C4452B;
+    --mustard: #F0B429;
+    --forest: #1F6F5C;
+    --plum: #6B2D5C;
+    --sage: #A9C7AE;
+    --blush: #F4C7B3;
+    --muted: #6B5E52;
+    --border-color: #2A2320;
+
+    /* Typography */
+    --font-heading: 'Lora', Georgia, serif;
+    --font-body: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-dyslexic: 'Lexend', sans-serif;
+    --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --current-font-family: var(--font-body);
+
+    /* Text Scale & Spacing */
+    --font-scale: 100%;
+    --line-height-base: 1.6;
+    --touch-target-min: 44px;
+
+    /* Craft rules: 2px ink outline & 4px hard offset shadow */
+    --border-width: 2px;
+    --box-shadow-card: 4px 4px 0px var(--ink);
+    --box-shadow-card-hover: 6px 6px 0px var(--ink);
+    --box-shadow-pressed: 2px 2px 0px var(--ink);
+    --focus-ring: 3px solid var(--mustard);
+}
+
+/* Theme variations */
+body.theme-light {
+    --paper: #FFFFFF;
+    --paper-card: #F9FAFB;
+    --ink: #111827;
+    --border-color: #111827;
+    --muted: #4B5563;
+}
+
+body.theme-dark {
+    color-scheme: dark;
+    --paper: #111827;
+    --paper-card: #1F2937;
+    --ink: #F3F4F6;
+    --terracotta: #F0785E;
+    --mustard: #F5C451;
+    --forest: #48B99A;
+    --plum: #C084B5;
+    --sage: #8CC9A5;
+    --blush: #E9A58E;
+    --muted: #C1CBD7;
+    --border-color: #526174;
+    --box-shadow-card: 4px 4px 0px #080D16;
+    --box-shadow-card-hover: 6px 6px 0px #080D16;
+    --box-shadow-pressed: 2px 2px 0px #080D16;
+    --focus-ring: 3px solid #F5C451;
+    --bs-body-color: #F3F4F6;
+    --bs-body-bg: #111827;
+    --bs-secondary-color: #C1CBD7;
+    --bs-tertiary-bg: #273446;
+    --bs-border-color: #526174;
+    --bs-emphasis-color: #FFFFFF;
+    --bs-dark-rgb: 243, 244, 246;
+    --bs-white-rgb: 31, 41, 55;
+    --bs-table-color: #F3F4F6;
+    --bs-table-bg: #1F2937;
+    --bs-table-border-color: #526174;
+}
+
+body.theme-high-contrast {
+    --paper: #000000;
+    --paper-card: #121212;
+    --ink: #FFFFFF;
+    --border-color: #FFD700;
+    --terracotta: #FF5733;
+    --mustard: #FFD700;
+    --forest: #00FF66;
+    --plum: #FF66CC;
+    --sage: #00E5FF;
+    --blush: #FFB3BA;
+    --muted: #E0E0E0;
+    --box-shadow-card: 4px 4px 0px #FFD700;
+    --box-shadow-card-hover: 6px 6px 0px #FFD700;
+    --box-shadow-pressed: 2px 2px 0px #FFD700;
+}
+
+body.theme-dark .demo-control-bar select,
+body.theme-dark .accessed-input,
+body.theme-dark .accessed-select,
+body.theme-dark .accessed-textarea {
+    background-color: var(--paper-card);
+    color: var(--ink);
+}
+
+body.theme-dark .demo-control-bar {
+    background-color: #0B1220;
+    color: #F3F4F6;
+}
+
+body.theme-dark .btn-accessed-secondary:hover {
+    background-color: var(--paper-card);
+    color: var(--ink);
+}
+
+body.theme-dark .bg-white,
+body.theme-dark .accessed-card.bg-white,
+body.theme-dark .sidebar-user-pill,
+body.theme-dark .progress-stat-pill,
+body.theme-dark .kanban-card,
+body.theme-dark .accessed-card[style*="background"] {
+    background-color: var(--paper-card) !important;
+    color: var(--ink);
+}
+
+body.theme-dark .text-dark {
+    color: var(--ink) !important;
+}
+
+body.theme-dark .table {
+    --bs-table-color: var(--ink);
+    --bs-table-bg: var(--paper-card);
+    --bs-table-border-color: var(--border-color);
+    --bs-table-striped-color: var(--ink);
+    --bs-table-striped-bg: #273446;
+    --bs-table-hover-color: var(--ink);
+    --bs-table-hover-bg: #2B3A4D;
+}
+
+body.theme-dark .table > :not(caption) > * > * {
+    color: var(--ink);
+    background-color: var(--paper-card);
+    border-bottom-color: var(--border-color);
+}
+
+body.theme-dark .table thead th {
+    color: #FFFFFF;
+}
+
+body.font-dyslexia {
+    --current-font-family: var(--font-dyslexic) !important;
+}
+
+body.font-mono {
+    --current-font-family: var(--font-mono) !important;
+}
+
+body.reduced-motion * {
+    transition: none !important;
+    animation: none !important;
+}
+
+body.underline-links a {
+    text-decoration: underline !important;
+}
+
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--current-font-family);
+    font-size: var(--font-scale);
+    line-height: var(--line-height-base);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6, .brand-title {
+    font-family: var(--font-heading);
+    color: var(--ink);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+h1 { font-size: 2.375rem; line-height: 1.15; }
+h2 { font-size: 1.625rem; line-height: 1.3; }
+h3 { font-size: 1.25rem; line-height: 1.4; }
+
+/* Skip Link */
+.skip-to-content {
+    position: absolute;
+    top: -60px;
+    left: 12px;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 10px 16px;
+    z-index: 9999;
+    font-weight: 600;
+    text-decoration: none;
+    border: 2px solid var(--mustard);
+    border-radius: 4px;
+    transition: top 0.2s;
+}
+.skip-to-content:focus {
+    top: 12px;
+}
+
+/* Focus Ring */
+:focus-visible {
+    outline: var(--focus-ring) !important;
+    outline-offset: 2px !important;
+}
+
+/* ==========================================================================
+   Demo Switcher Bar (For SIH Judges & Review)
+   ========================================================================== */
+
+.demo-control-bar {
+    background: var(--ink);
+    color: #FFF;
+    padding: 8px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.85rem;
+    position: sticky;
+    top: 0;
+    z-index: 2000;
+    border-bottom: 2px solid var(--mustard);
+}
+
+.demo-control-bar select {
+    background: #FFF;
+    color: #000;
+    border: 2px solid var(--mustard);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   Component Kit (Neo-Brutalist Craft)
+   ========================================================================== */
+
+/* Cards */
+.accessed-card {
+    background: var(--paper-card);
+    border: var(--border-width) solid var(--border-color);
+    box-shadow: var(--box-shadow-card);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.accessed-card:hover {
+    box-shadow: var(--box-shadow-card-hover);
+}
+
+/* Buttons */
+.btn-accessed-primary {
+    background-color: var(--terracotta);
+    color: #FFF8EA;
+    border: var(--border-width) solid var(--border-color);
+    box-shadow: var(--box-shadow-card);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    min-height: var(--touch-target-min);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    text-decoration: none;
+}
+
+.btn-accessed-primary:hover {
+    color: #FFF8EA;
+    transform: translate(-1px, -1px);
+    box-shadow: var(--box-shadow-card-hover);
+}
+
+.btn-accessed-primary:active {
+    transform: translate(2px, 2px);
+    box-shadow: var(--box-shadow-pressed);
+}
+
+.btn-accessed-secondary {
+    background-color: var(--paper-card);
+    color: var(--ink);
+    border: var(--border-width) solid var(--border-color);
+    box-shadow: var(--box-shadow-card);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    min-height: var(--touch-target-min);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    text-decoration: none;
+}
+
+.btn-accessed-secondary:hover {
+    background-color: #FFF;
+    color: var(--ink);
+    box-shadow: var(--box-shadow-card-hover);
+}
+
+.btn-accessed-secondary:active {
+    transform: translate(2px, 2px);
+    box-shadow: var(--box-shadow-pressed);
+}
+
+/* Status Chips */
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    border: 2px solid var(--border-color);
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    line-height: 1.2;
+}
+
+.status-chip.resolved, .status-chip.compliant, .status-chip.ready {
+    background-color: var(--sage);
+    color: var(--ink);
+}
+
+.status-chip.in-review, .status-chip.action-needed, .status-chip.medium {
+    background-color: var(--mustard);
+    color: var(--ink);
+}
+
+.status-chip.at-risk, .status-chip.high, .status-chip.escalated {
+    background-color: var(--terracotta);
+    color: #FFF;
+}
+
+.status-chip.new-badge, .status-chip.forest {
+    background-color: var(--forest);
+    color: #FFF;
+}
+
+.status-chip.priority, .status-chip.plum {
+    background-color: var(--plum);
+    color: #FFF;
+}
+
+.status-chip.audio-badge {
+    background-color: var(--blush);
+    color: var(--ink);
+}
+
+.status-chip.outline-neutral {
+    background-color: var(--paper-card);
+    color: var(--ink);
+}
+
+/* Form Inputs */
+.accessed-input, .accessed-select, .accessed-textarea {
+    width: 100%;
+    background-color: #FFF;
+    border: var(--border-width) solid var(--border-color);
+    box-shadow: 2px 2px 0px var(--border-color);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--ink);
+    min-height: var(--touch-target-min);
+}
+
+.accessed-input:focus, .accessed-select:focus, .accessed-textarea:focus {
+    background-color: #FFF;
+    border-color: var(--ink);
+    outline: var(--focus-ring) !important;
+}
+
+/* Toggle Switch */
+.accessed-toggle {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 30px;
+}
+
+.accessed-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--paper-card);
+    border: 2px solid var(--border-color);
+    transition: 0.2s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: var(--ink);
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--forest);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(22px);
+    background-color: #FFF;
+}
+
+/* Segmented Tabs / Filter Tabs */
+.filter-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.filter-tab-btn {
+    background: var(--paper-card);
+    border: 2px solid var(--border-color);
+    box-shadow: 2px 2px 0px var(--border-color);
+    border-radius: 9999px;
+    padding: 6px 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    min-height: 38px;
+}
+
+.filter-tab-btn.active, .filter-tab-btn:hover {
+    background: var(--terracotta);
+    color: #FFF;
+}
+
+/* ==========================================================================
+   App Shell Layout (Desktop 232px Sidebar, Tablet, Mobile)
+   ========================================================================== */
+
+.app-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.app-sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--paper-card);
+    border-right: var(--border-width) solid var(--border-color);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--border-color);
+    text-decoration: none;
+    color: var(--ink);
+}
+
+.sidebar-brand img {
+    height: 44px;
+    width: auto;
+    border-radius: 6px;
+    background: white;
+    padding: 2px;
+    border: 1px solid var(--border-color);
+}
+
+.sidebar-nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sidebar-nav-item a, .sidebar-nav-item button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: none;
+    border: 2px solid transparent;
+    width: 100%;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+}
+
+.sidebar-nav-item a:hover, .sidebar-nav-item button:hover {
+    background: var(--paper);
+    border-color: var(--border-color);
+}
+
+.sidebar-nav-item.active a, .sidebar-nav-item.active button {
+    background: var(--mustard);
+    border-color: var(--border-color);
+    box-shadow: 2px 2px 0px var(--border-color);
+}
+
+.sidebar-user-pill {
+    margin-top: auto;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background: #FFF;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+    width: 38px;
+    height: 38px;
+    background: var(--plum);
+    color: #FFF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: 2px solid var(--border-color);
+}
+
+/* Main Content Area */
+.app-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+.app-topbar {
+    background: var(--paper-card);
+    border-bottom: var(--border-width) solid var(--border-color);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.app-content {
+    padding: 28px 32px;
+    flex-grow: 1;
+    max-width: 1320px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Mobile Bottom Tab Bar (< 640px) */
+.mobile-tab-bar {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--paper-card);
+    border-top: 2px solid var(--border-color);
+    z-index: 1000;
+    padding: 6px 12px;
+    justify-content: space-around;
+}
+
+.mobile-tab-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink);
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+}
+
+.mobile-tab-btn.active {
+    color: var(--terracotta);
+}
+
+/* Responsive Media Queries */
+@media (max-width: 1024px) {
+    .app-sidebar {
+        width: 80px;
+        padding: 16px 8px;
+    }
+    .sidebar-brand span, .sidebar-nav-item span, .sidebar-user-pill .user-info {
+        display: none;
+    }
+    .app-content {
+        padding: 20px 16px;
+    }
+}
+
+@media (max-width: 640px) {
+    .app-sidebar {
+        display: none;
+    }
+    .mobile-tab-bar {
+        display: flex;
+    }
+    .app-content {
+        padding: 16px 12px 72px 12px;
+    }
+}
+
+/* ==========================================================================
+   Specialized Components (Audio Player, Reader Mode, Kanban, etc.)
+   ========================================================================== */
+
+/* Progress Circle Container */
+.progress-stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #FFF;
+    border: 2px solid var(--border-color);
+    box-shadow: 2px 2px 0px var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+/* Audio Player Widget */
+.audio-player-card {
+    background: var(--paper);
+    border: 2px solid var(--border-color);
+    box-shadow: 3px 3px 0px var(--border-color);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.audio-play-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #FFF;
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.audio-scrubber {
+    flex-grow: 1;
+    height: 8px;
+    background: var(--mustard);
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    position: relative;
+}
+
+.audio-progress-bar {
+    width: 40%;
+    height: 100%;
+    background: var(--terracotta);
+    border-radius: 4px;
+}
+
+/* Text-to-Speech Karaoke Highlighting */
+.reader-sentence {
+    display: inline;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.reader-sentence.active {
+    background-color: var(--mustard);
+    border: 1px dashed var(--ink);
+    font-weight: 500;
+}
+
+/* Kanban Board Layout */
+.kanban-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .kanban-board {
+        grid-template-columns: 1fr;
+    }
+}
+
+.kanban-column {
+    background: var(--paper-card);
+    border: 2px solid var(--border-color);
+    box-shadow: var(--box-shadow-card);
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.kanban-card {
+    background: #FFF;
+    border: 2px solid var(--border-color);
+    box-shadow: 2px 2px 0px var(--border-color);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 12px;
+    cursor: grab;
+}
+
+.kanban-card:hover {
+    box-shadow: 4px 4px 0px var(--border-color);
+}
+
+/* Screen visibility classes */
+.screen-view {
+    display: none;
+}
+
+.screen-view.active {
+    display: block;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}

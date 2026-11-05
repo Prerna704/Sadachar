@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sadachar — Education Without Barriers (AccessEd UI/UX)</title>
+    <link rel="icon" type="image/jpeg" href="/images/logo.jpg">
+
+    <!-- Bootstrap 5.3 + Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- AccessEd / Sadachar Design Tokens & Styles -->
+    <link rel="stylesheet" href="/css/accessed.css">
+</head>
+<body data-role="student">
+
+    <!-- Screen Reader Announcer -->
+    <div id="screen-announcer" class="visually-hidden" aria-live="polite"></div>
+
+    <!-- Skip Link (WCAG 2.2 Bypass Blocks) -->
+    <a href="#main-app-content" class="skip-to-content">Skip to main content</a>
+
+    <!-- ======================================================================
+         Top SIH Demonstration Control Bar (Quick Switch Between All 14 Screens)
+         ====================================================================== -->
+    <header class="demo-control-bar" role="banner">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-warning text-dark fw-bold px-2 py-1">SIH 2026 DEMO</span>
+            <strong>Sadachar: Education Without Barriers.</strong>
+            <span class="text-white-50 d-none d-md-inline">| UI/UX Design System v1.0 (14 Screens)</span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-1">
+                <label for="sih-role-select" class="text-white-50 small fw-semibold">Role:</label>
+                <select id="sih-role-select" aria-label="Switch User Role">
+                    <option value="student">Student (Aarav)</option>
+                    <option value="teacher">Teacher (Dr. Iyer)</option>
+                    <option value="admin">Admin (Ombudsman)</option>
+                    <option value="public">Public (Landing / Login)</option>
+                </select>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <label for="sih-screen-select" class="text-white-50 small fw-semibold">Screen:</label>
+                <select id="sih-screen-select" aria-label="Navigate Directly to any of the 14 Screens">
+                    <optgroup label="Public Screens">
+                        <option value="screen-landing">1. Landing Page</option>
+                        <option value="screen-login">2. Login & Register</option>
+                    </optgroup>
+                    <optgroup label="Student Screens">
+                        <option value="screen-student-dash">3. Student Dashboard</option>
+                        <option value="screen-resources">4. Accessible Learning Resources</option>
+                        <option value="screen-course-details">5. Course & Material Details</option>
+                        <option value="screen-accessibility-settings">6. Accessibility Settings</option>
+                        <option value="screen-tts-reader">7. Text-to-Speech Controls</option>
+                        <option value="screen-support">8. Support & Complaint Portal (72h SLA)</option>
+                    </optgroup>
+                    <optgroup label="Teacher Screens">
+                        <option value="screen-teacher-dash">9. Teacher Dashboard</option>
+                    </optgroup>
+                    <optgroup label="Administrator Screens">
+                        <option value="screen-admin-dash">10. Admin Dashboard</option>
+                        <option value="screen-compliance">11. Compliance Monitoring (RPwD/WCAG)</option>
+                        <option value="screen-kanban">12. Issue Tracking (Kanban Board)</option>
+                        <option value="screen-reports">13. Reports & Audits (CSV Export)</option>
+                    </optgroup>
+                    <optgroup label="All Roles">
+                        <option value="screen-profile">14. Profile & Privacy Settings</option>
+                    </optgroup>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- ======================================================================
+         Main App Layout: Fixed 240px Sidebar + Header Topbar + Content
+         ====================================================================== -->
+    <div class="app-wrapper">
+
+        <!-- Sidebar Navigation (Desktop / Tablet) -->
+        <aside class="app-sidebar" role="navigation" aria-label="Main Application Navigation">
+            <div>
+                <!-- Brand Header -->
+                <a href="#" class="sidebar-brand" onclick="navigateToScreen('screen-landing')">
+                    <img src="/images/logo.jpg" alt="Sadachar Logo">
+                    <div>
+                        <div class="fw-bold fs-5 brand-title" style="letter-spacing: -0.5px;">Sadachar</div>
+                        <small class="text-muted d-block" style="font-size: 0.72rem; line-height: 1;">AccessEd v1.0</small>
+                    </div>
+                </a>
+
+                <!-- Nav Items (Filtered by Role via data-roles) -->
+                <ul class="sidebar-nav-list">
+                    <li class="sidebar-nav-item" data-screen="screen-landing" data-roles="public,all">
+                        <button><i class="bi bi-house-door" aria-hidden="true"></i> <span>Home</span></button>
+                    </li>
+                    <li class="sidebar-nav-item active" data-screen="screen-student-dash" data-roles="student">
+                        <button><i class="bi bi-speedometer2" aria-hidden="true"></i> <span>Dashboard</span></button>
+                    </li>
+                    <li class="sidebar-nav-item" data-screen="screen-resources" data-roles="student,teacher">
+                        <button><i class="bi bi-collection-play" aria-hidden="true"></i> <span>Resources</span></button>
+                    </li>
+                    <li class="sidebar-nav-item" data-screen="screen-course-details" data-roles="student">
+                        <button><i class="bi bi-book-half" aria-hidden="true"></i> <span>Lesson View</span></button>
+                    </li>
+                    <li class="sidebar-nav-item" data-screen="screen-accessibility-settings" data-roles="student,all">
+                        <button><i class="bi bi-sliders" aria-hidden="true"></i> <span>Accessibility</span></button>
+                    </li>
+                    <li class="sidebar-nav-item" data-screen="screen-tts-reader" data-roles="student">
+                        <button><i class="bi bi-volume-up" aria-hidden="true"></i> <span>Reader (TTS)</span></button>
+                    </li>
+                    <li class="sidebar-nav-item" data-screen="screen-support" data-roles="student,teacher,all">
+                        <button><i class="bi bi-shield-exclamation" aria-hidden="true"></i> <span>Support (SLA)</span></button>
+                    </li>
+                    <li class="sidebar-nav-item" data-screen="screen-teacher-dash" data-roles="teacher">
+                        <button><i class="bi bi-person-video3" aria-hidden="true"></i> <span>Faculty Hub</span></button>
+                    </li>
+                    <li class="sidebar-nav-item" data-screen="screen-admin-dash" data-roles="admin">
+                        <button><i class="bi bi-grid-1x2" aria-hidden="true"></i> <span>Admin Overview</span></button>
+                    </li>
+                    <li class="sidebar-nav-item" data-screen="screen-compliance" data-roles="admin">
+                        <button><i class="bi bi-patch-check" aria-hidden="true"></i> <span>Compliance</span></button>
+                    </li>
+                    <li class="sidebar-nav-item" data-screen="screen-kanban" data-roles="admin">
+                        <button><i class="bi bi-kanban" aria-hidden="true"></i> <span>Issue Board</span></button>
+                    </li>
+                    <li class="sidebar-nav-item" data-screen="screen-reports" data-roles="admin">
+                        <button><i class="bi bi-bar-chart-line" aria-hidden="true"></i> <span>Reports</span></button>
+                    </li>
+                    <li class="sidebar-nav-item" data-screen="screen-profile" data-roles="student,teacher,admin,all">
+                        <button><i class="bi bi-person-gear" aria-hidden="true"></i> <span>Profile</span></button>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- User Status Pill -->
+            <div class="sidebar-user-pill">
+                <div class="user-avatar" id="sidebar-user-avatar">AS</div>
+                <div class="user-info" style="line-height: 1.2;">
+                    <strong class="d-block" id="sidebar-user-name" style="font-size: 0.85rem;">Aarav Sharma</strong>
+                    <small class="text-muted" id="sidebar-user-role" style="font-size: 0.72rem;">Student • Low vision</small>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Body Column -->
+        <div class="app-main">
+
+            <!-- Topbar Header -->
+            <header class="app-topbar" role="region" aria-label="Header Utilities">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="status-chip forest d-none d-sm-inline-flex">
+                        <i class="bi bi-check-circle-fill"></i> RPwD 2016 & WCAG 2.2 AA
+                    </span>
+                    <span class="text-muted d-none d-lg-inline small">Education Without Barriers.</span>
+                </div>
+
+                <!-- Accessibility Quick Toggles -->
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn-accessed-secondary py-1 px-2" id="quick-contrast-btn" aria-label="Toggle dark theme" title="Dark mode">
+                        <i class="bi bi-moon-stars"></i> <span class="d-none d-md-inline ms-1">Dark mode</span>
+                    </button>
+                    <button class="btn-accessed-secondary py-1 px-2" id="quick-font-increase" aria-label="Increase Text Size" title="Font Larger">A+</button>
+                    <button class="btn-accessed-secondary py-1 px-2" id="quick-font-reset" aria-label="Reset Text Size" title="Reset Font">A</button>
+                    <a href="/swagger" target="_blank" class="btn-accessed-primary py-1 px-3" style="font-size: 0.85rem;">
+                        <i class="bi bi-journal-code"></i> <span class="d-none d-sm-inline">API Docs</span>
+                    </a>
+                </div>
+            </header>
+
+            <!-- Main Content Container with all 14 screens -->
+            <main id="main-app-content" class="app-content" role="main">
+
+                <!-- ==============================================================
+                     SCREEN 1: LANDING PAGE (Public / Overview)
+                     ============================================================== -->
+                <section id="screen-landing" class="screen-view active" aria-labelledby="screen1-heading">
+                    <div class="row align-items-center g-4 my-3">
+                        <div class="col-lg-7">
+                            <span class="status-chip forest mb-3">
+                                <i class="bi bi-award-fill"></i> Built around WCAG 2.2 AA Principles
+                            </span>
+                            <h1 id="screen1-heading" class="display-5 fw-bold mb-3" style="color: var(--ink);">
+                                Education that adapts to <span style="color: var(--terracotta);">every learner.</span>
+                            </h1>
+                            <p class="lead mb-4" style="color: var(--muted); font-size: 1.15rem;">
+                                <strong>Sadachar</strong> brings accessible learning resources, real-time assistive speech tools, and transparent statutory governance together in one unified platform for specially-abled students and institutions.
+                            </p>
+                            <div class="d-flex flex-wrap gap-3 mb-4">
+                                <button class="btn-accessed-primary" onclick="switchRole('student')">
+                                    Start Learning <i class="bi bi-arrow-right"></i>
+                                </button>
+                                <button class="btn-accessed-secondary" onclick="navigateToScreen('screen-course-details')">
+                                    <i class="bi bi-play-circle"></i> Watch Overview
+                                </button>
+                            </div>
+
+                            <!-- Stat Counters -->
+                            <div class="row g-3 pt-2">
+                                <div class="col-4">
+                                    <div class="p-3 bg-white rounded border border-2 border-dark text-center" style="box-shadow: 2px 2px 0 var(--ink);">
+                                        <div class="display-6 fw-bold" style="color: var(--terracotta);">4</div>
+                                        <small class="fw-semibold text-muted">Needs Supported</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-3 bg-white rounded border border-2 border-dark text-center" style="box-shadow: 2px 2px 0 var(--ink);">
+                                        <div class="display-6 fw-bold" style="color: var(--forest);">3</div>
+                                        <small class="fw-semibold text-muted">Role Workspaces</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-3 bg-white rounded border border-2 border-dark text-center" style="box-shadow: 2px 2px 0 var(--ink);">
+                                        <div class="display-6 fw-bold" style="color: var(--plum);">72h</div>
+                                        <small class="fw-semibold text-muted">Grievance SLA</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live Feature Preview Card -->
+                        <div class="col-lg-5">
+                            <div class="accessed-card" style="background: #FFF;">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="status-chip audio-badge"><i class="bi bi-soundwave"></i> Listening mode</span>
+                                    <span class="status-chip ready"><i class="bi bi-badge-cc"></i> Captions on</span>
+                                </div>
+                                <h3 class="h5 fw-bold mb-2">Linked Lists: Insertion</h3>
+                                <p class="small text-muted mb-3" style="line-height: 1.6;">
+                                    "A node stores a value and a pointer to the next node. To insert at the head, create a new node and point it to the old head."
+                                </p>
+                                <div class="audio-player-card mb-2">
+                                    <button class="audio-play-btn" onclick="navigateToScreen('screen-tts-reader')" aria-label="Play Sample Audio">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                    <div class="audio-scrubber">
+                                        <div class="audio-progress-bar"></div>
+                                    </div>
+                                    <small class="fw-bold">02:14 / 05:20</small>
+                                </div>
+                                <div class="text-end">
+                                    <small class="badge bg-light text-dark border">Speed 1.0×</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3 Feature Pillars -->
+                    <div class="row g-4 mt-2">
+                        <div class="col-md-4">
+                            <div class="accessed-card h-100">
+                                <div class="fs-2 text-warning mb-2"><i class="bi bi-eye"></i></div>
+                                <h3 class="h5 fw-bold">Adaptive Reading</h3>
+                                <p class="text-muted small mb-0">Font size, spacing, high-contrast, and dyslexia-friendly typography (Lexend) that remembers each student's profile.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="accessed-card h-100">
+                                <div class="fs-2 text-danger mb-2"><i class="bi bi-megaphone"></i></div>
+                                <h3 class="h5 fw-bold">Listen & Caption</h3>
+                                <p class="text-muted small mb-0">Synchronized sentence-by-sentence text-to-speech with audio speed control and captioned lecture archives.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="accessed-card h-100">
+                                <div class="fs-2 text-success mb-2"><i class="bi bi-shield-check"></i></div>
+                                <h3 class="h5 fw-bold">Governed Support</h3>
+                                <p class="text-muted small mb-0">Autonomous 72-Hour SLA grievance resolution with automatic ombudsman escalation and DPDP Act 2023 privacy protection.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==============================================================
+                     SCREEN 2: LOGIN & REGISTER
+                     ============================================================== -->
+                <section id="screen-login" class="screen-view" aria-labelledby="screen2-heading">
+                    <div class="row justify-content-center my-4">
+                        <div class="col-lg-5 col-md-6 mb-4">
+                            <div class="accessed-card h-100">
+                                <h2 id="screen2-heading" class="h4 fw-bold mb-3">Welcome back to a learning space that fits you.</h2>
+                                <p class="text-muted small mb-4">Sign in to continue with your saved accessibility profile and customized workspace.</p>
+
+                                <div class="p-3 rounded border border-2 border-dark bg-white mb-3" style="box-shadow: 2px 2px 0 var(--ink);">
+                                    <h3 class="h6 fw-bold mb-2"><i class="bi bi-magic me-1"></i> Preview Assistive Settings Before Login</h3>
+                                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                        <span class="small fw-semibold">High-contrast mode</span>
+                                        <button class="btn-accessed-secondary py-0 px-2" onclick="document.getElementById('quick-contrast-btn').click()">Toggle</button>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                        <span class="small fw-semibold">Large text (120%)</span>
+                                        <button class="btn-accessed-secondary py-0 px-2" onclick="document.getElementById('quick-font-increase').click()">Zoom A+</button>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center py-2">
+                                        <span class="small fw-semibold">Dyslexia-friendly font</span>
+                                        <button class="btn-accessed-secondary py-0 px-2" onclick="AccessEdState.accessibility.fontFamily = 'dyslexia'; applyAccessibilitySettings();">Apply</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-5 col-md-6">
+                            <div class="accessed-card bg-white">
+                                <div class="d-flex gap-2 mb-3 pb-2 border-bottom">
+                                    <button class="btn-accessed-primary flex-fill">Sign In</button>
+                                    <button class="btn-accessed-secondary flex-fill">Register</button>
+                                </div>
+
+                                <form onsubmit="event.preventDefault(); switchRole('student');">
+                                    <div class="mb-3">
+                                        <label for="login-email" class="form-label small fw-bold">Email Address</label>
+                                        <input type="email" id="login-email" class="accessed-input" value="aarav.sharma@college.edu" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="login-pass" class="form-label small fw-bold">Password</label>
+                                        <input type="password" id="login-pass" class="accessed-input" value="SecurePassword123" required>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <label class="small"><input type="checkbox" checked> Remember me</label>
+                                        <a href="#" class="small text-decoration-none">Forgot password?</a>
+                                    </div>
+                                    <button type="submit" class="btn-accessed-primary w-100 py-2 mb-3">Sign In</button>
+                                </form>
+
+                                <div class="pt-2 text-center border-top">
+                                    <small class="text-muted d-block mb-2">Or quick-switch profile:</small>
+                                    <div class="btn-group w-100">
+                                        <button class="btn btn-outline-dark btn-sm fw-bold" onclick="switchRole('student')">Student</button>
+                                        <button class="btn btn-outline-dark btn-sm fw-bold" onclick="switchRole('teacher')">Teacher</button>
+                                        <button class="btn btn-outline-dark btn-sm fw-bold" onclick="switchRole('admin')">Admin</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==============================================================
+                     SCREEN 3: STUDENT DASHBOARD
+                     ============================================================== -->
+                <section id="screen-student-dash" class="screen-view" aria-labelledby="screen3-heading">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                        <div>
+                            <h1 id="screen3-heading" class="h3 fw-bold mb-1">Good morning, Aarav</h1>
+                            <p class="text-muted mb-0 small">Wednesday • 3 active accessible courses this term</p>
+                        </div>
+                        <button class="btn-accessed-secondary btn-sm" onclick="navigateToScreen('screen-resources')">
+                            <i class="bi bi-search"></i> Search Catalog
+                        </button>
+                    </div>
+
+                    <!-- 4 Metric Cards -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-lg-3">
+                            <div class="accessed-card p-3 mb-0 text-center">
+                                <div class="display-6 fw-bold text-primary">4</div>
+                                <div class="small fw-semibold text-muted">Enrolled Courses</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="accessed-card p-3 mb-0 text-center">
+                                <div class="display-6 fw-bold text-success">28</div>
+                                <div class="small fw-semibold text-muted">Accessible Resources</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="accessed-card p-3 mb-0 text-center">
+                                <div class="display-6 fw-bold text-warning">6 days</div>
+                                <div class="small fw-semibold text-muted">Reading Streak</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="accessed-card p-3 mb-0 text-center">
+                                <div class="display-6 fw-bold text-danger">1</div>
+                                <div class="small fw-semibold text-muted">Open Support Ticket</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Left Column: Continue Learning & Schedule -->
+                        <div class="col-lg-8">
+                            <!-- Continue Learning Card -->
+                            <div class="accessed-card mb-4 bg-white">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h3 class="h5 fw-bold mb-0">Continue Learning</h3>
+                                    <button class="btn-accessed-secondary py-1 px-3 btn-sm" onclick="navigateToScreen('screen-resources')">View All</button>
+                                </div>
+                                <div class="progress-stat-pill mb-3">
+                                    <div class="d-flex align-items-center justify-content-center bg-light border border-2 border-dark rounded-circle" style="width: 58px; height: 58px;">
+                                        <span class="fw-bold fs-5 text-primary">68%</span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h4 class="h6 fw-bold mb-1">Data Structures: Linked Lists</h4>
+                                        <small class="text-muted d-block mb-2">Module 3 • Audio + Large Print Available</small>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn-accessed-primary py-1 px-3 btn-sm" onclick="navigateToScreen('screen-course-details')">Resume</button>
+                                            <button class="btn-accessed-secondary py-1 px-3 btn-sm" onclick="navigateToScreen('screen-tts-reader')"><i class="bi bi-volume-up"></i> Listen</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-bottom">
+                                        <div>
+                                            <span class="fw-bold d-block small">Digital Literacy • Week 5 Video</span>
+                                            <small class="text-muted">Captions + Interactive Transcript</small>
+                                        </div>
+                                        <span class="status-chip ready">Ready</span>
+                                    </div>
+                                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                        <div>
+                                            <span class="fw-bold d-block small">Assistive Tech Basics • Reading</span>
+                                            <small class="text-muted">Easy-read tactile format</small>
+                                        </div>
+                                        <span class="status-chip new-badge">New</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Schedule with Access Notes -->
+                            <div class="accessed-card bg-white">
+                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-calendar-event me-2"></i> This Week (With Access Notes)</h3>
+                                <div class="p-3 mb-2 rounded border border-2 border-dark d-flex justify-content-between align-items-center" style="background: var(--paper);">
+                                    <div>
+                                        <strong class="d-block">Lab: Linked List Practice</strong>
+                                        <small class="text-muted">Thu 10:00 • Room 204 • Ramp access confirmed</small>
+                                    </div>
+                                    <span class="badge bg-dark">Thu</span>
+                                </div>
+                                <div class="p-3 rounded border border-2 border-dark d-flex justify-content-between align-items-center" style="background: var(--paper);">
+                                    <div>
+                                        <strong class="d-block">Quiz: Digital Literacy</strong>
+                                        <small class="text-muted">Fri • Extra time approved: +25% accommodation</small>
+                                    </div>
+                                    <span class="badge bg-warning text-dark">+25%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Quick Profile Toggles & Announcements -->
+                        <div class="col-lg-4">
+                            <div class="accessed-card mb-4 bg-white">
+                                <h3 class="h6 fw-bold mb-3"><i class="bi bi-toggles me-1"></i> My Accessibility Profile</h3>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="small fw-semibold">Dyslexia-friendly font</span>
+                                    <label class="accessed-toggle">
+                                        <input type="checkbox" onchange="AccessEdState.accessibility.fontFamily = this.checked ? 'dyslexia' : 'default'; applyAccessibilitySettings();">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="small fw-semibold">High contrast</span>
+                                    <label class="accessed-toggle">
+                                        <input type="checkbox" onchange="AccessEdState.accessibility.theme = this.checked ? 'high-contrast' : 'paper'; applyAccessibilitySettings();">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="small fw-semibold">Read aloud tool</span>
+                                    <label class="accessed-toggle">
+                                        <input type="checkbox" checked onchange="AccessEdState.accessibility.readAloud = this.checked;">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="small fw-semibold">Reduce motion</span>
+                                    <label class="accessed-toggle">
+                                        <input type="checkbox" onchange="AccessEdState.accessibility.reduceMotion = this.checked; applyAccessibilitySettings();">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <button class="btn-accessed-secondary w-100 btn-sm" onclick="navigateToScreen('screen-accessibility-settings')">Open Settings</button>
+                            </div>
+
+                            <!-- Announcements -->
+                            <div class="accessed-card bg-white">
+                                <h3 class="h6 fw-bold mb-3"><i class="bi bi-bell me-1"></i> Announcements</h3>
+                                <div class="mb-3 pb-2 border-bottom">
+                                    <strong class="d-block small">Captioned lecture archive updated</strong>
+                                    <small class="text-muted">Computer Science • 2h ago</small>
+                                </div>
+                                <div>
+                                    <strong class="d-block small">Accessibility audit published</strong>
+                                    <small class="text-muted">Administration • Yesterday</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==============================================================
+                     SCREEN 4: ACCESSIBLE LEARNING RESOURCES
+                     ============================================================== -->
+                <section id="screen-resources" class="screen-view" aria-labelledby="screen4-heading">
+                    <div class="mb-4">
+                        <h1 id="screen4-heading" class="h3 fw-bold mb-1">Accessible Learning Resources</h1>
+                        <p class="text-muted small">Find materials in the multi-sensory format that works best for you.</p>
+                    </div>
+
+                    <!-- Search & Filter Controls -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-8">
+                            <input type="text" class="accessed-input" placeholder="Search by title, subject or format…">
+                        </div>
+                        <div class="col-md-4">
+                            <select class="accessed-select" aria-label="Sort Resources">
+                                <option>Sort: Recently added</option>
+                                <option>Sort: Most accessible score</option>
+                                <option>Sort: Course module</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Filter Tabs -->
+                    <div class="filter-tabs">
+                        <button class="filter-tab-btn active">All</button>
+                        <button class="filter-tab-btn"><i class="bi bi-volume-up"></i> Audio</button>
+                        <button class="filter-tab-btn"><i class="bi bi-type"></i> Large print</button>
+                        <button class="filter-tab-btn"><i class="bi bi-grid-3x3"></i> Braille-ready</button>
+                        <button class="filter-tab-btn"><i class="bi bi-badge-cc"></i> Captioned</button>
+                        <button class="filter-tab-btn"><i class="bi bi-book"></i> Easy-read</button>
+                    </div>
+
+                    <!-- Resources Grid -->
+                    <div class="row g-4">
+                        <!-- Card 1 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="accessed-card h-100 bg-white" onclick="navigateToScreen('screen-course-details')" style="cursor: pointer;">
+                                <div class="p-3 mb-3 rounded d-flex align-items-center justify-content-center text-white" style="background: var(--terracotta); height: 90px; border: 2px solid var(--border-color);">
+                                    <i class="bi bi-volume-up display-5"></i>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="status-chip audio-badge">Audio</span>
+                                    <small class="text-muted">12 min</small>
+                                </div>
+                                <h3 class="h6 fw-bold mb-1">Linked Lists: Insertion</h3>
+                                <p class="small text-muted mb-0">Computer Science • Module 3</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="accessed-card h-100 bg-white" onclick="navigateToScreen('screen-course-details')" style="cursor: pointer;">
+                                <div class="p-3 mb-3 rounded d-flex align-items-center justify-content-center text-white" style="background: var(--forest); height: 90px; border: 2px solid var(--border-color);">
+                                    <i class="bi bi-file-earmark-text display-5"></i>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="status-chip resolved">Easy-read</span>
+                                    <small class="text-muted">12 min</small>
+                                </div>
+                                <h3 class="h6 fw-bold mb-1">Intro to Assistive Tech</h3>
+                                <p class="small text-muted mb-0">Digital Literacy • Module 1</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="accessed-card h-100 bg-white" onclick="navigateToScreen('screen-course-details')" style="cursor: pointer;">
+                                <div class="p-3 mb-3 rounded d-flex align-items-center justify-content-center text-white" style="background: var(--plum); height: 90px; border: 2px solid var(--border-color);">
+                                    <i class="bi bi-badge-cc display-5"></i>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="status-chip priority">Captioned</span>
+                                    <small class="text-muted">15 min</small>
+                                </div>
+                                <h3 class="h6 fw-bold mb-1">Binary Trees Explained</h3>
+                                <p class="small text-muted mb-0">Computer Science • Module 4</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 4 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="accessed-card h-100 bg-white" onclick="navigateToScreen('screen-course-details')" style="cursor: pointer;">
+                                <div class="p-3 mb-3 rounded d-flex align-items-center justify-content-center text-dark" style="background: var(--mustard); height: 90px; border: 2px solid var(--border-color);">
+                                    <i class="bi bi-camera-video display-5"></i>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="status-chip in-review">Sign video</span>
+                                    <small class="text-muted">12 min</small>
+                                </div>
+                                <h3 class="h6 fw-bold mb-1">Sign Language Basics</h3>
+                                <p class="small text-muted mb-0">Communication Studies</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 5 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="accessed-card h-100 bg-white" onclick="navigateToScreen('screen-course-details')" style="cursor: pointer;">
+                                <div class="p-3 mb-3 rounded d-flex align-items-center justify-content-center text-dark" style="background: var(--sage); height: 90px; border: 2px solid var(--border-color);">
+                                    <i class="bi bi-type-h1 display-5"></i>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="status-chip resolved">Large print</span>
+                                    <small class="text-muted">18 min</small>
+                                </div>
+                                <h3 class="h6 fw-bold mb-1">Database Normalisation</h3>
+                                <p class="small text-muted mb-0">Information Systems</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 6 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="accessed-card h-100 bg-white" onclick="navigateToScreen('screen-course-details')" style="cursor: pointer;">
+                                <div class="p-3 mb-3 rounded d-flex align-items-center justify-content-center text-dark" style="background: var(--blush); height: 90px; border: 2px solid var(--border-color);">
+                                    <i class="bi bi-grid-3x3 display-5"></i>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="status-chip audio-badge">Braille-ready</span>
+                                    <small class="text-muted">12 min</small>
+                                </div>
+                                <h3 class="h6 fw-bold mb-1">Web Accessibility 101</h3>
+                                <p class="small text-muted mb-0">Web Technologies</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==============================================================
+                     SCREEN 5: COURSE AND MATERIAL DETAILS
+                     ============================================================== -->
+                <section id="screen-course-details" class="screen-view" aria-labelledby="screen5-heading">
+                    <div class="mb-3">
+                        <small class="text-muted">Computer Science › Module 3 › Lesson 2</small>
+                        <h1 id="screen5-heading" class="h3 fw-bold mb-2">Linked Lists: Insertion</h1>
+                    </div>
+
+                    <!-- Multi-Format Switcher -->
+                    <div class="filter-tabs mb-4">
+                        <button class="filter-tab-btn active"><i class="bi bi-file-text"></i> Text</button>
+                        <button class="filter-tab-btn" onclick="navigateToScreen('screen-tts-reader')"><i class="bi bi-volume-up"></i> Audio</button>
+                        <button class="filter-tab-btn"><i class="bi bi-badge-cc"></i> Captioned video</button>
+                        <button class="filter-tab-btn"><i class="bi bi-grid-3x3"></i> Braille-ready</button>
+                        <button class="filter-tab-btn"><i class="bi bi-book"></i> Easy-read</button>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Main Lesson Content -->
+                        <div class="col-lg-8">
+                            <div class="accessed-card bg-white">
+                                <h3 class="h5 fw-bold mb-3">Lesson Text</h3>
+                                <div class="p-3 mb-3 rounded border" style="background: var(--paper); line-height: 1.8;">
+                                    <p class="mb-2"><strong>A linked list</strong> stores items in sequential memory nodes. Each node holds a value and a pointer reference to the next node in the structure.</p>
+                                    <p class="mb-2" style="background: var(--mustard); padding: 4px; border-radius: 4px; display: inline-block;">
+                                        To insert at the head, create a new node and point its pointer to the existing head node.
+                                    </p>
+                                    <p class="mb-0">Finally, update the head reference pointer so the list starts directly from the newly created node.</p>
+                                </div>
+
+                                <!-- Inline Audio Player -->
+                                <div class="audio-player-card">
+                                    <button class="audio-play-btn" onclick="navigateToScreen('screen-tts-reader')" aria-label="Play lesson audio">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                    <div class="audio-scrubber">
+                                        <div class="audio-progress-bar" style="width: 35%;"></div>
+                                    </div>
+                                    <small class="fw-bold">01:45 / 05:20</small>
+                                    <span class="badge bg-light text-dark border">1.0×</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Verification & Downloads -->
+                        <div class="col-lg-4">
+                            <!-- Accessibility Checks -->
+                            <div class="accessed-card mb-4 bg-white">
+                                <h3 class="h6 fw-bold mb-3"><i class="bi bi-patch-check-fill text-success"></i> Accessibility Checks</h3>
+                                <ul class="list-unstyled mb-0 small">
+                                    <li class="py-1"><i class="bi bi-check-circle-fill text-success me-2"></i> Alt text on all diagrams</li>
+                                    <li class="py-1"><i class="bi bi-check-circle-fill text-success me-2"></i> Captions and transcript verified</li>
+                                    <li class="py-1"><i class="bi bi-check-circle-fill text-success me-2"></i> Logical screen-reader order</li>
+                                    <li class="py-1"><i class="bi bi-check-circle-fill text-success me-2"></i> WCAG AAA Contrast verified</li>
+                                </ul>
+                            </div>
+
+                            <!-- Downloads -->
+                            <div class="accessed-card bg-white">
+                                <h3 class="h6 fw-bold mb-3"><i class="bi bi-download me-1"></i> Multi-Format Downloads</h3>
+                                <div class="d-grid gap-2">
+                                    <button class="btn-accessed-secondary btn-sm"><i class="bi bi-file-earmark-music"></i> Download MP3 Audio</button>
+                                    <button class="btn-accessed-secondary btn-sm"><i class="bi bi-file-earmark-code"></i> Download BRF (Braille)</button>
+                                    <button class="btn-accessed-secondary btn-sm"><i class="bi bi-file-earmark-pdf"></i> Large Print PDF (18pt)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==============================================================
+                     SCREEN 6: ACCESSIBILITY SETTINGS (Live Preview Engine)
+                     ============================================================== -->
+                <section id="screen-accessibility-settings" class="screen-view" aria-labelledby="screen6-heading">
+                    <div class="mb-4">
+                        <h1 id="screen6-heading" class="h3 fw-bold mb-1">Accessibility Settings</h1>
+                        <p class="text-muted small">Personal reading, color, and display controls. Changes are saved to your profile and apply across every device.</p>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <!-- Reading Controls -->
+                        <div class="col-lg-6">
+                            <div class="accessed-card bg-white h-100">
+                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-type me-2"></i> Reading & Typography</h3>
+
+                                <!-- Text Size Slider -->
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label for="setting-text-size" class="fw-semibold small">Text Size</label>
+                                        <span id="text-size-val" class="badge bg-dark">100%</span>
+                                    </div>
+                                    <input type="range" class="form-range" id="setting-text-size" min="80" max="150" value="100" step="5">
+                                </div>
+
+                                <!-- Typeface Selection -->
+                                <div class="mb-4">
+                                    <label class="fw-semibold small d-block mb-2">Typeface</label>
+                                    <div class="btn-group w-100">
+                                        <button class="btn-accessed-secondary py-1 px-2 flex-fill active" data-font-type="default">Default</button>
+                                        <button class="btn-accessed-secondary py-1 px-2 flex-fill" data-font-type="dyslexia">Dyslexia-friendly</button>
+                                        <button class="btn-accessed-secondary py-1 px-2 flex-fill" data-font-type="mono">Mono</button>
+                                    </div>
+                                </div>
+
+                                <!-- Line Spacing -->
+                                <div>
+                                    <label class="fw-semibold small d-block mb-2">Line Spacing</label>
+                                    <div class="btn-group w-100">
+                                        <button class="btn-accessed-secondary py-1 px-2 flex-fill" data-spacing-val="1.4">1.4</button>
+                                        <button class="btn-accessed-secondary py-1 px-2 flex-fill active" data-spacing-val="1.6">1.6</button>
+                                        <button class="btn-accessed-secondary py-1 px-2 flex-fill" data-spacing-val="2.2">2.2</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Display and Motion Controls -->
+                        <div class="col-lg-6">
+                            <div class="accessed-card bg-white h-100">
+                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-palette me-2"></i> Display & Motion</h3>
+
+                                <!-- Theme Selection -->
+                                <div class="mb-4">
+                                    <label class="fw-semibold small d-block mb-2">Color Theme</label>
+                                    <div class="btn-group w-100">
+                                        <button class="btn-accessed-secondary py-1 px-2 flex-fill active" data-theme-name="paper">Paper (#F6EEDF)</button>
+                                        <button class="btn-accessed-secondary py-1 px-2 flex-fill" data-theme-name="light">Light (#FFF)</button>
+                                        <button class="btn-accessed-secondary py-1 px-2 flex-fill" data-theme-name="dark">Dark</button>
+                                        <button class="btn-accessed-secondary py-1 px-2 flex-fill" data-theme-name="high-contrast">High Contrast</button>
+                                    </div>
+                                </div>
+
+                                <!-- Motion & Focus Toggles -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="small fw-semibold">Reduce motion</span>
+                                    <label class="accessed-toggle">
+                                        <input type="checkbox" id="toggle-reduce-motion">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="small fw-semibold">Visible focus outlines</span>
+                                    <label class="accessed-toggle">
+                                        <input type="checkbox" checked disabled>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="small fw-semibold">Underline links</span>
+                                    <label class="accessed-toggle">
+                                        <input type="checkbox" id="toggle-underline-links">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Preview Panel -->
+                    <div class="accessed-card bg-white">
+                        <h3 class="h6 fw-bold mb-2"><i class="bi bi-eye me-1"></i> Live Preview</h3>
+                        <div id="accessibility-live-preview" class="p-4 rounded border border-2 border-dark" style="background: var(--paper); transition: all 0.2s;">
+                            "Every learner deserves educational materials that are clear, readable, comfortable, and without barriers."
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==============================================================
+                     SCREEN 7: TEXT-TO-SPEECH CONTROLS (Reader Mode)
+                     ============================================================== -->
+                <section id="screen-tts-reader" class="screen-view" aria-labelledby="screen7-heading">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <small class="text-muted">Assistive Speech Technology</small>
+                            <h1 id="screen7-heading" class="h3 fw-bold mb-0">Reader Mode: Text-to-Speech Controls</h1>
+                        </div>
+                        <span class="status-chip audio-badge"><i class="bi bi-mic"></i> Speech Synthesis Live</span>
+                    </div>
+
+                    <!-- Reader Box with Karaoke Sentence Highlighting -->
+                    <div class="accessed-card bg-white mb-4">
+                        <div id="karaoke-reader-text" class="p-4 rounded border border-2 border-dark mb-4" style="background: var(--paper); line-height: 2; font-size: 1.15rem;" data-reader-raw="Accessible design starts with choices. Learners should decide how fast, how loud and in which voice their materials are read. Each sentence is highlighted as it is spoken so that reading and listening stay in sync. You can pause at any point or skip forward and back.">
+                            <!-- Sentences dynamically parsed and inserted here -->
+                        </div>
+
+                        <!-- Player Controls Bar -->
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 bg-light rounded border border-2 border-dark">
+                            <span id="tts-sentence-counter" class="small fw-bold">Sentence 1 of 4</span>
+
+                            <!-- Play, Prev, Next -->
+                            <div class="d-flex align-items-center gap-2">
+                                <button id="tts-prev-btn" class="btn-accessed-secondary py-1 px-3" aria-label="Previous Sentence">
+                                    <i class="bi bi-skip-start-fill"></i>
+                                </button>
+                                <button id="tts-play-btn" class="btn-accessed-primary py-2 px-4" aria-label="Play or Pause Speech">
+                                    <i class="bi bi-play-fill"></i> Play
+                                </button>
+                                <button id="tts-next-btn" class="btn-accessed-secondary py-1 px-3" aria-label="Next Sentence">
+                                    <i class="bi bi-skip-end-fill"></i>
+                                </button>
+                            </div>
+
+                            <!-- Shortcut Hints -->
+                            <div class="small text-muted d-none d-md-block">
+                                <kbd>Space</kbd>: play/pause &nbsp; <kbd>←</kbd> <kbd>→</kbd>: sentence &nbsp; <kbd>+</kbd> <kbd>-</kbd>: speed
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Voice, Speed, Pitch Panel -->
+                    <div class="accessed-card bg-white">
+                        <h3 class="h6 fw-bold mb-3"><i class="bi bi-sliders2 me-1"></i> Voice Engine Settings</h3>
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-4">
+                                <label for="tts-voice-select" class="form-label small fw-semibold">Voice (Indian / UK / US)</label>
+                                <select id="tts-voice-select" class="accessed-select">
+                                    <option>Aria • English (India)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex justify-content-between">
+                                    <label for="tts-speed-slider" class="form-label small fw-semibold">Speech Speed</label>
+                                    <span id="tts-speed-label" class="badge bg-dark">1.0×</span>
+                                </div>
+                                <input type="range" class="form-range" id="tts-speed-slider" min="0.5" max="2.0" step="0.25" value="1.0">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="tts-pitch-slider" class="form-label small fw-semibold">Pitch Control</label>
+                                <input type="range" class="form-range" id="tts-pitch-slider" min="0.5" max="1.5" step="0.1" value="1.0">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==============================================================
+                     SCREEN 8: SUPPORT AND COMPLAINT PORTAL (72-Hour SLA)
+                     ============================================================== -->
+                <section id="screen-support" class="screen-view" aria-labelledby="screen8-heading">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                        <div>
+                            <h1 id="screen8-heading" class="h3 fw-bold mb-1">Support & Grievance Portal</h1>
+                            <p class="text-muted small mb-0">Report accessibility barriers, track status, and enforce the statutory <strong>72-Hour SLA</strong>.</p>
+                        </div>
+                        <button id="portal-trigger-sla" class="btn-accessed-secondary btn-sm">
+                            <i class="bi bi-arrow-repeat"></i> Trigger 72h SLA Audit
+                        </button>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <!-- Request Form -->
+                        <div class="col-lg-6">
+                            <div class="accessed-card bg-white h-100">
+                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-plus-circle text-danger me-2"></i> Log New Request</h3>
+                                <form id="portal-grievance-form">
+                                    <div class="mb-3">
+                                        <label for="portal-grievance-cat" class="form-label small fw-bold">Barrier Category</label>
+                                        <select id="portal-grievance-cat" class="accessed-select">
+                                            <option>Inaccessible digital material / PDF</option>
+                                            <option>Physical campus obstacle (Ramp / Elevator)</option>
+                                            <option>Exam portal lack of NVDA compatibility</option>
+                                            <option>Ableist language / Harassment incident</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="portal-grievance-desc" class="form-label small fw-bold">Describe the Barrier</label>
+                                        <textarea id="portal-grievance-desc" class="accessed-textarea" rows="3" placeholder="Explain the accessibility obstacle encountered..." required>The PDF for Module 3 cannot be read by my screen reader during homework review.</textarea>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="small fw-semibold">Submit confidentially (DPDP 2023)</span>
+                                        <label class="accessed-toggle">
+                                            <input type="checkbox" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="btn-accessed-primary w-100">Submit Request & Start 72-Hr SLA</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Help Centre Articles -->
+                        <div class="col-lg-6">
+                            <div class="accessed-card bg-white h-100">
+                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-life-preserver me-2"></i> Help Centre</h3>
+                                <div class="p-3 mb-3 rounded border border-2 border-dark" style="background: var(--paper);">
+                                    <strong class="d-block">How to report an accessibility barrier</strong>
+                                    <small class="text-muted">Learn about the 72-hour grievance timeline and student rights • 2 min read</small>
+                                </div>
+                                <div class="p-3 rounded border border-2 border-dark" style="background: var(--paper);">
+                                    <strong class="d-block">RPwD Act 2016 Institutional Policies</strong>
+                                    <small class="text-muted">Section 40 & 42 mandates on accessible electronic media • 5 min read</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Requests Table -->
+                    <div class="accessed-card bg-white">
+                        <h3 class="h5 fw-bold mb-3"><i class="bi bi-table me-2"></i> My Active Requests (72h SLA Tracker)</h3>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Ticket ID</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>SLA Expiry (72h)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="support-requests-tbody">
+                                    <tr>
+                                        <td><strong>#ACC-1042</strong></td>
+                                        <td>PDF for Module 3 not screen-reader friendly</td>
+                                        <td><span class="status-chip in-review">In review</span></td>
+                                        <td><small class="text-muted">SLA: 48h remaining</small></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>#ACC-0987</strong></td>
+                                        <td>Captions out of sync in Week 4 lecture</td>
+                                        <td><span class="status-chip resolved">Resolved</span></td>
+                                        <td><small class="text-muted">Resolved within SLA</small></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>#ACC-0954</strong></td>
+                                        <td>Lab room 204 ramp access locked</td>
+                                        <td><span class="status-chip resolved">Resolved</span></td>
+                                        <td><small class="text-muted">Resolved within SLA</small></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==============================================================
+                     SCREEN 9: TEACHER DASHBOARD
+                     ============================================================== -->
+                <section id="screen-teacher-dash" class="screen-view" aria-labelledby="screen9-heading">
+                    <div class="mb-4">
+                        <small class="text-muted">Faculty Workspace • Computer Science • Autumn Term</small>
+                        <h1 id="screen9-heading" class="h3 fw-bold mb-1">Teacher Dashboard</h1>
+                    </div>
+
+                    <!-- Metric Cards -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-lg-3">
+                            <div class="accessed-card p-3 mb-0 text-center">
+                                <div class="display-6 fw-bold text-primary">5</div>
+                                <div class="small fw-semibold text-muted">Active Courses</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="accessed-card p-3 mb-0 text-center">
+                                <div class="display-6 fw-bold text-success">86</div>
+                                <div class="small fw-semibold text-muted">Enrolled Students</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="accessed-card p-3 mb-0 text-center">
+                                <div class="display-6 fw-bold text-warning">92%</div>
+                                <div class="small fw-semibold text-muted">Avg. Accessibility Score</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="accessed-card p-3 mb-0 text-center">
+                                <div class="display-6 fw-bold text-danger">3</div>
+                                <div class="small fw-semibold text-muted">Items to Fix</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Left: Course Accessibility list -->
+                        <div class="col-lg-7">
+                            <div class="accessed-card bg-white mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h3 class="h5 fw-bold mb-0">Course Accessibility Overview</h3>
+                                    <button class="btn-accessed-secondary btn-sm" onclick="navigateToScreen('screen-compliance')">Upload Material</button>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between small fw-bold mb-1">
+                                        <span>Data Structures</span>
+                                        <span class="text-success">96% Compliant</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-success" style="width: 96%"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between small fw-bold mb-1">
+                                        <span>Digital Literacy</span>
+                                        <span class="text-success">91% Compliant</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-success" style="width: 91%"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between small fw-bold mb-1">
+                                        <span>Web Technologies</span>
+                                        <span class="text-danger">78% (At Risk)</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-danger" style="width: 78%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="d-flex justify-content-between small fw-bold mb-1">
+                                        <span>Database Systems</span>
+                                        <span class="text-primary">88% Compliant</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-primary" style="width: 88%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Student Support Queue -->
+                            <div class="accessed-card bg-white">
+                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-person-heart me-1"></i> Students Who May Need Support</h3>
+                                <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
+                                    <div>
+                                        <strong class="d-block small">Aarav Sharma</strong>
+                                        <small class="text-muted">Requested large print format for Module 4</small>
+                                    </div>
+                                    <span class="status-chip in-review">Pending</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center p-2">
+                                    <div>
+                                        <strong class="d-block small">Nisha Verma</strong>
+                                        <small class="text-muted">Extra time for Friday quiz accommodation</small>
+                                    </div>
+                                    <span class="status-chip resolved">Approved</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Upload Checklist -->
+                        <div class="col-lg-5">
+                            <div class="accessed-card bg-white">
+                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-card-checklist text-primary"></i> Pre-Publish Checklist</h3>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" checked id="c1">
+                                    <label class="form-check-label small fw-semibold" for="c1">Alt text added to all equations & figures</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" checked id="c2">
+                                    <label class="form-check-label small fw-semibold" for="c2">Captions & transcripts attached</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" checked id="c3">
+                                    <label class="form-check-label small fw-semibold" for="c3">Logical semantic heading structure (H1-H3)</label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="c4">
+                                    <label class="form-check-label small fw-semibold text-danger" for="c4">Color contrast verified (≥ 4.5:1)</label>
+                                </div>
+                                <button class="btn-accessed-primary w-100 btn-sm" onclick="navigateToScreen('screen-compliance')">Run Automated Compliance Check</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==============================================================
+                     SCREEN 10: ADMIN DASHBOARD
+                     ============================================================== -->
+                <section id="screen-admin-dash" class="screen-view" aria-labelledby="screen10-heading">
+                    <div class="mb-4">
+                        <small class="text-muted">All Departments • Illustrative Institution Governance</small>
+                        <h1 id="screen10-heading" class="h3 fw-bold mb-1">Administration Overview</h1>
+                    </div>
+
+                    <!-- KPI Row -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-lg-3">
+                            <div class="accessed-card p-3 mb-0 text-center">
+                                <div class="display-6 fw-bold text-primary">1,248</div>
+                                <div class="small fw-semibold text-muted">Registered Users</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="accessed-card p-3 mb-0 text-center">
+                                <div class="display-6 fw-bold text-success">64</div>
+                                <div class="small fw-semibold text-muted">Active Courses</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="accessed-card p-3 mb-0 text-center">
+                                <div class="display-6 fw-bold text-warning">87%</div>
+                                <div class="small fw-semibold text-muted">Compliance Score</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="accessed-card p-3 mb-0 text-center">
+                                <div class="display-6 fw-bold text-danger">14</div>
+                                <div class="small fw-semibold text-muted">Open Issues</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Left: Compliance Trend Graph Visual -->
+                        <div class="col-lg-7">
+                            <div class="accessed-card bg-white mb-4">
+                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-graph-up text-primary"></i> Compliance Trend</h3>
+                                <div class="p-4 rounded border border-2 border-dark text-center" style="background: var(--paper); height: 180px; display: flex; align-items: flex-end; justify-content: space-around;">
+                                    <div style="height: 50%; width: 30px; background: var(--terracotta); border: 2px solid var(--ink);" title="Jul: 65%"></div>
+                                    <div style="height: 65%; width: 30px; background: var(--mustard); border: 2px solid var(--ink);" title="Aug: 74%"></div>
+                                    <div style="height: 75%; width: 30px; background: var(--sage); border: 2px solid var(--ink);" title="Sep: 82%"></div>
+                                    <div style="height: 87%; width: 30px; background: var(--forest); border: 2px solid var(--ink);" title="Oct: 87%"></div>
+                                </div>
+                                <div class="d-flex justify-content-around text-muted small mt-2">
+                                    <span>July</span><span>August</span><span>September</span><span class="fw-bold text-dark">October</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Issues by Category -->
+                        <div class="col-lg-5">
+                            <div class="accessed-card bg-white mb-4">
+                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-pie-chart text-danger"></i> Issues by Category</h3>
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between small fw-bold"><span>Documents & PDFs</span><span>45%</span></div>
+                                    <div class="progress" style="height: 8px;"><div class="progress-bar bg-danger" style="width: 45%;"></div></div>
+                                </div>
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between small fw-bold"><span>Media & Captions</span><span>30%</span></div>
+                                    <div class="progress" style="height: 8px;"><div class="progress-bar bg-warning" style="width: 30%;"></div></div>
+                                </div>
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between small fw-bold"><span>Physical Facilities (Ramps/Labs)</span><span>15%</span></div>
+                                    <div class="progress" style="height: 8px;"><div class="progress-bar bg-primary" style="width: 15%;"></div></div>
+                                </div>
+                                <div>
+                                    <div class="d-flex justify-content-between small fw-bold"><span>DPDP Conduct Incidents</span><span>10%</span></div>
+                                    <div class="progress" style="height: 8px;"><div class="progress-bar bg-info" style="width: 10%;"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Audit Activity -->
+                    <div class="accessed-card bg-white">
+                        <h3 class="h5 fw-bold mb-3"><i class="bi bi-activity"></i> Recent Audit Activity</h3>
+                        <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
+                            <div>
+                                <strong class="d-block small">Web Technologies Audit Completed</strong>
+                                <small class="text-muted">Dr. Iyer • 2 items flagged for contrast</small>
+                            </div>
+                            <button class="btn-accessed-secondary btn-sm py-1" onclick="navigateToScreen('screen-compliance')">Review</button>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center p-2">
+                            <div>
+                                <strong class="d-block small">Issue #ACC-0987 Closed</strong>
+                                <small class="text-muted">Support team • Resolved within statutory 72h SLA</small>
+                            </div>
+                            <span class="status-chip resolved">Closed</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==============================================================
+                     SCREEN 11: COMPLIANCE MONITORING (RPwD 2016 & WCAG 2.2)
+                     ============================================================== -->
+                <section id="screen-compliance" class="screen-view" aria-labelledby="screen11-heading">
+                    <div class="mb-4">
+                        <h1 id="screen11-heading" class="h3 fw-bold mb-1">Compliance Monitoring</h1>
+                        <p class="text-muted small">Track institutional alignment with <strong>RPwD Act 2016</strong>, <strong>WCAG 2.2 Level AA</strong>, and <strong>DPDP Act 2023</strong>.</p>
+                    </div>
+
+                    <!-- 3 Standard Score Cards -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="accessed-card p-3 mb-0 bg-white">
+                                <small class="text-muted fw-bold">WCAG 2.2 AA Checks</small>
+                                <div class="display-6 fw-bold text-success">91%</div>
+                                <div class="progress mt-2" style="height: 6px;"><div class="progress-bar bg-success" style="width: 91%;"></div></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="accessed-card p-3 mb-0 bg-white">
+                                <small class="text-muted fw-bold">Institutional Policy (RPwD 2016)</small>
+                                <div class="display-6 fw-bold text-primary">84%</div>
+                                <div class="progress mt-2" style="height: 6px;"><div class="progress-bar bg-primary" style="width: 84%;"></div></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="accessed-card p-3 mb-0 bg-white">
+                                <small class="text-muted fw-bold">DPDP Data Protection Compliance</small>
+                                <div class="display-6 fw-bold text-warning">79%</div>
+                                <div class="progress mt-2" style="height: 6px;"><div class="progress-bar bg-warning" style="width: 79%;"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Department Status Table -->
+                    <div class="accessed-card bg-white mb-4">
+                        <h3 class="h5 fw-bold mb-3"><i class="bi bi-building me-2"></i> Department Status</h3>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Department</th>
+                                        <th>Score</th>
+                                        <th>Last Audit</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Computer Science</strong></td>
+                                        <td>92%</td>
+                                        <td>20 Oct</td>
+                                        <td><span class="status-chip compliant">Compliant</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Commerce</strong></td>
+                                        <td>81%</td>
+                                        <td>18 Oct</td>
+                                        <td><span class="status-chip action-needed">Action needed</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Humanities</strong></td>
+                                        <td>74%</td>
+                                        <td>11 Oct</td>
+                                        <td><span class="status-chip at-risk">At risk</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Sciences</strong></td>
+                                        <td>88%</td>
+                                        <td>15 Oct</td>
+                                        <td><span class="status-chip compliant">Compliant</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Live Evaluator Form connected to backend -->
+                    <div class="accessed-card bg-white">
+                        <h3 class="h5 fw-bold mb-3"><i class="bi bi-calculator text-primary"></i> Evaluate New Learning Material</h3>
+                        <form id="portal-compliance-form">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="eval-material-id" class="form-label small fw-bold">Material ID</label>
+                                    <input type="text" id="eval-material-id" class="accessed-input" value="CS-401-COMPLIANCE-DOC" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="eval-material-title" class="form-label small fw-bold">Title</label>
+                                    <input type="text" id="eval-material-title" class="accessed-input" value="Accessible AI Syllabus (WCAG 2.2 AA)" required>
+                                </div>
+                                <div class="col-3">
+                                    <label for="eval-contrast" class="form-label small">Contrast (0-100)</label>
+                                    <input type="number" id="eval-contrast" class="accessed-input" value="95">
+                                </div>
+                                <div class="col-3">
+                                    <label for="eval-alt" class="form-label small">Alt-Text (0-100)</label>
+                                    <input type="number" id="eval-alt" class="accessed-input" value="85">
+                                </div>
+                                <div class="col-3">
+                                    <label for="eval-nav" class="form-label small">Keyboard (0-100)</label>
+                                    <input type="number" id="eval-nav" class="accessed-input" value="90">
+                                </div>
+                                <div class="col-3">
+                                    <label for="eval-aria" class="form-label small">ARIA (0-100)</label>
+                                    <input type="number" id="eval-aria" class="accessed-input" value="80">
+                                </div>
+                                <div class="col-12 text-end">
+                                    <button type="submit" class="btn-accessed-primary">Calculate & Certify Compliance</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- ==============================================================
+                     SCREEN 12: ISSUE TRACKING (3-Column Kanban Board)
+                     ============================================================== -->
+                <section id="screen-kanban" class="screen-view" aria-labelledby="screen12-heading">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h1 id="screen12-heading" class="h3 fw-bold mb-1">Issue Tracking</h1>
+                            <p class="text-muted small mb-0">Assign, prioritize, and resolve accessibility barriers before the 72h SLA breaches.</p>
+                        </div>
+                        <button class="btn-accessed-primary btn-sm" onclick="navigateToScreen('screen-support')">
+                            <i class="bi bi-plus-lg"></i> New Barrier Ticket
+                        </button>
+                    </div>
+
+                    <!-- Kanban Columns -->
+                    <div class="kanban-board">
+                        <!-- Column 1: Open -->
+                        <div class="kanban-column" data-status="open">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="h6 fw-bold mb-0">Open</h3>
+                                <span class="badge bg-dark column-count">2</span>
+                            </div>
+                            <div class="kanban-cards-container">
+                                <div class="kanban-card">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <small class="text-muted fw-bold">#ACC-1042</small>
+                                        <span class="status-chip high">High</span>
+                                    </div>
+                                    <strong class="d-block small mb-2">PDF not screen-reader friendly</strong>
+                                    <div class="d-flex justify-content-between align-items-center small text-muted">
+                                        <span><i class="bi bi-person-circle"></i> Assigned: MI</span>
+                                        <span class="badge bg-light text-dark border">SLA: 2 days</span>
+                                    </div>
+                                </div>
+
+                                <div class="kanban-card">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <small class="text-muted fw-bold">#ACC-1039</small>
+                                        <span class="status-chip medium">Medium</span>
+                                    </div>
+                                    <strong class="d-block small mb-2">Missing captions: Week 5 video</strong>
+                                    <div class="d-flex justify-content-between align-items-center small text-muted">
+                                        <span><i class="bi bi-person-circle"></i> Assigned: MI</span>
+                                        <span class="badge bg-light text-dark border">SLA: 2 days</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 2: In Review -->
+                        <div class="kanban-column" data-status="in-review">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="h6 fw-bold mb-0">In Review</h3>
+                                <span class="badge bg-dark column-count">1</span>
+                            </div>
+                            <div class="kanban-cards-container">
+                                <div class="kanban-card">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <small class="text-muted fw-bold">#ACC-1031</small>
+                                        <span class="status-chip high">High</span>
+                                    </div>
+                                    <strong class="d-block small mb-2">Ramp access to Lab 204 obstructed</strong>
+                                    <div class="d-flex justify-content-between align-items-center small text-muted">
+                                        <span><i class="bi bi-person-circle"></i> Assigned: Estate</span>
+                                        <span class="badge bg-light text-dark border">SLA: 2 days</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 3: Resolved -->
+                        <div class="kanban-column" data-status="resolved">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="h6 fw-bold mb-0">Resolved</h3>
+                                <span class="badge bg-dark column-count">2</span>
+                            </div>
+                            <div class="kanban-cards-container">
+                                <div class="kanban-card">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <small class="text-muted fw-bold">#ACC-0987</small>
+                                        <span class="status-chip resolved">Low</span>
+                                    </div>
+                                    <strong class="d-block small mb-2">Captions out of sync in Week 4</strong>
+                                    <div class="d-flex justify-content-between align-items-center small text-muted">
+                                        <span><i class="bi bi-person-circle"></i> Support team</span>
+                                        <span class="badge bg-success text-white">Within SLA</span>
+                                    </div>
+                                </div>
+
+                                <div class="kanban-card">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <small class="text-muted fw-bold">#ACC-0954</small>
+                                        <span class="status-chip resolved">Low</span>
+                                    </div>
+                                    <strong class="d-block small mb-2">Contrast issue on quiz landing page</strong>
+                                    <div class="d-flex justify-content-between align-items-center small text-muted">
+                                        <span><i class="bi bi-person-circle"></i> Tech team</span>
+                                        <span class="badge bg-success text-white">Within SLA</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==============================================================
+                     SCREEN 13: REPORTS & AUDITS (CSV Export)
+                     ============================================================== -->
+                <section id="screen-reports" class="screen-view" aria-labelledby="screen13-heading">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                        <div>
+                            <h1 id="screen13-heading" class="h3 fw-bold mb-1">Reports & Statutory Audits</h1>
+                            <p class="text-muted small mb-0">Export-ready institutional compliance summaries for government accreditation and regulatory audits.</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button id="export-report-csv" class="btn-accessed-secondary btn-sm"><i class="bi bi-file-earmark-spreadsheet"></i> CSV</button>
+                            <button class="btn-accessed-primary btn-sm" onclick="window.print()"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Chips -->
+                    <div class="filter-tabs mb-4">
+                        <span class="filter-tab-btn active">Oct 2026</span>
+                        <span class="filter-tab-btn">All Departments</span>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-6">
+                            <div class="accessed-card bg-white h-100">
+                                <h3 class="h6 fw-bold mb-3"><i class="bi bi-bar-chart me-1"></i> Resources Made Accessible</h3>
+                                <div class="d-flex align-items-end justify-content-around p-3 border rounded" style="height: 160px; background: var(--paper);">
+                                    <div style="height: 35%; width: 22px; background: var(--mustard); border: 2px solid var(--ink);"></div>
+                                    <div style="height: 55%; width: 22px; background: var(--mustard); border: 2px solid var(--ink);"></div>
+                                    <div style="height: 70%; width: 22px; background: var(--sage); border: 2px solid var(--ink);"></div>
+                                    <div style="height: 85%; width: 22px; background: var(--terracotta); border: 2px solid var(--ink);"></div>
+                                </div>
+                                <div class="d-flex justify-content-around text-muted small mt-2">
+                                    <span>W1</span><span>W2</span><span>W3</span><span class="fw-bold text-dark">W4</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="accessed-card bg-white h-100">
+                                <h3 class="h6 fw-bold mb-3"><i class="bi bi-clock-history me-1"></i> Average Resolution Time (Days)</h3>
+                                <div class="d-flex align-items-center justify-content-center p-3 border rounded" style="height: 160px; background: var(--paper);">
+                                    <div class="text-center">
+                                        <div class="display-5 fw-bold text-success">1.8 Days</div>
+                                        <small class="text-muted">Target Statutory SLA: ≤ 3.0 Days (72 Hours)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Table -->
+                    <div class="accessed-card bg-white">
+                        <h3 class="h6 fw-bold mb-3">Key Compliance Metrics</h3>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th>This Month</th>
+                                        <th>Change</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Issues resolved within 72h SLA</strong></td>
+                                        <td>91%</td>
+                                        <td><span class="badge bg-success">+4%</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Captioned media coverage</strong></td>
+                                        <td>83%</td>
+                                        <td><span class="badge bg-success">+6%</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>RPwD Section 40 Certification</strong></td>
+                                        <td>88%</td>
+                                        <td><span class="badge bg-success">+5%</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==============================================================
+                     SCREEN 14: PROFILE AND SETTINGS
+                     ============================================================== -->
+                <section id="screen-profile" class="screen-view" aria-labelledby="screen14-heading">
+                    <div class="mb-4">
+                        <h1 id="screen14-heading" class="h3 fw-bold mb-1">Profile and Settings</h1>
+                        <p class="text-muted small">Manage your account identity, accessibility needs, and DPDP Act 2023 privacy preferences.</p>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-lg-4">
+                            <div class="accessed-card bg-white text-center">
+                                <div class="user-avatar mx-auto mb-3" style="width: 72px; height: 72px; font-size: 1.8rem;">AS</div>
+                                <h3 class="h5 fw-bold mb-1">Aarav Sharma</h3>
+                                <p class="text-muted small mb-2">Student • BCA Semester 5</p>
+                                <span class="status-chip in-review">Low vision</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-8">
+                            <div class="accessed-card bg-white mb-4">
+                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-person me-2"></i> Personal Details</h3>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="prof-name" class="form-label small fw-bold">Full Name</label>
+                                        <input type="text" id="prof-name" class="accessed-input" value="Aarav Sharma">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="prof-email" class="form-label small fw-bold">Email Address</label>
+                                        <input type="email" id="prof-email" class="accessed-input" value="aarav@college.edu">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accessed-card bg-white">
+                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-shield-lock me-2"></i> Notifications & DPDP 2023 Privacy</h3>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <div>
+                                        <strong class="d-block small">Email me when tickets update</strong>
+                                        <small class="text-muted">Receive real-time 72h SLA escalation alerts</small>
+                                    </div>
+                                    <label class="accessed-toggle">
+                                        <input type="checkbox" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <div>
+                                        <strong class="d-block small">Share needs with my teachers</strong>
+                                        <small class="text-muted">Allows faculty to automatically provision large print & extra quiz time</small>
+                                    </div>
+                                    <label class="accessed-toggle">
+                                        <input type="checkbox" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <div>
+                                        <strong class="d-block small">Two-step verification</strong>
+                                        <small class="text-muted">Protects student medical and accessibility records</small>
+                                    </div>
+                                    <label class="accessed-toggle">
+                                        <input type="checkbox" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2">
+                                    <div>
+                                        <strong class="d-block small">Anonymize analytics data (DPDP 2023)</strong>
+                                        <small class="text-muted">SHA-256 salted pseudonymization of activity logs</small>
+                                    </div>
+                                    <label class="accessed-toggle">
+                                        <input type="checkbox" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Accessible Footer -->
+            <footer class="text-center py-4 border-top" style="background: var(--paper-card); border-color: var(--border-color);" role="contentinfo">
+                <div class="container">
+                    <div class="mb-2">
+                        <img src="/images/logo.jpg" alt="Sadachar Logo" style="height: 40px; width: auto; border-radius: 4px; background: white; padding: 2px; border: 1px solid var(--border-color);">
+                    </div>
+                    <p class="mb-1"><strong>Sadachar</strong> — <em>Education Without Barriers.</em> Built for Smart India Hackathon (SIH)</p>
+                    <p class="small text-muted mb-0">Compliant with RPwD Act 2016, WCAG 2.2 Level AA, 72-Hour Statutory Grievance SLAs & DPDP Act 2023.</p>
+                </div>
+            </footer>
+
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar (< 640px) -->
+    <nav class="mobile-tab-bar" role="navigation" aria-label="Mobile Navigation">
+        <button class="mobile-tab-btn active" data-screen="screen-student-dash">
+            <i class="bi bi-speedometer2 fs-5"></i>
+            <span>Dashboard</span>
+        </button>
+        <button class="mobile-tab-btn" data-screen="screen-resources">
+            <i class="bi bi-collection-play fs-5"></i>
+            <span>Resources</span>
+        </button>
+        <button class="mobile-tab-btn" data-screen="screen-accessibility-settings">
+            <i class="bi bi-sliders fs-5"></i>
+            <span>Accessibility</span>
+        </button>
+        <button class="mobile-tab-btn" data-screen="screen-support">
+            <i class="bi bi-shield-exclamation fs-5"></i>
+            <span>Support</span>
+        </button>
+        <button class="mobile-tab-btn" data-screen="screen-profile">
+            <i class="bi bi-person fs-5"></i>
+            <span>Profile</span>
+        </button>
+    </nav>
+
+    <!-- Core Interactive Script -->
+    <script src="/js/accessed.js"></script>
+</body>
+</html>

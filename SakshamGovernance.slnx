@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SakshamGovernance.Core/SakshamGovernance.Core.csproj" />
+    <Project Path="src/SakshamGovernance.Infrastructure/SakshamGovernance.Infrastructure.csproj" />
+    <Project Path="src/SakshamGovernance.Web/SakshamGovernance.Web.csproj" />
+  </Folder>
+</Solution>
