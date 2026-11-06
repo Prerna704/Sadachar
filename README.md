@@ -1,7 +1,7 @@
 # Sadachar (सदाचार) — Education Without Barriers.
 
 <p align="center">
-  <img src="src/Sadachar.Web/wwwroot/images/logo.jpg" alt="Sadachar: Inclusive Education Ecosystem - Education Without Barriers" width="460" />
+ar   <img src="src/Sadachar.Web/wwwroot/images/logo.jpg" alt="Sadachar: Inclusive Education Ecosystem - Education Without Barriers" width="460" />
 </p>
 
 > **Inclusive Education Ecosystem for Specially-Abled Students**  
@@ -115,9 +115,11 @@ dotnet ef database update --project src/Sadachar.Infrastructure/Sadachar.Infrast
 dotnet run --project src/Sadachar.Web/Sadachar.Web.csproj
 ```
 
-Sign in at `/Account/Login`; create a student account at `/Account/Register`. Passwords are hashed by ASP.NET Core Identity and are never stored as plain text. New self-registered accounts have student access only; an administrator must provision educator accounts. The seeded showcase student has no demo password—register an account to test sign-in.
+Sign in at `/Account/Login`; create a student account at `/Account/Register`. Passwords are hashed by ASP.NET Core Identity and are never stored as plain text. New self-registered accounts have student access only; an administrator must provision educator accounts. The LMS starts without seeded student accounts or sample course content.
 
 The login cookie protects the account profile and APIs. Students can create and view only their own grievances; educator, administrator, and auditor access is checked from the account role stored in `AspNetUsers`.
+
+The LMS applies checked-in EF Core migrations on startup. To provision the first administrator, set `BootstrapAdmin:Email`, `BootstrapAdmin:Password`, and optionally `BootstrapAdmin:FullName` through .NET User Secrets or environment variables. For example, use `dotnet user-secrets set` for each value; do not put administrator credentials in `appsettings.json` or source control. The bootstrap runs only when the configured email does not already exist.
 
 For a different local database, keep connection strings out of source control and use .NET User Secrets:
 
