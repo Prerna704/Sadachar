@@ -28,7 +28,7 @@ public class GovernanceController : ControllerBase
     /// Logs a new grievance ticket for a specially-abled student, initializing a strict 72-Hour SLA clock.
     /// </summary>
     [HttpPost("grievance")]
-    [Authorize(Roles = "Student")]
+    [Authorize(Roles = "Student,Educator")]
     [ProducesResponseType(typeof(GrievanceResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateGrievanceTicket(
@@ -118,13 +118,13 @@ public class GovernanceController : ControllerBase
     /// <summary>
     /// Returns all registered grievance tickets and their current SLA status.
     /// </summary>
-    [Authorize(Roles = "Student,Admin,Auditor")]
+    [Authorize(Roles = "Student,Educator,Admin,Auditor")]
     [HttpGet("grievances")]
     [ProducesResponseType(typeof(IEnumerable<GrievanceResponseDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllGrievances(CancellationToken cancellationToken)
     {
         var tickets = await _grievanceRepository.GetAllTicketsAsync(cancellationToken);
-        if (User.IsInRole(nameof(UserRole.Student)))
+        if (User.IsInRole(nameof(UserRole.Student)) || User.IsInRole(nameof(UserRole.Educator)))
         {
             var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             tickets = tickets.Where(ticket => ticket.StudentId == studentId).ToList();
@@ -144,6 +144,25 @@ public class GovernanceController : ControllerBase
         ));
 
         return Ok(response);
+    }
+
+    public record GrievanceStatusUpdate(TicketStatus Status, string? ResolutionNotes);
+
+    [Authorize(Roles = "Admin")]
+    [HttpPut("grievance/{ticketId:guid}/status")]
+    public async Task<IActionResult> UpdateGrievanceStatus(Guid ticketId, [FromBody] GrievanceStatusUpdate request, CancellationToken cancellationToken)
+    {
+        if (request.Status is not (TicketStatus.InProgress or TicketStatus.Resolved) || request.ResolutionNotes?.Length > 1000) return BadRequest();
+        var ticket = await _grievanceRepository.GetTicketByIdAsync(ticketId, cancellationToken);
+        if (ticket is null) return NotFound();
+        ticket.Status = request.Status;
+        if (request.Status == TicketStatus.Resolved)
+        {
+            ticket.ResolvedAt = DateTime.UtcNow;
+            ticket.ResolutionNotes = request.ResolutionNotes?.Trim();
+        }
+        await _grievanceRepository.UpdateTicketAsync(ticket, cancellationToken);
+        return NoContent();
     }
 
     /// <summary>

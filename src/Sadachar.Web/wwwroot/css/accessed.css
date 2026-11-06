@@ -1065,6 +1065,9 @@ body.theme-dark .user-avatar {
 .profile-settings-button { width: 100%; min-height: 36px; margin-top: 13px; color: var(--plum); background: color-mix(in srgb, var(--plum) 8%, var(--paper-card)); border: 1px solid color-mix(in srgb, var(--plum) 22%, var(--border-color)); border-radius: 8px; font: inherit; font-size: 0.72rem; font-weight: 600; cursor: pointer; }
 .profile-settings-button:hover { background: color-mix(in srgb, var(--plum) 14%, var(--paper-card)); }
 .schedule-row { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 11px; padding: 11px 2px; border-bottom: 1px solid var(--border-color); }
+.weekly-activity-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) 48px; align-items: center; gap: 10px; margin: 10px 0; color: var(--muted); font-size: .75rem; }
+.weekly-activity-row progress { width: 100%; height: 12px; accent-color: #7657d5; }
+.lesson-copy { max-height: 55vh; overflow: auto; }
 .schedule-row:last-child { border-bottom: 0; }
 .schedule-date { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--muted); font-size: 0.55rem; font-weight: 700; }
 .schedule-date strong { color: var(--plum); font-size: 1rem; }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Sadachar.Core.Entities;
@@ -10,6 +11,15 @@ using Sadachar.Infrastructure.Services;
 using Sadachar.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Allow deployments and restricted local environments to choose a writable,
+// persistent key-ring location for authentication cookies and antiforgery tokens.
+var dataProtectionKeysDirectory = builder.Configuration["DataProtection:KeysDirectory"];
+if (!string.IsNullOrWhiteSpace(dataProtectionKeysDirectory))
+{
+    Directory.CreateDirectory(dataProtectionKeysDirectory);
+    builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysDirectory));
+}
 
 // 1. Flexible Database Configuration (In-Memory for zero-friction demo / SQL Server for production)
 var useInMemory = builder.Configuration.GetValue<bool>("UseInMemoryDatabase", true);
@@ -48,6 +58,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+builder.Services.Configure<Microsoft.AspNetCore.Identity.SecurityStampValidatorOptions>(options => options.ValidationInterval = TimeSpan.Zero);
 
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 builder.Services.ConfigureApplicationCookie(options =>
@@ -86,7 +97,8 @@ builder.Services.AddScoped<ISlaEscalationService, SlaEscalationService>();
 builder.Services.AddHostedService<SlaEscalationBackgroundService>();
 
 // 5. Web APIs & OpenAPI / Swagger
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options => options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()));
+builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -98,119 +110,31 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// 6. CORS Policy for Web / Frontend Integrations
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowClientApp", policy =>
-    {
-        policy.AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowAnyOrigin();
-    });
-});
-
 var app = builder.Build();
 
-// Ensure Database & Seed Realistic Initial Records for Hackathon Showcase
+// Apply database schema. LMS content and learner activity are created through authenticated workflows.
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<ApplicationDbContext>();
-    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    if (useInMemory) await context.Database.EnsureCreatedAsync();
+    else await context.Database.MigrateAsync();
 
-    if (useInMemory)
+    var bootstrapEmail = builder.Configuration["BootstrapAdmin:Email"];
+    var bootstrapPassword = builder.Configuration["BootstrapAdmin:Password"];
+    if (!string.IsNullOrWhiteSpace(bootstrapEmail) && !string.IsNullOrWhiteSpace(bootstrapPassword))
     {
-        await context.Database.EnsureCreatedAsync();
-    }
-    else
-    {
-        await context.Database.MigrateAsync();
-    }
-
-    // Seed Sample Student User if not present
-    var sampleStudent = await userManager.FindByIdAsync("STU-2026-0891");
-    if (sampleStudent == null)
-    {
-        sampleStudent = new ApplicationUser
+        var users = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        if (await users.FindByEmailAsync(bootstrapEmail) is null)
         {
-            Id = "STU-2026-0891",
-            UserName = "aarav.sharma@institution.edu.in",
-            Email = "aarav.sharma@institution.edu.in",
-            FullName = "Aarav Sharma",
-            Role = UserRole.Student,
-            Disability = DisabilityType.LocomotorDisability,
-            CreatedAtUtc = DateTime.UtcNow
-        };
-        await userManager.CreateAsync(sampleStudent);
-    }
-
-    // Seed Sample Compliance Audits
-    if (!context.ComplianceLogs.Any())
-    {
-        context.ComplianceLogs.AddRange(
-            new ComplianceLog
+            var bootstrapAdmin = new ApplicationUser
             {
-                MaterialId = "CSE-101-LECTURE-01",
-                MaterialTitle = "Data Structures & Algorithms (Accessible PDF with Tactile Diagrams)",
-                WcagScore = 92.50m,
-                IsRpwdCompliant = true,
-                AuditedAt = DateTime.UtcNow.AddDays(-1),
-                AuditRemarks = "Meets WCAG 2.2 Level AA and Section 40 RPwD Act 2016 standard."
-            },
-            new ComplianceLog
-            {
-                MaterialId = "PHY-201-OPTICS-LAB",
-                MaterialTitle = "Optics & Laser Experiment Manual (Scanned Untagged Images)",
-                WcagScore = 58.00m,
-                IsRpwdCompliant = false,
-                AuditedAt = DateTime.UtcNow.AddDays(-3),
-                AuditRemarks = "Failed: Missing image descriptions, contrast ratio below 4.5:1."
-            }
-        );
-        await context.SaveChangesAsync();
-    }
-
-    // Seed Sample Grievances
-    if (!context.GrievanceTickets.Any())
-    {
-        context.GrievanceTickets.AddRange(
-            new GrievanceTicket
-            {
-                StudentId = sampleStudent.Id,
-                IssueDescription = "Main Academic Block ramp slope exceeds 1:12 ratio; wheelchair access impaired.",
-                Status = TicketStatus.Open,
-                CreatedAt = DateTime.UtcNow.AddHours(-12),
-                SLAExpiryDateTime = DateTime.UtcNow.AddHours(60) // 60h remaining in 72h SLA
-            },
-            new GrievanceTicket
-            {
-                StudentId = sampleStudent.Id,
-                IssueDescription = "Semester Examination portal lacks screen-reader NVDA compatibility.",
-                Status = TicketStatus.Escalated,
-                CreatedAt = DateTime.UtcNow.AddHours(-85),
-                SLAExpiryDateTime = DateTime.UtcNow.AddHours(-13), // Breached 13 hours ago
-                EscalatedAt = DateTime.UtcNow.AddHours(-13)
-            }
-        );
-        await context.SaveChangesAsync();
-    }
-
-    // Seed Sample Conduct Incidents (DPDP Act 2023 Compliant)
-    if (!context.ConductLogs.Any())
-    {
-        context.ConductLogs.AddRange(
-            new ConductLog
-            {
-                PseudonymizedUserHash = "8f3b14a67e9c5620df981e4ab612347890123456789abcdef0123456789abcde",
-                IncidentType = IncidentType.AbleistSlur,
-                SanitizedContextSnippet = "Excluded peer from group forum: '[REDACTED_DEROGATORY_COMMENT]'",
-                AiConfidenceScore = 0.978m,
-                FlaggedAtUtc = DateTime.UtcNow.AddDays(-2),
-                DataRetentionExpiryUtc = DateTime.UtcNow.AddDays(88),
-                IsReviewedByOmbudsman = false
-            }
-        );
-        await context.SaveChangesAsync();
+                UserName = bootstrapEmail.Trim(), Email = bootstrapEmail.Trim(),
+                FullName = builder.Configuration["BootstrapAdmin:FullName"]?.Trim() ?? "Administrator",
+                Role = UserRole.Admin, CreatedAtUtc = DateTime.UtcNow
+            };
+            var result = await users.CreateAsync(bootstrapAdmin, bootstrapPassword);
+            if (!result.Succeeded) throw new InvalidOperationException($"Could not create the configured administrator: {string.Join("; ", result.Errors.Select(e => e.Description))}");
+        }
     }
 }
 
@@ -227,8 +151,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseDefaultFiles();
 app.UseStaticFiles();
-
-app.UseCors("AllowClientApp");
 
 app.UseAuthentication();
 app.UseAuthorization();

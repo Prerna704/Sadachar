@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.EntityFrameworkCore;
 using Sadachar.Core.Entities;
 using Sadachar.Core.Enums;
+using Sadachar.Infrastructure.Data;
 using Sadachar.Web.ViewModels;
 
 namespace Sadachar.Web.Controllers;
@@ -13,13 +16,27 @@ public class AccountController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly ApplicationDbContext _db;
+    private readonly IAntiforgery _antiforgery;
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager)
+        SignInManager<ApplicationUser> signInManager,
+        ApplicationDbContext db,
+        IAntiforgery antiforgery)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _db = db;
+        _antiforgery = antiforgery;
+    }
+
+    [AllowAnonymous]
+    [HttpGet("/api/account/csrf")]
+    public IActionResult CsrfToken()
+    {
+        var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
+        return Ok(new { RequestToken = tokens.RequestToken });
     }
 
     [Authorize]
@@ -40,6 +57,22 @@ public class AccountController : Controller
             Disability = user.Disability.ToString()
         });
     }
+
+    [Authorize]
+    [HttpPut("/api/account/me")]
+    public async Task<IActionResult> UpdateCurrentUser([FromBody] ProfileUpdateRequest request)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null || !user.IsActive) return Unauthorized();
+        if (string.IsNullOrWhiteSpace(request.FullName) || request.FullName.Trim().Length > 150) return BadRequest(new { message = "Enter a name up to 150 characters." });
+        user.FullName = request.FullName.Trim();
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded) return BadRequest(result.Errors.Select(e => e.Description));
+        await _signInManager.RefreshSignInAsync(user);
+        return Ok(new { user.FullName, user.Email });
+    }
+
+    public record ProfileUpdateRequest(string FullName);
 
     [AllowAnonymous]
     [HttpGet]

@@ -70,7 +70,7 @@
                     <li class="sidebar-nav-item" data-screen="screen-admin-dash" data-roles="admin">
                         <button><i class="bi bi-grid-1x2" aria-hidden="true"></i> <span>Admin Overview</span></button>
                     </li>
-                    <li class="sidebar-nav-item" data-screen="screen-compliance" data-roles="admin">
+                    <li class="sidebar-nav-item" data-screen="screen-compliance" data-roles="admin,auditor,teacher">
                         <button><i class="bi bi-patch-check" aria-hidden="true"></i> <span>Compliance</span></button>
                     </li>
                     <li class="sidebar-nav-item" data-screen="screen-kanban" data-roles="admin">
@@ -79,7 +79,7 @@
                     <li class="sidebar-nav-item" data-screen="screen-reports" data-roles="admin">
                         <button><i class="bi bi-bar-chart-line" aria-hidden="true"></i> <span>Reports</span></button>
                     </li>
-                    <li class="sidebar-nav-item" data-screen="screen-profile" data-roles="student,teacher,admin">
+                    <li class="sidebar-nav-item" data-screen="screen-profile" data-roles="student,teacher,admin,auditor">
                         <button><i class="bi bi-person-gear" aria-hidden="true"></i> <span>Profile</span></button>
                     </li>
                 </ul>
@@ -116,9 +116,9 @@
                         <button id="quick-font-reset" aria-label="Reset text size" title="Reset text size">A</button>
                         <button id="quick-font-increase" aria-label="Increase text size" title="Increase text size">A+</button>
                     </div>
-                    <span class="notification-button" role="img" aria-label="Notifications">
+                    <button type="button" class="notification-button" id="notification-button" aria-label="Open announcements">
                         <i class="bi bi-bell"></i><span class="notification-dot" aria-hidden="true"></span>
-                    </span>
+                    </button>
                     <a id="account-nav-link" class="account-avatar" href="/Account/Login" aria-label="Sign in">G</a>
                     <a href="/swagger" target="_blank" class="api-docs-link">
                         <i class="bi bi-journal-code"></i><span>API</span>
@@ -157,14 +157,14 @@
                             <div class="row g-3 pt-2">
                                 <div class="col-4">
                                     <div class="p-3 bg-white rounded border border-2 border-dark text-center" style="box-shadow: 2px 2px 0 var(--ink);">
-                                        <div class="display-6 fw-bold" style="color: var(--terracotta);">4</div>
+                                        <div class="display-6 fw-bold" style="color: var(--terracotta);">Accessible</div>
                                         <small class="fw-semibold text-muted">Needs Supported</small>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="p-3 bg-white rounded border border-2 border-dark text-center" style="box-shadow: 2px 2px 0 var(--ink);">
-                                        <div class="display-6 fw-bold" style="color: var(--forest);">3</div>
-                                        <small class="fw-semibold text-muted">Role Workspaces</small>
+                                        <div class="display-6 fw-bold" style="color: var(--forest);">Inclusive</div>
+                                        <small class="fw-semibold text-muted">Learning Workspaces</small>
                                     </div>
                                 </div>
                                 <div class="col-4">
@@ -183,19 +183,11 @@
                                     <span class="status-chip audio-badge"><i class="bi bi-soundwave"></i> Listening mode</span>
                                     <span class="status-chip ready"><i class="bi bi-badge-cc"></i> Captions on</span>
                                 </div>
-                                <h3 class="h5 fw-bold mb-2">Linked Lists: Insertion</h3>
+                                <h3 class="h5 fw-bold mb-2">Find your next lesson</h3>
                                 <p class="small text-muted mb-3" style="line-height: 1.6;">
-                                    "A node stores a value and a pointer to the next node. To insert at the head, create a new node and point it to the old head."
+                                    Browse published courses and accessible learning resources. Your enrolled courses and lesson progress appear on your dashboard.
                                 </p>
-                                <div class="audio-player-card mb-2">
-                                    <button class="audio-play-btn" onclick="navigateToScreen('screen-tts-reader')" aria-label="Play Sample Audio">
-                                        <i class="bi bi-play-fill"></i>
-                                    </button>
-                                    <div class="audio-scrubber">
-                                        <div class="audio-progress-bar"></div>
-                                    </div>
-                                    <small class="fw-bold">02:14 / 05:20</small>
-                                </div>
+                                <button class="btn-accessed-primary" onclick="navigateToScreen('screen-library')"><i class="bi bi-collection me-2"></i>Browse courses and resources</button>
                                 <div class="text-end">
                                     <small class="badge bg-light text-dark border">Speed 1.0×</small>
                                 </div>
@@ -260,7 +252,7 @@
                         <div class="col-lg-5 col-md-6">
                             <div class="accessed-card bg-white">
                                 <h3 class="h5 fw-bold mb-2">Sign in to Sadachar</h3>
-                                <p class="text-muted small">Accounts are securely checked against the application database. Access level comes from your account, not the demo role switcher.</p>
+                                <p class="text-muted small">Accounts are checked against the application database. Your access level comes from your assigned account role.</p>
                                 <a href="/Account/Login?returnUrl=%2F" class="btn-accessed-primary w-100 mb-3">Sign in</a>
                                 <a href="/Account/Register" class="btn-accessed-secondary w-100">Create a student account</a>
                                 <p class="small text-muted mt-3 mb-0">Educator accounts are provisioned by an administrator.</p>
@@ -294,24 +286,41 @@
                     <div class="dashboard-metrics" aria-label="Learning overview">
                         <article class="metric-card metric-blue">
                             <span class="metric-icon"><i class="bi bi-book-half"></i></span>
-                            <div><strong>4</strong><span>Enrolled Courses</span></div>
+                            <div><strong id="stat-enrolled">0</strong><span>Enrolled Courses</span></div>
                             <i class="bi bi-arrow-right metric-arrow"></i>
                         </article>
                         <article class="metric-card metric-green">
                             <span class="metric-icon"><i class="bi bi-star-fill"></i></span>
-                            <div><strong>28</strong><span>Accessible Resources</span></div>
+                            <div><strong id="stat-resources">0</strong><span>Accessible Resources</span></div>
                             <i class="bi bi-arrow-right metric-arrow"></i>
                         </article>
                         <article class="metric-card metric-orange">
                             <span class="metric-icon"><i class="bi bi-calendar2-week"></i></span>
-                            <div><strong>6 days</strong><span>Reading Streak</span></div>
+                            <div><strong id="stat-streak">0 days</strong><span>Reading Streak</span></div>
                             <i class="bi bi-arrow-right metric-arrow"></i>
                         </article>
                         <article class="metric-card metric-pink">
                             <span class="metric-icon"><i class="bi bi-ticket-perforated-fill"></i></span>
-                            <div><strong>1</strong><span>Open Support Ticket</span></div>
+                            <div><strong id="stat-tickets">0</strong><span>Open Support Ticket</span></div>
                             <i class="bi bi-arrow-right metric-arrow"></i>
                         </article>
+                    </div>
+
+                    <div class="dashboard-metrics" aria-label="Your learning performance">
+                        <article class="metric-card metric-green"><div><strong id="stat-completed">0</strong><span>Courses Completed</span></div></article>
+                        <article class="metric-card metric-blue"><div><strong id="stat-in-progress">0</strong><span>Courses In Progress</span></div></article>
+                        <article class="metric-card metric-orange"><div><strong id="stat-hours">0</strong><span>Learning Hours</span></div></article>
+                        <article class="metric-card metric-pink"><div><strong id="stat-progress">0%</strong><span>Overall Progress</span></div></article>
+                    </div>
+
+                    <div class="dashboard-metrics" aria-label="Upcoming work">
+                        <article class="metric-card metric-orange"><div><strong id="stat-pending">0</strong><span>Pending Assignments</span></div></article>
+                        <article class="metric-card metric-pink"><div><strong id="stat-assessments">0</strong><span>Upcoming Assessments</span></div></article>
+                    </div>
+
+                    <div class="dashboard-grid mb-3">
+                        <section class="dashboard-panel" aria-labelledby="performance-heading"><div class="panel-heading"><h2 id="performance-heading">Weekly learning activity</h2><span id="weekly-total" class="text-muted small"></span></div><div id="weekly-activity" role="list" aria-label="Daily learning time"></div><h3 class="h6 mt-4">Recent quiz scores</h3><div id="quiz-score-trend"></div></section>
+                        <section class="dashboard-panel" aria-labelledby="recommendations-heading"><div class="panel-heading"><h2 id="recommendations-heading">Learning recommendations</h2></div><div id="learning-recommendations" aria-live="polite"><p class="text-muted">Recommendations appear after you complete lessons and assessments.</p></div></section>
                     </div>
 
                     <div class="dashboard-grid">
@@ -320,28 +329,7 @@
                                 <h2 id="continue-heading"><i class="bi bi-bar-chart-fill"></i> Continue Learning</h2>
                                 <button class="panel-link" onclick="navigateToScreen('screen-resources')">View All <i class="bi bi-arrow-right"></i></button>
                             </div>
-                            <div class="featured-course">
-                                <div class="course-progress" role="img" aria-label="68 percent complete"><span>68%</span></div>
-                                <div class="featured-course-copy">
-                                    <h3>Data Structures: Linked Lists</h3>
-                                    <p>Module 3 • Arrays & Linked List Fundamentals</p>
-                                    <div class="course-actions">
-                                        <button class="hero-cta" onclick="navigateToScreen('screen-course-details')"><i class="bi bi-play-fill"></i> Resume</button>
-                                        <button class="course-secondary" onclick="navigateToScreen('screen-tts-reader')"><i class="bi bi-volume-up"></i> Listen</button>
-                                    </div>
-                                </div>
-                                <div class="course-art" aria-hidden="true"><i class="bi bi-laptop"></i><i class="bi bi-code-slash"></i><i class="bi bi-book-half"></i></div>
-                            </div>
-                            <div class="course-list-row">
-                                <span class="course-mini-icon mini-green"><i class="bi bi-universal-access"></i></span>
-                                <div><strong>Digital Literacy • Week 5 Video</strong><small>Captions + Interactive Transcript</small></div>
-                                <span class="course-status status-ready">Ready</span>
-                            </div>
-                            <div class="course-list-row">
-                                <span class="course-mini-icon mini-blue"><i class="bi bi-journal-bookmark-fill"></i></span>
-                                <div><strong>Assistive Tech Basics • Reading</strong><small>Easy-read tactile format</small></div>
-                                <span class="course-status status-new">New</span>
-                            </div>
+                            <div id="continue-learning-list" aria-live="polite"><p class="text-muted">Loading your courses...</p></div>
                             <div class="quick-access">
                                 <strong><i class="bi bi-lightning-charge-fill"></i> Quick Access</strong>
                                 <button onclick="navigateToScreen('screen-resources')"><i class="bi bi-display"></i> Digital Literacy</button>
@@ -357,22 +345,20 @@
                             </div>
                             <div class="profile-setting-row"><span class="setting-icon"><i class="bi bi-type"></i></span><span>Dyslexia-friendly font</span><label class="accessed-toggle"><input type="checkbox" aria-label="Dyslexia-friendly font" onchange="AccessEdState.accessibility.fontFamily = this.checked ? 'dyslexia' : 'default'; applyAccessibilitySettings();"><span class="toggle-slider"></span></label></div>
                             <div class="profile-setting-row"><span class="setting-icon"><i class="bi bi-sun"></i></span><span>High contrast mode</span><label class="accessed-toggle"><input type="checkbox" aria-label="High contrast mode" onchange="AccessEdState.accessibility.theme = this.checked ? 'high-contrast' : 'paper'; applyAccessibilitySettings();"><span class="toggle-slider"></span></label></div>
-                            <div class="profile-setting-row"><span class="setting-icon"><i class="bi bi-volume-up"></i></span><span>Read aloud tool</span><label class="accessed-toggle"><input type="checkbox" aria-label="Read aloud tool" checked onchange="AccessEdState.accessibility.readAloud = this.checked;"><span class="toggle-slider"></span></label></div>
+                            <div class="profile-setting-row"><span class="setting-icon"><i class="bi bi-volume-up"></i></span><span>Read aloud tool</span><label class="accessed-toggle"><input type="checkbox" aria-label="Read aloud tool" checked onchange="AccessEdState.accessibility.readAloud = this.checked; applyAccessibilitySettings();"><span class="toggle-slider"></span></label></div>
                             <div class="profile-setting-row"><span class="setting-icon"><i class="bi bi-stars"></i></span><span>Reduce motion</span><label class="accessed-toggle"><input type="checkbox" aria-label="Reduce motion" onchange="AccessEdState.accessibility.reduceMotion = this.checked; applyAccessibilitySettings();"><span class="toggle-slider"></span></label></div>
                             <button class="profile-settings-button" onclick="navigateToScreen('screen-accessibility-settings')"><i class="bi bi-gear-fill"></i> Open Settings</button>
                         </aside>
 
                         <section class="dashboard-panel schedule-panel" aria-labelledby="schedule-heading">
                             <div class="panel-heading"><h2 id="schedule-heading"><i class="bi bi-calendar2-week"></i> This Week (With Access Notes)</h2><span class="panel-link">This Week <i class="bi bi-chevron-down"></i></span></div>
-                            <div class="schedule-row"><span class="schedule-date">MON<strong>27</strong></span><div><strong>Lab: Linked List Practice</strong><small><i class="bi bi-clock"></i> 10:00 AM – 11:00 AM • Topic: Practice Problems</small></div><span class="course-status status-ready"><i class="bi bi-check-circle-fill"></i> On Track</span></div>
-                            <div class="schedule-row"><span class="schedule-date">TUE<strong>28</strong></span><div><strong>Quiz: Digital Literacy</strong><small><i class="bi bi-clock"></i> 02:00 PM – 03:00 PM • MCQ Based Quiz</small></div><span class="course-status status-upcoming"><i class="bi bi-clock-fill"></i> Upcoming</span></div>
-                        </section>
+                            <div id="schedule-list" aria-live="polite"><p class="text-muted">Loading your schedule...</p></div></section>
+
+                        <section class="dashboard-panel" aria-labelledby="assessment-heading"><div class="panel-heading"><h2 id="assessment-heading">Upcoming assignments</h2></div><div id="assessment-list" aria-live="polite"></div></section>
 
                         <section class="dashboard-panel announcements-panel" aria-labelledby="announcements-heading">
                             <div class="panel-heading"><h2 id="announcements-heading"><i class="bi bi-megaphone-fill"></i> Announcements</h2><span class="panel-link">View All <i class="bi bi-arrow-right"></i></span></div>
-                            <div class="announcement-row"><span class="announcement-dot"></span><div><strong>Updated lecture notes available!</strong><small>2 hours ago</small></div></div>
-                            <div class="announcement-row"><span class="announcement-dot"></span><div><strong>Accessibility guide has been enhanced.</strong><small>1 day ago</small></div></div>
-                        </section>
+                            <div id="announcement-list" aria-live="polite"><p class="text-muted">Loading announcements...</p></div></section>
                     </div>
                 </section>
 
@@ -380,199 +366,30 @@
                      SCREEN 4: ACCESSIBLE LEARNING RESOURCES
                      ============================================================== -->
                 <section id="screen-resources" class="screen-view" aria-labelledby="screen4-heading">
-                    <div class="mb-4">
-                        <h1 id="screen4-heading" class="h3 fw-bold mb-1">Accessible Learning Resources</h1>
-                        <p class="text-muted small">Find materials in the multi-sensory format that works best for you.</p>
-                    </div>
-
-                    <!-- Search & Filter Controls -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-8">
-                            <input type="text" class="accessed-input" placeholder="Search by title, subject or format…">
-                        </div>
-                        <div class="col-md-4">
-                            <select class="accessed-select" aria-label="Sort Resources">
-                                <option>Sort: Recently added</option>
-                                <option>Sort: Most accessible score</option>
-                                <option>Sort: Course module</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Filter Tabs -->
-                    <div class="filter-tabs">
-                        <button class="filter-tab-btn active">All</button>
-                        <button class="filter-tab-btn"><i class="bi bi-volume-up"></i> Audio</button>
-                        <button class="filter-tab-btn"><i class="bi bi-type"></i> Large print</button>
-                        <button class="filter-tab-btn"><i class="bi bi-grid-3x3"></i> Braille-ready</button>
-                        <button class="filter-tab-btn"><i class="bi bi-badge-cc"></i> Captioned</button>
-                        <button class="filter-tab-btn"><i class="bi bi-book"></i> Easy-read</button>
-                    </div>
-
-                    <!-- Resources Grid -->
-                    <div class="row g-4">
-                        <!-- Card 1 -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="accessed-card h-100 bg-white" onclick="navigateToScreen('screen-course-details')" style="cursor: pointer;">
-                                <div class="p-3 mb-3 rounded d-flex align-items-center justify-content-center text-white" style="background: var(--terracotta); height: 90px; border: 2px solid var(--border-color);">
-                                    <i class="bi bi-volume-up display-5"></i>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="status-chip audio-badge">Audio</span>
-                                    <small class="text-muted">12 min</small>
-                                </div>
-                                <h3 class="h6 fw-bold mb-1">Linked Lists: Insertion</h3>
-                                <p class="small text-muted mb-0">Computer Science • Module 3</p>
-                            </div>
-                        </div>
-
-                        <!-- Card 2 -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="accessed-card h-100 bg-white" onclick="navigateToScreen('screen-course-details')" style="cursor: pointer;">
-                                <div class="p-3 mb-3 rounded d-flex align-items-center justify-content-center text-white" style="background: var(--forest); height: 90px; border: 2px solid var(--border-color);">
-                                    <i class="bi bi-file-earmark-text display-5"></i>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="status-chip resolved">Easy-read</span>
-                                    <small class="text-muted">12 min</small>
-                                </div>
-                                <h3 class="h6 fw-bold mb-1">Intro to Assistive Tech</h3>
-                                <p class="small text-muted mb-0">Digital Literacy • Module 1</p>
-                            </div>
-                        </div>
-
-                        <!-- Card 3 -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="accessed-card h-100 bg-white" onclick="navigateToScreen('screen-course-details')" style="cursor: pointer;">
-                                <div class="p-3 mb-3 rounded d-flex align-items-center justify-content-center text-white" style="background: var(--plum); height: 90px; border: 2px solid var(--border-color);">
-                                    <i class="bi bi-badge-cc display-5"></i>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="status-chip priority">Captioned</span>
-                                    <small class="text-muted">15 min</small>
-                                </div>
-                                <h3 class="h6 fw-bold mb-1">Binary Trees Explained</h3>
-                                <p class="small text-muted mb-0">Computer Science • Module 4</p>
-                            </div>
-                        </div>
-
-                        <!-- Card 4 -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="accessed-card h-100 bg-white" onclick="navigateToScreen('screen-course-details')" style="cursor: pointer;">
-                                <div class="p-3 mb-3 rounded d-flex align-items-center justify-content-center text-dark" style="background: var(--mustard); height: 90px; border: 2px solid var(--border-color);">
-                                    <i class="bi bi-camera-video display-5"></i>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="status-chip in-review">Sign video</span>
-                                    <small class="text-muted">12 min</small>
-                                </div>
-                                <h3 class="h6 fw-bold mb-1">Sign Language Basics</h3>
-                                <p class="small text-muted mb-0">Communication Studies</p>
-                            </div>
-                        </div>
-
-                        <!-- Card 5 -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="accessed-card h-100 bg-white" onclick="navigateToScreen('screen-course-details')" style="cursor: pointer;">
-                                <div class="p-3 mb-3 rounded d-flex align-items-center justify-content-center text-dark" style="background: var(--sage); height: 90px; border: 2px solid var(--border-color);">
-                                    <i class="bi bi-type-h1 display-5"></i>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="status-chip resolved">Large print</span>
-                                    <small class="text-muted">18 min</small>
-                                </div>
-                                <h3 class="h6 fw-bold mb-1">Database Normalisation</h3>
-                                <p class="small text-muted mb-0">Information Systems</p>
-                            </div>
-                        </div>
-
-                        <!-- Card 6 -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="accessed-card h-100 bg-white" onclick="navigateToScreen('screen-course-details')" style="cursor: pointer;">
-                                <div class="p-3 mb-3 rounded d-flex align-items-center justify-content-center text-dark" style="background: var(--blush); height: 90px; border: 2px solid var(--border-color);">
-                                    <i class="bi bi-grid-3x3 display-5"></i>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="status-chip audio-badge">Braille-ready</span>
-                                    <small class="text-muted">12 min</small>
-                                </div>
-                                <h3 class="h6 fw-bold mb-1">Web Accessibility 101</h3>
-                                <p class="small text-muted mb-0">Web Technologies</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+  <div class="mb-4"><h1 id="screen4-heading" class="h3 fw-bold mb-1">Accessible Learning Resources</h1><p class="text-muted small">Search published learning materials and browse the course catalog.</p></div>
+  <div class="row g-3 mb-3"><div class="col-md-6"><label class="visually-hidden" for="resource-search">Search resources</label><input type="search" id="resource-search" class="accessed-input" placeholder="Search resources"></div><div class="col-md-3"><label class="visually-hidden" for="resource-type">Resource type</label><select id="resource-type" class="accessed-select"><option value="">All types</option><option>PDF notes</option><option>E-book</option><option>Video lecture</option><option>Audio lesson</option><option>Recorded lecture</option><option>Interactive quiz</option><option>Practice exercise</option><option>Assignment</option><option>Study guide</option><option>Sign-language video</option><option>Large print</option><option>Dyslexia-friendly</option></select></div><div class="col-md-3"><label class="visually-hidden" for="resource-sort">Sort resources</label><select id="resource-sort" class="accessed-select"><option value="recent">Recently added</option><option value="title">Title</option></select></div></div>
+  <div class="row g-3 mb-3"><div class="col-md-6"><label class="visually-hidden" for="resource-subject">Filter by subject</label><input id="resource-subject" class="accessed-input" placeholder="Filter by subject"></div><div class="col-md-3"><label class="visually-hidden" for="resource-course">Filter by course</label><select id="resource-course" class="accessed-select"><option value="">All courses</option></select></div><div class="col-md-3"><label class="visually-hidden" for="resource-category">Filter by category</label><input id="resource-category" class="accessed-input" placeholder="Filter by category"></div></div>
+  <div id="resource-list" class="row g-4" aria-live="polite"><p class="text-muted">Sign in to browse resources.</p></div>
+  <nav class="d-flex justify-content-center gap-3 mt-4" aria-label="Resource pages"><button class="btn-accessed-secondary" id="resources-previous">Previous</button><span id="resource-page-label" class="align-self-center"></span><button class="btn-accessed-secondary" id="resources-next">Next</button></nav>
+  <section class="dashboard-panel mt-4" aria-labelledby="available-courses-heading"><div class="panel-heading"><h2 id="available-courses-heading">Course catalog</h2></div><div id="available-courses-list" class="row g-3"></div></section>
+  <section class="dashboard-panel mt-4" id="quiz-panel" hidden aria-labelledby="quiz-heading"><h2 id="quiz-heading" class="h5">Quiz</h2><form id="quiz-form"></form><div id="quiz-feedback" role="status"></div></section>
+  <section class="dashboard-panel mt-4" id="admin-content-panel" hidden aria-labelledby="admin-content-heading"><div class="panel-heading"><h2 id="admin-content-heading">Publish course or resource</h2></div>
+    <form id="admin-course-form" class="mb-4"><h3 class="h6">Create course</h3><div class="row g-2"><div class="col-md-3"><label class="visually-hidden" for="new-course-title">Course title</label><input id="new-course-title" class="accessed-input" placeholder="Course title" required></div><div class="col-md-3"><label class="visually-hidden" for="new-course-subject">Subject</label><input id="new-course-subject" class="accessed-input" placeholder="Subject" required></div><div class="col-md-4"><label class="visually-hidden" for="new-course-description">Description</label><input id="new-course-description" class="accessed-input" placeholder="Description"></div><div class="col-md-2"><button class="btn-accessed-primary w-100">Create course</button></div></div></form>
+    <form id="admin-resource-form"><h3 class="h6">Add resource</h3><div class="row g-2"><div class="col-md-3"><label class="visually-hidden" for="new-resource-title">Resource title</label><input id="new-resource-title" class="accessed-input" placeholder="Title" required></div><div class="col-md-2"><label class="visually-hidden" for="new-resource-type">Resource type</label><select id="new-resource-type" class="accessed-select"><option>PDF notes</option><option>E-book</option><option>Video lecture</option><option>Audio lesson</option><option>Recorded lecture</option><option>Study guide</option><option>Sign-language video</option><option>Large print</option><option>Dyslexia-friendly</option></select></div><div class="col-md-2"><label class="visually-hidden" for="new-resource-subject">Subject</label><input id="new-resource-subject" class="accessed-input" placeholder="Subject"></div><div class="col-md-3"><label class="visually-hidden" for="new-resource-file">Upload learning file</label><input id="new-resource-file" class="accessed-input" type="file" accept=".pdf,.epub,.mp3,.mp4,.txt,.docx,.vtt,.srt"></div><div class="col-md-2"><button class="btn-accessed-primary w-100">Publish resource</button></div></div></form>
+    <form id="admin-lesson-form" class="mt-4"><h3 class="h6">Add lesson</h3><div class="row g-2"><div class="col-md-3"><label class="visually-hidden" for="lesson-course">Course</label><select class="accessed-select" id="lesson-course" required></select></div><div class="col-md-3"><label class="visually-hidden" for="lesson-title">Lesson title</label><input id="lesson-title" class="accessed-input" placeholder="Lesson title" required></div><div class="col-md-4"><label class="visually-hidden" for="lesson-text">Lesson text</label><input id="lesson-text" class="accessed-input" placeholder="Lesson text"></div><div class="col-md-1"><label class="visually-hidden" for="lesson-order">Order</label><input id="lesson-order" class="accessed-input" type="number" min="0" value="1" aria-label="Lesson order"></div><div class="col-md-1"><button class="btn-accessed-primary w-100">Add</button></div></div></form>
+    <form id="admin-quiz-form" class="mt-4"><h3 class="h6">Create a quiz question</h3><div class="row g-2"><div class="col-md-2"><label class="visually-hidden" for="quiz-course">Course</label><select class="accessed-select" id="quiz-course" required></select></div><div class="col-md-2"><label class="visually-hidden" for="quiz-topic">Topic</label><input id="quiz-topic" class="accessed-input" placeholder="Topic" required></div><div class="col-md-3"><label class="visually-hidden" for="quiz-question">Question</label><input id="quiz-question" class="accessed-input" placeholder="Question" required></div><div class="col-md-3"><label class="visually-hidden" for="quiz-options">Options separated by |</label><input id="quiz-options" class="accessed-input" placeholder="Option 1 | Option 2" required></div><div class="col-md-1"><label class="visually-hidden" for="quiz-answer">Correct option number</label><input id="quiz-answer" class="accessed-input" type="number" min="1" value="1" required></div><div class="col-md-1"><button class="btn-accessed-primary w-100">Create</button></div></div></form>
+    <form id="admin-assignment-form" class="mt-4"><h3 class="h6">Create assignment</h3><div class="row g-2"><div class="col-md-3"><label class="visually-hidden" for="assignment-course">Course</label><select class="accessed-select" id="assignment-course" required></select></div><div class="col-md-3"><label class="visually-hidden" for="assignment-title">Assignment title</label><input id="assignment-title" class="accessed-input" placeholder="Title" required></div><div class="col-md-3"><label class="visually-hidden" for="assignment-due">Due date</label><input id="assignment-due" class="accessed-input" type="datetime-local" required></div><div class="col-md-2"><label class="visually-hidden" for="assignment-description">Description</label><input id="assignment-description" class="accessed-input" placeholder="Instructions"></div><div class="col-md-1"><button class="btn-accessed-primary w-100">Add</button></div></div></form>
+    <form id="admin-schedule-form" class="mt-4"><h3 class="h6">Schedule a class or assessment</h3><div class="row g-2"><div class="col-md-3"><label class="visually-hidden" for="schedule-title">Title</label><input id="schedule-title" class="accessed-input" placeholder="Title" required></div><div class="col-md-2"><label class="visually-hidden" for="schedule-type">Type</label><select id="schedule-type" class="accessed-select"><option>Class</option><option>Assignment deadline</option><option>Quiz</option><option>Examination</option><option>Accessibility session</option></select></div><div class="col-md-3"><label class="visually-hidden" for="schedule-start">Starts at</label><input id="schedule-start" type="datetime-local" class="accessed-input" required></div><div class="col-md-2"><label class="visually-hidden" for="schedule-notes">Access notes</label><input id="schedule-notes" class="accessed-input" placeholder="Access notes"></div><div class="col-md-2"><button class="btn-accessed-primary w-100">Publish schedule</button></div></div></form><form id="admin-announcement-form" class="mt-4"><h3 class="h6">Publish announcement</h3><div class="row g-2"><div class="col-md-4"><label class="visually-hidden" for="announcement-title">Announcement title</label><input id="announcement-title" class="accessed-input" placeholder="Title" required></div><div class="col-md-6"><label class="visually-hidden" for="announcement-body">Announcement message</label><input id="announcement-body" class="accessed-input" placeholder="Message" required></div><div class="col-md-2"><button class="btn-accessed-primary w-100">Publish</button></div></div></form><p id="admin-form-feedback" role="status" class="mt-2"></p>
+  </section>
+</section>
 
                 <!-- ==============================================================
                      SCREEN 5: COURSE AND MATERIAL DETAILS
                      ============================================================== -->
                 <section id="screen-course-details" class="screen-view" aria-labelledby="screen5-heading">
-                    <div class="mb-3">
-                        <small class="text-muted">Computer Science › Module 3 › Lesson 2</small>
-                        <h1 id="screen5-heading" class="h3 fw-bold mb-2">Linked Lists: Insertion</h1>
-                    </div>
-
-                    <!-- Multi-Format Switcher -->
-                    <div class="filter-tabs mb-4">
-                        <button class="filter-tab-btn active"><i class="bi bi-file-text"></i> Text</button>
-                        <button class="filter-tab-btn" onclick="navigateToScreen('screen-tts-reader')"><i class="bi bi-volume-up"></i> Audio</button>
-                        <button class="filter-tab-btn"><i class="bi bi-badge-cc"></i> Captioned video</button>
-                        <button class="filter-tab-btn"><i class="bi bi-grid-3x3"></i> Braille-ready</button>
-                        <button class="filter-tab-btn"><i class="bi bi-book"></i> Easy-read</button>
-                    </div>
-
-                    <div class="row g-4">
-                        <!-- Main Lesson Content -->
-                        <div class="col-lg-8">
-                            <div class="accessed-card bg-white">
-                                <h3 class="h5 fw-bold mb-3">Lesson Text</h3>
-                                <div class="p-3 mb-3 rounded border" style="background: var(--paper); line-height: 1.8;">
-                                    <p class="mb-2"><strong>A linked list</strong> stores items in sequential memory nodes. Each node holds a value and a pointer reference to the next node in the structure.</p>
-                                    <p class="mb-2" style="background: var(--mustard); padding: 4px; border-radius: 4px; display: inline-block;">
-                                        To insert at the head, create a new node and point its pointer to the existing head node.
-                                    </p>
-                                    <p class="mb-0">Finally, update the head reference pointer so the list starts directly from the newly created node.</p>
-                                </div>
-
-                                <!-- Inline Audio Player -->
-                                <div class="audio-player-card">
-                                    <button class="audio-play-btn" onclick="navigateToScreen('screen-tts-reader')" aria-label="Play lesson audio">
-                                        <i class="bi bi-play-fill"></i>
-                                    </button>
-                                    <div class="audio-scrubber">
-                                        <div class="audio-progress-bar" style="width: 35%;"></div>
-                                    </div>
-                                    <small class="fw-bold">01:45 / 05:20</small>
-                                    <span class="badge bg-light text-dark border">1.0×</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right Column: Verification & Downloads -->
-                        <div class="col-lg-4">
-                            <!-- Accessibility Checks -->
-                            <div class="accessed-card mb-4 bg-white">
-                                <h3 class="h6 fw-bold mb-3"><i class="bi bi-patch-check-fill text-success"></i> Accessibility Checks</h3>
-                                <ul class="list-unstyled mb-0 small">
-                                    <li class="py-1"><i class="bi bi-check-circle-fill text-success me-2"></i> Alt text on all diagrams</li>
-                                    <li class="py-1"><i class="bi bi-check-circle-fill text-success me-2"></i> Captions and transcript verified</li>
-                                    <li class="py-1"><i class="bi bi-check-circle-fill text-success me-2"></i> Logical screen-reader order</li>
-                                    <li class="py-1"><i class="bi bi-check-circle-fill text-success me-2"></i> WCAG AAA Contrast verified</li>
-                                </ul>
-                            </div>
-
-                            <!-- Downloads -->
-                            <div class="accessed-card bg-white">
-                                <h3 class="h6 fw-bold mb-3"><i class="bi bi-download me-1"></i> Multi-Format Downloads</h3>
-                                <div class="d-grid gap-2">
-                                    <button class="btn-accessed-secondary btn-sm"><i class="bi bi-file-earmark-music"></i> Download MP3 Audio</button>
-                                    <button class="btn-accessed-secondary btn-sm"><i class="bi bi-file-earmark-code"></i> Download BRF (Braille)</button>
-                                    <button class="btn-accessed-secondary btn-sm"><i class="bi bi-file-earmark-pdf"></i> Large Print PDF (18pt)</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+  <div class="mb-3"><small class="text-muted" id="lesson-breadcrumb">Choose a lesson from your enrolled courses.</small><h1 id="screen5-heading" class="h3 fw-bold mb-2">Lesson</h1></div>
+  <div class="accessed-card"><div id="lesson-content" class="lesson-copy" aria-live="polite"><p>Select a lesson from the course catalog or Continue Learning.</p></div><div id="lesson-media" class="my-3"></div><div class="d-flex flex-wrap gap-2"><button class="btn-accessed-primary" id="lesson-complete" disabled>Mark lesson complete</button><button class="btn-accessed-secondary" id="lesson-bookmark" disabled>Bookmark lesson</button><button class="btn-accessed-secondary" id="lesson-read-aloud">Read aloud</button></div></div>
+</section>
 
                 <!-- ==============================================================
                      SCREEN 6: ACCESSIBILITY SETTINGS (Live Preview Engine)
@@ -701,6 +518,7 @@
                                 <button id="tts-play-btn" class="btn-accessed-primary py-2 px-4" aria-label="Play or Pause Speech">
                                     <i class="bi bi-play-fill"></i> Play
                                 </button>
+                                <button id="tts-stop-btn" class="btn-accessed-secondary py-1 px-3" aria-label="Stop speech"><i class="bi bi-stop-fill"></i> Stop</button>
                                 <button id="tts-next-btn" class="btn-accessed-secondary py-1 px-3" aria-label="Next Sentence">
                                     <i class="bi bi-skip-end-fill"></i>
                                 </button>
@@ -769,7 +587,7 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="portal-grievance-desc" class="form-label small fw-bold">Describe the Barrier</label>
-                                        <textarea id="portal-grievance-desc" class="accessed-textarea" rows="3" placeholder="Explain the accessibility obstacle encountered..." required>The PDF for Module 3 cannot be read by my screen reader during homework review.</textarea>
+                                        <textarea id="portal-grievance-desc" class="accessed-textarea" rows="3" placeholder="Explain the accessibility obstacle encountered..." required></textarea>
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <span class="small fw-semibold">Submit confidentially (DPDP 2023)</span>
@@ -812,26 +630,7 @@
                                         <th>SLA Expiry (72h)</th>
                                     </tr>
                                 </thead>
-                                <tbody id="support-requests-tbody">
-                                    <tr>
-                                        <td><strong>#ACC-1042</strong></td>
-                                        <td>PDF for Module 3 not screen-reader friendly</td>
-                                        <td><span class="status-chip in-review">In review</span></td>
-                                        <td><small class="text-muted">SLA: 48h remaining</small></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>#ACC-0987</strong></td>
-                                        <td>Captions out of sync in Week 4 lecture</td>
-                                        <td><span class="status-chip resolved">Resolved</span></td>
-                                        <td><small class="text-muted">Resolved within SLA</small></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>#ACC-0954</strong></td>
-                                        <td>Lab room 204 ramp access locked</td>
-                                        <td><span class="status-chip resolved">Resolved</span></td>
-                                        <td><small class="text-muted">Resolved within SLA</small></td>
-                                    </tr>
-                                </tbody>
+                                <tbody id="support-requests-tbody"><tr><td colspan="4">Loading support requests...</td></tr></tbody>
                             </table>
                         </div>
                     </div>
@@ -840,537 +639,19 @@
                 <!-- ==============================================================
                      SCREEN 9: TEACHER DASHBOARD
                      ============================================================== -->
-                <section id="screen-teacher-dash" class="screen-view" aria-labelledby="screen9-heading">
-                    <div class="mb-4">
-                        <small class="text-muted">Faculty Workspace • Computer Science • Autumn Term</small>
-                        <h1 id="screen9-heading" class="h3 fw-bold mb-1">Teacher Dashboard</h1>
-                    </div>
+                <section id="screen-teacher-dash" class="screen-view" aria-labelledby="screen9-heading"><div class="dashboard-hero"><div class="hero-copy"><span class="hero-eyebrow">EDUCATOR WORKSPACE</span><h1 id="screen9-heading">Course and content management</h1><p>Manage published courses and accessible materials.</p><button class="hero-cta" onclick="navigateToScreen('screen-resources')">Open course and resource manager</button></div></div><div class="dashboard-panel"><h2 class="h5">Your courses</h2><div id="educator-course-list"></div></div></section>
 
-                    <!-- Metric Cards -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-6 col-lg-3">
-                            <div class="accessed-card p-3 mb-0 text-center">
-                                <div class="display-6 fw-bold text-primary">5</div>
-                                <div class="small fw-semibold text-muted">Active Courses</div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-lg-3">
-                            <div class="accessed-card p-3 mb-0 text-center">
-                                <div class="display-6 fw-bold text-success">86</div>
-                                <div class="small fw-semibold text-muted">Enrolled Students</div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-lg-3">
-                            <div class="accessed-card p-3 mb-0 text-center">
-                                <div class="display-6 fw-bold text-warning">92%</div>
-                                <div class="small fw-semibold text-muted">Avg. Accessibility Score</div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-lg-3">
-                            <div class="accessed-card p-3 mb-0 text-center">
-                                <div class="display-6 fw-bold text-danger">3</div>
-                                <div class="small fw-semibold text-muted">Items to Fix</div>
-                            </div>
-                        </div>
-                    </div>
+                <!-- ============================================================== -->
+                <!-- SCREEN 10: ADMIN DASHBOARD -->
+                <!-- ============================================================== -->
+                <section id="screen-admin-dash" class="screen-view" aria-labelledby="screen10-heading"><h1 id="screen10-heading" class="h3 fw-bold mb-4">Administration</h1><div class="dashboard-metrics"><article class="metric-card"><div><strong id="admin-users-count">0</strong><span>Accounts</span></div></article><article class="metric-card"><div><strong id="admin-students-count">0</strong><span>Students</span></div></article><article class="metric-card"><div><strong id="admin-courses-count">0</strong><span>Courses</span></div></article><article class="metric-card"><div><strong id="admin-resources-count">0</strong><span>Published resources</span></div></article><article class="metric-card"><div><strong id="admin-enrollments-count">0</strong><span>Enrollments</span></div></article><article class="metric-card"><div><strong id="admin-assignments-count">0</strong><span>Upcoming assignments</span></div></article><article class="metric-card"><div><strong id="admin-tickets-count">0</strong><span>Open support tickets</span></div></article></div><section class="dashboard-panel mt-3"><div class="panel-heading"><h2>Accounts</h2></div><div class="table-responsive"><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Courses</th><th>Status</th></tr></thead><tbody id="admin-users-list"></tbody></table></div></section><p id="admin-overview-error" role="status"></p></section>
 
-                    <div class="row g-4">
-                        <!-- Left: Course Accessibility list -->
-                        <div class="col-lg-7">
-                            <div class="accessed-card bg-white mb-4">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h3 class="h5 fw-bold mb-0">Course Accessibility Overview</h3>
-                                    <button class="btn-accessed-secondary btn-sm" onclick="navigateToScreen('screen-compliance')">Upload Material</button>
-                                </div>
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between small fw-bold mb-1">
-                                        <span>Data Structures</span>
-                                        <span class="text-success">96% Compliant</span>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-success" style="width: 96%"></div>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between small fw-bold mb-1">
-                                        <span>Digital Literacy</span>
-                                        <span class="text-success">91% Compliant</span>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-success" style="width: 91%"></div>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between small fw-bold mb-1">
-                                        <span>Web Technologies</span>
-                                        <span class="text-danger">78% (At Risk)</span>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-danger" style="width: 78%"></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="d-flex justify-content-between small fw-bold mb-1">
-                                        <span>Database Systems</span>
-                                        <span class="text-primary">88% Compliant</span>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-primary" style="width: 88%"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Student Support Queue -->
-                            <div class="accessed-card bg-white">
-                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-person-heart me-1"></i> Students Who May Need Support</h3>
-                                <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
-                                    <div>
-                                        <strong class="d-block small">Student requesting support</strong>
-                                        <small class="text-muted">Requested large print format for Module 4</small>
-                                    </div>
-                                    <span class="status-chip in-review">Pending</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center p-2">
-                                    <div>
-                                        <strong class="d-block small">Nisha Verma</strong>
-                                        <small class="text-muted">Extra time for Friday quiz accommodation</small>
-                                    </div>
-                                    <span class="status-chip resolved">Approved</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right: Upload Checklist -->
-                        <div class="col-lg-5">
-                            <div class="accessed-card bg-white">
-                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-card-checklist text-primary"></i> Pre-Publish Checklist</h3>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" checked id="c1">
-                                    <label class="form-check-label small fw-semibold" for="c1">Alt text added to all equations & figures</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" checked id="c2">
-                                    <label class="form-check-label small fw-semibold" for="c2">Captions & transcripts attached</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" checked id="c3">
-                                    <label class="form-check-label small fw-semibold" for="c3">Logical semantic heading structure (H1-H3)</label>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="c4">
-                                    <label class="form-check-label small fw-semibold text-danger" for="c4">Color contrast verified (≥ 4.5:1)</label>
-                                </div>
-                                <button class="btn-accessed-primary w-100 btn-sm" onclick="navigateToScreen('screen-compliance')">Run Automated Compliance Check</button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ==============================================================
-                     SCREEN 10: ADMIN DASHBOARD
-                     ============================================================== -->
-                <section id="screen-admin-dash" class="screen-view" aria-labelledby="screen10-heading">
-                    <div class="mb-4">
-                        <small class="text-muted">All Departments • Illustrative Institution Governance</small>
-                        <h1 id="screen10-heading" class="h3 fw-bold mb-1">Administration Overview</h1>
-                    </div>
-
-                    <!-- KPI Row -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-6 col-lg-3">
-                            <div class="accessed-card p-3 mb-0 text-center">
-                                <div class="display-6 fw-bold text-primary">1,248</div>
-                                <div class="small fw-semibold text-muted">Registered Users</div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-lg-3">
-                            <div class="accessed-card p-3 mb-0 text-center">
-                                <div class="display-6 fw-bold text-success">64</div>
-                                <div class="small fw-semibold text-muted">Active Courses</div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-lg-3">
-                            <div class="accessed-card p-3 mb-0 text-center">
-                                <div class="display-6 fw-bold text-warning">87%</div>
-                                <div class="small fw-semibold text-muted">Compliance Score</div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-lg-3">
-                            <div class="accessed-card p-3 mb-0 text-center">
-                                <div class="display-6 fw-bold text-danger">14</div>
-                                <div class="small fw-semibold text-muted">Open Issues</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row g-4">
-                        <!-- Left: Compliance Trend Graph Visual -->
-                        <div class="col-lg-7">
-                            <div class="accessed-card bg-white mb-4">
-                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-graph-up text-primary"></i> Compliance Trend</h3>
-                                <div class="p-4 rounded border border-2 border-dark text-center" style="background: var(--paper); height: 180px; display: flex; align-items: flex-end; justify-content: space-around;">
-                                    <div style="height: 50%; width: 30px; background: var(--terracotta); border: 2px solid var(--ink);" title="Jul: 65%"></div>
-                                    <div style="height: 65%; width: 30px; background: var(--mustard); border: 2px solid var(--ink);" title="Aug: 74%"></div>
-                                    <div style="height: 75%; width: 30px; background: var(--sage); border: 2px solid var(--ink);" title="Sep: 82%"></div>
-                                    <div style="height: 87%; width: 30px; background: var(--forest); border: 2px solid var(--ink);" title="Oct: 87%"></div>
-                                </div>
-                                <div class="d-flex justify-content-around text-muted small mt-2">
-                                    <span>July</span><span>August</span><span>September</span><span class="fw-bold text-dark">October</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right: Issues by Category -->
-                        <div class="col-lg-5">
-                            <div class="accessed-card bg-white mb-4">
-                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-pie-chart text-danger"></i> Issues by Category</h3>
-                                <div class="mb-2">
-                                    <div class="d-flex justify-content-between small fw-bold"><span>Documents & PDFs</span><span>45%</span></div>
-                                    <div class="progress" style="height: 8px;"><div class="progress-bar bg-danger" style="width: 45%;"></div></div>
-                                </div>
-                                <div class="mb-2">
-                                    <div class="d-flex justify-content-between small fw-bold"><span>Media & Captions</span><span>30%</span></div>
-                                    <div class="progress" style="height: 8px;"><div class="progress-bar bg-warning" style="width: 30%;"></div></div>
-                                </div>
-                                <div class="mb-2">
-                                    <div class="d-flex justify-content-between small fw-bold"><span>Physical Facilities (Ramps/Labs)</span><span>15%</span></div>
-                                    <div class="progress" style="height: 8px;"><div class="progress-bar bg-primary" style="width: 15%;"></div></div>
-                                </div>
-                                <div>
-                                    <div class="d-flex justify-content-between small fw-bold"><span>DPDP Conduct Incidents</span><span>10%</span></div>
-                                    <div class="progress" style="height: 8px;"><div class="progress-bar bg-info" style="width: 10%;"></div></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Audit Activity -->
-                    <div class="accessed-card bg-white">
-                        <h3 class="h5 fw-bold mb-3"><i class="bi bi-activity"></i> Recent Audit Activity</h3>
-                        <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
-                            <div>
-                                <strong class="d-block small">Web Technologies Audit Completed</strong>
-                                <small class="text-muted">Dr. Iyer • 2 items flagged for contrast</small>
-                            </div>
-                            <button class="btn-accessed-secondary btn-sm py-1" onclick="navigateToScreen('screen-compliance')">Review</button>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center p-2">
-                            <div>
-                                <strong class="d-block small">Issue #ACC-0987 Closed</strong>
-                                <small class="text-muted">Support team • Resolved within statutory 72h SLA</small>
-                            </div>
-                            <span class="status-chip resolved">Closed</span>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ==============================================================
-                     SCREEN 11: COMPLIANCE MONITORING (RPwD 2016 & WCAG 2.2)
-                     ============================================================== -->
-                <section id="screen-compliance" class="screen-view" aria-labelledby="screen11-heading">
-                    <div class="mb-4">
-                        <h1 id="screen11-heading" class="h3 fw-bold mb-1">Compliance Monitoring</h1>
-                        <p class="text-muted small">Track institutional alignment with <strong>RPwD Act 2016</strong>, <strong>WCAG 2.2 Level AA</strong>, and <strong>DPDP Act 2023</strong>.</p>
-                    </div>
-
-                    <!-- 3 Standard Score Cards -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <div class="accessed-card p-3 mb-0 bg-white">
-                                <small class="text-muted fw-bold">WCAG 2.2 AA Checks</small>
-                                <div class="display-6 fw-bold text-success">91%</div>
-                                <div class="progress mt-2" style="height: 6px;"><div class="progress-bar bg-success" style="width: 91%;"></div></div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="accessed-card p-3 mb-0 bg-white">
-                                <small class="text-muted fw-bold">Institutional Policy (RPwD 2016)</small>
-                                <div class="display-6 fw-bold text-primary">84%</div>
-                                <div class="progress mt-2" style="height: 6px;"><div class="progress-bar bg-primary" style="width: 84%;"></div></div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="accessed-card p-3 mb-0 bg-white">
-                                <small class="text-muted fw-bold">DPDP Data Protection Compliance</small>
-                                <div class="display-6 fw-bold text-warning">79%</div>
-                                <div class="progress mt-2" style="height: 6px;"><div class="progress-bar bg-warning" style="width: 79%;"></div></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Department Status Table -->
-                    <div class="accessed-card bg-white mb-4">
-                        <h3 class="h5 fw-bold mb-3"><i class="bi bi-building me-2"></i> Department Status</h3>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>Department</th>
-                                        <th>Score</th>
-                                        <th>Last Audit</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>Computer Science</strong></td>
-                                        <td>92%</td>
-                                        <td>20 Oct</td>
-                                        <td><span class="status-chip compliant">Compliant</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Commerce</strong></td>
-                                        <td>81%</td>
-                                        <td>18 Oct</td>
-                                        <td><span class="status-chip action-needed">Action needed</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Humanities</strong></td>
-                                        <td>74%</td>
-                                        <td>11 Oct</td>
-                                        <td><span class="status-chip at-risk">At risk</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Sciences</strong></td>
-                                        <td>88%</td>
-                                        <td>15 Oct</td>
-                                        <td><span class="status-chip compliant">Compliant</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Live Evaluator Form connected to backend -->
-                    <div class="accessed-card bg-white">
-                        <h3 class="h5 fw-bold mb-3"><i class="bi bi-calculator text-primary"></i> Evaluate New Learning Material</h3>
-                        <form id="portal-compliance-form">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="eval-material-id" class="form-label small fw-bold">Material ID</label>
-                                    <input type="text" id="eval-material-id" class="accessed-input" value="CS-401-COMPLIANCE-DOC" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="eval-material-title" class="form-label small fw-bold">Title</label>
-                                    <input type="text" id="eval-material-title" class="accessed-input" value="Accessible AI Syllabus (WCAG 2.2 AA)" required>
-                                </div>
-                                <div class="col-3">
-                                    <label for="eval-contrast" class="form-label small">Contrast (0-100)</label>
-                                    <input type="number" id="eval-contrast" class="accessed-input" value="95">
-                                </div>
-                                <div class="col-3">
-                                    <label for="eval-alt" class="form-label small">Alt-Text (0-100)</label>
-                                    <input type="number" id="eval-alt" class="accessed-input" value="85">
-                                </div>
-                                <div class="col-3">
-                                    <label for="eval-nav" class="form-label small">Keyboard (0-100)</label>
-                                    <input type="number" id="eval-nav" class="accessed-input" value="90">
-                                </div>
-                                <div class="col-3">
-                                    <label for="eval-aria" class="form-label small">ARIA (0-100)</label>
-                                    <input type="number" id="eval-aria" class="accessed-input" value="80">
-                                </div>
-                                <div class="col-12 text-end">
-                                    <button type="submit" class="btn-accessed-primary">Calculate & Certify Compliance</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </section>
-
-                <!-- ==============================================================
-                     SCREEN 12: ISSUE TRACKING (3-Column Kanban Board)
-                     ============================================================== -->
-                <section id="screen-kanban" class="screen-view" aria-labelledby="screen12-heading">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div>
-                            <h1 id="screen12-heading" class="h3 fw-bold mb-1">Issue Tracking</h1>
-                            <p class="text-muted small mb-0">Assign, prioritize, and resolve accessibility barriers before the 72h SLA breaches.</p>
-                        </div>
-                        <button class="btn-accessed-primary btn-sm" onclick="navigateToScreen('screen-support')">
-                            <i class="bi bi-plus-lg"></i> New Barrier Ticket
-                        </button>
-                    </div>
-
-                    <!-- Kanban Columns -->
-                    <div class="kanban-board">
-                        <!-- Column 1: Open -->
-                        <div class="kanban-column" data-status="open">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h3 class="h6 fw-bold mb-0">Open</h3>
-                                <span class="badge bg-dark column-count">2</span>
-                            </div>
-                            <div class="kanban-cards-container">
-                                <div class="kanban-card">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <small class="text-muted fw-bold">#ACC-1042</small>
-                                        <span class="status-chip high">High</span>
-                                    </div>
-                                    <strong class="d-block small mb-2">PDF not screen-reader friendly</strong>
-                                    <div class="d-flex justify-content-between align-items-center small text-muted">
-                                        <span><i class="bi bi-person-circle"></i> Assigned: MI</span>
-                                        <span class="badge bg-light text-dark border">SLA: 2 days</span>
-                                    </div>
-                                </div>
-
-                                <div class="kanban-card">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <small class="text-muted fw-bold">#ACC-1039</small>
-                                        <span class="status-chip medium">Medium</span>
-                                    </div>
-                                    <strong class="d-block small mb-2">Missing captions: Week 5 video</strong>
-                                    <div class="d-flex justify-content-between align-items-center small text-muted">
-                                        <span><i class="bi bi-person-circle"></i> Assigned: MI</span>
-                                        <span class="badge bg-light text-dark border">SLA: 2 days</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Column 2: In Review -->
-                        <div class="kanban-column" data-status="in-review">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h3 class="h6 fw-bold mb-0">In Review</h3>
-                                <span class="badge bg-dark column-count">1</span>
-                            </div>
-                            <div class="kanban-cards-container">
-                                <div class="kanban-card">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <small class="text-muted fw-bold">#ACC-1031</small>
-                                        <span class="status-chip high">High</span>
-                                    </div>
-                                    <strong class="d-block small mb-2">Ramp access to Lab 204 obstructed</strong>
-                                    <div class="d-flex justify-content-between align-items-center small text-muted">
-                                        <span><i class="bi bi-person-circle"></i> Assigned: Estate</span>
-                                        <span class="badge bg-light text-dark border">SLA: 2 days</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Column 3: Resolved -->
-                        <div class="kanban-column" data-status="resolved">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h3 class="h6 fw-bold mb-0">Resolved</h3>
-                                <span class="badge bg-dark column-count">2</span>
-                            </div>
-                            <div class="kanban-cards-container">
-                                <div class="kanban-card">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <small class="text-muted fw-bold">#ACC-0987</small>
-                                        <span class="status-chip resolved">Low</span>
-                                    </div>
-                                    <strong class="d-block small mb-2">Captions out of sync in Week 4</strong>
-                                    <div class="d-flex justify-content-between align-items-center small text-muted">
-                                        <span><i class="bi bi-person-circle"></i> Support team</span>
-                                        <span class="badge bg-success text-white">Within SLA</span>
-                                    </div>
-                                </div>
-
-                                <div class="kanban-card">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <small class="text-muted fw-bold">#ACC-0954</small>
-                                        <span class="status-chip resolved">Low</span>
-                                    </div>
-                                    <strong class="d-block small mb-2">Contrast issue on quiz landing page</strong>
-                                    <div class="d-flex justify-content-between align-items-center small text-muted">
-                                        <span><i class="bi bi-person-circle"></i> Tech team</span>
-                                        <span class="badge bg-success text-white">Within SLA</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ==============================================================
-                     SCREEN 13: REPORTS & AUDITS (CSV Export)
-                     ============================================================== -->
-                <section id="screen-reports" class="screen-view" aria-labelledby="screen13-heading">
-                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-                        <div>
-                            <h1 id="screen13-heading" class="h3 fw-bold mb-1">Reports & Statutory Audits</h1>
-                            <p class="text-muted small mb-0">Export-ready institutional compliance summaries for government accreditation and regulatory audits.</p>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button id="export-report-csv" class="btn-accessed-secondary btn-sm"><i class="bi bi-file-earmark-spreadsheet"></i> CSV</button>
-                            <button class="btn-accessed-primary btn-sm" onclick="window.print()"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
-                        </div>
-                    </div>
-
-                    <!-- Filter Chips -->
-                    <div class="filter-tabs mb-4">
-                        <span class="filter-tab-btn active">Oct 2026</span>
-                        <span class="filter-tab-btn">All Departments</span>
-                    </div>
-
-                    <!-- Charts Row -->
-                    <div class="row g-4 mb-4">
-                        <div class="col-lg-6">
-                            <div class="accessed-card bg-white h-100">
-                                <h3 class="h6 fw-bold mb-3"><i class="bi bi-bar-chart me-1"></i> Resources Made Accessible</h3>
-                                <div class="d-flex align-items-end justify-content-around p-3 border rounded" style="height: 160px; background: var(--paper);">
-                                    <div style="height: 35%; width: 22px; background: var(--mustard); border: 2px solid var(--ink);"></div>
-                                    <div style="height: 55%; width: 22px; background: var(--mustard); border: 2px solid var(--ink);"></div>
-                                    <div style="height: 70%; width: 22px; background: var(--sage); border: 2px solid var(--ink);"></div>
-                                    <div style="height: 85%; width: 22px; background: var(--terracotta); border: 2px solid var(--ink);"></div>
-                                </div>
-                                <div class="d-flex justify-content-around text-muted small mt-2">
-                                    <span>W1</span><span>W2</span><span>W3</span><span class="fw-bold text-dark">W4</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6">
-                            <div class="accessed-card bg-white h-100">
-                                <h3 class="h6 fw-bold mb-3"><i class="bi bi-clock-history me-1"></i> Average Resolution Time (Days)</h3>
-                                <div class="d-flex align-items-center justify-content-center p-3 border rounded" style="height: 160px; background: var(--paper);">
-                                    <div class="text-center">
-                                        <div class="display-5 fw-bold text-success">1.8 Days</div>
-                                        <small class="text-muted">Target Statutory SLA: ≤ 3.0 Days (72 Hours)</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Summary Table -->
-                    <div class="accessed-card bg-white">
-                        <h3 class="h6 fw-bold mb-3">Key Compliance Metrics</h3>
-                        <div class="table-responsive">
-                            <table class="table table-sm align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>Metric</th>
-                                        <th>This Month</th>
-                                        <th>Change</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>Issues resolved within 72h SLA</strong></td>
-                                        <td>91%</td>
-                                        <td><span class="badge bg-success">+4%</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Captioned media coverage</strong></td>
-                                        <td>83%</td>
-                                        <td><span class="badge bg-success">+6%</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>RPwD Section 40 Certification</strong></td>
-                                        <td>88%</td>
-                                        <td><span class="badge bg-success">+5%</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ==============================================================
-                     SCREEN 14: PROFILE AND SETTINGS
-                     ============================================================== -->
+                <!-- ============================================================== -->
+                <!-- SCREEN 11: COMPLIANCE MONITORING -->
+                <!-- ============================================================== -->
+                <section id="screen-compliance" class="screen-view" aria-labelledby="screen11-heading"><div class="mb-4"><h1 id="screen11-heading" class="h3 fw-bold mb-1">Accessibility audits</h1><p class="text-muted">Saved audit history and new material evaluations.</p></div><section class="dashboard-panel mb-4"><h2 class="h5">Audit history</h2><div class="table-responsive"><table class="table"><thead><tr><th>Material</th><th>Score</th><th>Status</th><th>Date</th></tr></thead><tbody id="compliance-history"><tr><td colspan="4">Loading audit history...</td></tr></tbody></table></div></section><div class="accessed-card bg-white"><h2 class="h5 fw-bold mb-3">Evaluate new learning material</h2><form id="portal-compliance-form"><div class="row g-3"><div class="col-md-6"><label for="eval-material-id" class="form-label">Material ID</label><input id="eval-material-id" class="accessed-input" required maxlength="200"></div><div class="col-md-6"><label for="eval-material-title" class="form-label">Title</label><input id="eval-material-title" class="accessed-input" required maxlength="300"></div><div class="col-3"><label for="eval-contrast" class="form-label">Contrast</label><input type="number" id="eval-contrast" class="accessed-input" min="0" max="100" required></div><div class="col-3"><label for="eval-alt" class="form-label">Alt text</label><input type="number" id="eval-alt" class="accessed-input" min="0" max="100" required></div><div class="col-3"><label for="eval-nav" class="form-label">Keyboard</label><input type="number" id="eval-nav" class="accessed-input" min="0" max="100" required></div><div class="col-3"><label for="eval-aria" class="form-label">Screen reader</label><input type="number" id="eval-aria" class="accessed-input" min="0" max="100" required></div><div class="col-12 text-end"><button class="btn-accessed-primary">Save audit</button></div></div></form></div></section>
+                <section id="screen-kanban" class="screen-view" aria-labelledby="screen12-heading"><h1 id="screen12-heading" class="h3 fw-bold mb-3">Support ticket management</h1><p class="text-muted">Review current tickets and update their status.</p><div class="dashboard-panel"><div class="table-responsive"><table class="table"><thead><tr><th>Ticket</th><th>Student</th><th>Description</th><th>Status</th><th>SLA due</th><th>Actions</th></tr></thead><tbody id="admin-ticket-list"></tbody></table></div></div><p id="admin-ticket-feedback" role="status"></p></section>
+                <section id="screen-reports" class="screen-view" aria-labelledby="screen13-heading"><h1 id="screen13-heading" class="h3 fw-bold mb-3">Learning analytics</h1><p class="text-muted">Analytics are calculated from recorded assessments and learning activity.</p><section class="dashboard-panel"><div class="panel-heading"><h2>Quiz score history</h2></div><div id="admin-score-history" aria-live="polite"></div></section><section class="dashboard-panel mt-3"><div class="panel-heading"><h2>Course enrollment totals</h2></div><div id="admin-course-enrollments"></div></section></section>
                 <section id="screen-profile" class="screen-view" aria-labelledby="screen14-heading">
                     <div class="mb-4">
                         <h1 id="screen14-heading" class="h3 fw-bold mb-1">Profile and Settings</h1>
@@ -1393,8 +674,9 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label for="prof-name" class="form-label small fw-bold">Full Name</label>
-                                        <input type="text" id="prof-name" class="accessed-input" readonly>
+                                        <input type="text" id="prof-name" class="accessed-input" maxlength="150" required>
                                     </div>
+                                    <div class="col-12"><button type="button" class="btn-accessed-primary" id="save-profile">Save profile</button><span id="profile-feedback" class="ms-3" role="status"></span></div>
                                     <div class="col-md-6">
                                         <label for="prof-email" class="form-label small fw-bold">Email Address</label>
                                         <input type="email" id="prof-email" class="accessed-input" readonly>
@@ -1402,49 +684,7 @@
                                 </div>
                             </div>
 
-                            <div class="accessed-card bg-white">
-                                <h3 class="h5 fw-bold mb-3"><i class="bi bi-shield-lock me-2"></i> Notifications & DPDP 2023 Privacy</h3>
-                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                                    <div>
-                                        <strong class="d-block small">Email me when tickets update</strong>
-                                        <small class="text-muted">Receive real-time 72h SLA escalation alerts</small>
-                                    </div>
-                                    <label class="accessed-toggle">
-                                        <input type="checkbox" checked>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                                    <div>
-                                        <strong class="d-block small">Share needs with my teachers</strong>
-                                        <small class="text-muted">Allows faculty to automatically provision large print & extra quiz time</small>
-                                    </div>
-                                    <label class="accessed-toggle">
-                                        <input type="checkbox" checked>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                                    <div>
-                                        <strong class="d-block small">Two-step verification</strong>
-                                        <small class="text-muted">Protects student medical and accessibility records</small>
-                                    </div>
-                                    <label class="accessed-toggle">
-                                        <input type="checkbox" checked>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center py-2">
-                                    <div>
-                                        <strong class="d-block small">Anonymize analytics data (DPDP 2023)</strong>
-                                        <small class="text-muted">SHA-256 salted pseudonymization of activity logs</small>
-                                    </div>
-                                    <label class="accessed-toggle">
-                                        <input type="checkbox" checked>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                            </div>
+                            <div class="accessed-card bg-white"><h3 class="h5 fw-bold mb-3">Learning history</h3><div id="profile-learning-history"></div><h3 class="h5 fw-bold mt-4 mb-3">Saved lessons and resources</h3><div id="saved-resources"></div></div>
                         </div>
                     </div>
                 </section>
