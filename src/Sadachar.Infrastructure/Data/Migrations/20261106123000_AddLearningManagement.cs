@@ -52,7 +52,7 @@ public partial class AddLearningManagement : Migration
             Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
             CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
             Title = table.Column<string>(type: "nvarchar(160)", maxLength: 160, nullable: false),
-            Content = table.Column<string>(type: "nvarchar(20000)", maxLength: 20000, nullable: false),
+            Content = table.Column<string>(type: "nvarchar(max)", maxLength: 20000, nullable: false),
             Order = table.Column<int>(type: "int", nullable: false),
             DurationMinutes = table.Column<int>(type: "int", nullable: false),
             VideoUrl = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
@@ -195,7 +195,7 @@ public partial class AddLearningManagement : Migration
             CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
             Title = table.Column<string>(type: "nvarchar(180)", maxLength: 180, nullable: false),
             Topic = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-            QuestionsJson = table.Column<string>(type: "nvarchar(30000)", maxLength: 30000, nullable: false),
+            QuestionsJson = table.Column<string>(type: "nvarchar(max)", maxLength: 30000, nullable: false),
             IsPublished = table.Column<bool>(type: "bit", nullable: false)
         }, constraints: table =>
         {
@@ -208,7 +208,7 @@ public partial class AddLearningManagement : Migration
             Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
             UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
             AssignmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-            SubmissionText = table.Column<string>(type: "nvarchar(10000)", maxLength: 10000, nullable: false),
+            SubmissionText = table.Column<string>(type: "nvarchar(max)", maxLength: 10000, nullable: false),
             SubmittedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
             Score = table.Column<int>(type: "int", nullable: true)
         }, constraints: table =>

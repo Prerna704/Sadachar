@@ -36,11 +36,23 @@ public class LearningResource
     [MaxLength(60)] public string Type { get; set; } = "Study guide";
     [MaxLength(100)] public string Category { get; set; } = string.Empty;
     [MaxLength(100)] public string Subject { get; set; } = string.Empty;
+    [MaxLength(20)] public string Difficulty { get; set; } = "Beginner";
+    public int EstimatedMinutes { get; set; } = 15;
     [MaxLength(1000)] public string? FileUrl { get; set; }
     [MaxLength(260)] public string? FileName { get; set; }
     [MaxLength(1000)] public string? TranscriptUrl { get; set; }
+    [MaxLength(1000)] public string? ThumbnailUrl { get; set; }
+    [MaxLength(500)] public string? AccessibilityNotes { get; set; }
     public bool IsPublished { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+}
+
+public class ResourceCategory
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    [MaxLength(100)] public string Name { get; set; } = string.Empty;
+    [MaxLength(500)] public string Description { get; set; } = string.Empty;
+    public bool IsActive { get; set; } = true;
 }
 
 public class Enrollment
@@ -51,6 +63,22 @@ public class Enrollment
     public DateTime EnrolledAtUtc { get; set; } = DateTime.UtcNow;
     public ApplicationUser? User { get; set; }
     public Course? Course { get; set; }
+}
+
+public class ParentStudentLink
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    [MaxLength(450)] public string ParentUserId { get; set; } = string.Empty;
+    [MaxLength(450)] public string StudentUserId { get; set; } = string.Empty;
+    public DateTime LinkedAtUtc { get; set; } = DateTime.UtcNow;
+}
+
+public class VolunteerStudentAssignment
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    [MaxLength(450)] public string VolunteerUserId { get; set; } = string.Empty;
+    [MaxLength(450)] public string StudentUserId { get; set; } = string.Empty;
+    public DateTime AssignedAtUtc { get; set; } = DateTime.UtcNow;
 }
 
 public class LearningActivity

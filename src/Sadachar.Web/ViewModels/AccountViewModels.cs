@@ -14,11 +14,6 @@ public class LoginViewModel
     [DataType(DataType.Password)]
     public string Password { get; set; } = string.Empty;
 
-    [Required]
-    [EnumDataType(typeof(UserRole))]
-    [Display(Name = "Account type")]
-    public UserRole Role { get; set; } = UserRole.Student;
-
     [Display(Name = "Remember me")]
     public bool RememberMe { get; set; }
 
@@ -48,4 +43,20 @@ public class StudentRegistrationViewModel
     [Compare(nameof(Password))]
     [Display(Name = "Confirm password")]
     public string ConfirmPassword { get; set; } = string.Empty;
+
+    [Required]
+    [EnumDataType(typeof(RegistrationRole))]
+    [Display(Name = "I’m joining as")]
+    public RegistrationRole Role { get; set; } = RegistrationRole.Student;
+
+    [Range(typeof(bool), "true", "true", ErrorMessage = "Please accept the terms to create an account.")]
+    [Display(Name = "I agree to the Terms and Conditions")]
+    public bool AcceptTerms { get; set; }
+}
+
+public enum RegistrationRole
+{
+    Student = 1,
+    Parent = 5,
+    Volunteer = 6
 }

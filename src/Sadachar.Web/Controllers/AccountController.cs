@@ -80,7 +80,7 @@ public class AccountController : Controller
     {
         if (User.Identity?.IsAuthenticated == true)
         {
-            return RedirectToAction(nameof(Profile));
+            return Redirect("~/");
         }
 
         return View(new LoginViewModel { ReturnUrl = returnUrl });
@@ -96,9 +96,9 @@ public class AccountController : Controller
         }
 
         var user = await _userManager.FindByEmailAsync(model.Email.Trim());
-        if (user is null || !user.IsActive || user.Role != model.Role)
+        if (user is null || !user.IsActive)
         {
-            ModelState.AddModelError(string.Empty, "Email, password, or account type is incorrect.");
+            ModelState.AddModelError(string.Empty, "Email or password is incorrect.");
             return View(model);
         }
 
@@ -115,10 +115,10 @@ public class AccountController : Controller
                 return LocalRedirect(model.ReturnUrl);
             }
 
-            return RedirectToAction(nameof(Profile));
+            return Redirect("~/");
         }
 
-        ModelState.AddModelError(string.Empty, "Email, password, or account type is incorrect.");
+        ModelState.AddModelError(string.Empty, "Email or password is incorrect.");
         return View(model);
     }
 
@@ -128,11 +128,15 @@ public class AccountController : Controller
     {
         if (User.Identity?.IsAuthenticated == true)
         {
-            return RedirectToAction(nameof(Profile));
+            return Redirect("~/");
         }
 
         return View(new StudentRegistrationViewModel());
     }
+
+    [AllowAnonymous]
+    [HttpGet]
+    public IActionResult ForgotPassword() => View();
 
     [AllowAnonymous]
     [HttpPost]
@@ -148,7 +152,13 @@ public class AccountController : Controller
             UserName = model.Email.Trim(),
             Email = model.Email.Trim(),
             FullName = model.FullName.Trim(),
-            Role = UserRole.Student,
+            Role = model.Role switch
+            {
+                RegistrationRole.Student => UserRole.Student,
+                RegistrationRole.Parent => UserRole.Parent,
+                RegistrationRole.Volunteer => UserRole.Volunteer,
+                _ => throw new InvalidOperationException("Unsupported registration role.")
+            },
             Disability = DisabilityType.None,
             CreatedAtUtc = DateTime.UtcNow
         };
@@ -169,7 +179,7 @@ public class AccountController : Controller
         }
 
         await _signInManager.SignInAsync(user, isPersistent: false);
-        return RedirectToAction(nameof(Profile));
+        return Redirect("~/");
     }
 
     [Authorize]
@@ -191,6 +201,6 @@ public class AccountController : Controller
     public async Task<IActionResult> Logout()
     {
         await _signInManager.SignOutAsync();
-        return RedirectToAction(nameof(Login));
+        return Redirect("~/");
     }
 }
