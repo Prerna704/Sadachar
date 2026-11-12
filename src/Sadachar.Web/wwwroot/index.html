@@ -453,13 +453,19 @@
 
                     <!-- Reader Box with Karaoke Sentence Highlighting -->
                     <div class="accessed-card bg-white mb-4">
-                        <div id="karaoke-reader-text" class="p-4 rounded border border-2 border-dark mb-4" style="background: var(--paper); line-height: 2; font-size: 1.15rem;" data-reader-raw="Accessible design starts with choices. Learners should decide how fast, how loud and in which voice their materials are read. Each sentence is highlighted as it is spoken so that reading and listening stay in sync. You can pause at any point or skip forward and back.">
-                            <!-- Sentences dynamically parsed and inserted here -->
+                        <div id="karaoke-reader-text" class="p-4 rounded border border-2 border-dark mb-4" style="background: var(--paper); line-height: 2; font-size: 1.15rem;" tabindex="0" aria-live="polite">
+                            Select Reader Mode from a lesson or resource to read its educational content here.
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+                            <button id="tts-read-selection" class="btn-accessed-secondary" type="button">Read selected text</button>
+                            <button id="tts-read-page" class="btn-accessed-secondary" type="button">Read current page</button>
+                            <span id="tts-source-label" class="small text-muted" role="status">Source: current page</span>
+                            <span id="tts-status" class="small text-muted" role="status" aria-live="polite"></span>
                         </div>
 
                         <!-- Player Controls Bar -->
                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 bg-light rounded border border-2 border-dark">
-                            <span id="tts-sentence-counter" class="small fw-bold">Sentence 1 of 4</span>
+                            <span id="tts-sentence-counter" class="small fw-bold">No content loaded</span>
 
                             <!-- Play, Prev, Next -->
                             <div class="d-flex align-items-center gap-2">
@@ -502,6 +508,10 @@
                             <div class="col-md-4">
                                 <label for="tts-pitch-slider" class="form-label small fw-semibold">Pitch Control</label>
                                 <input type="range" class="form-range" id="tts-pitch-slider" min="0.5" max="1.5" step="0.1" value="1.0">
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex justify-content-between"><label for="tts-volume-slider" class="form-label small fw-semibold">Volume</label><span id="tts-volume-label" class="badge bg-dark">100%</span></div>
+                                <input type="range" class="form-range" id="tts-volume-slider" min="0" max="1" step="0.05" value="1">
                             </div>
                         </div>
                     </div>

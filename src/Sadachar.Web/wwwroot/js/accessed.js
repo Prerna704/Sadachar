@@ -27,6 +27,8 @@ const AccessEdState = {
         sentences: [],
         rate: 1.0,
         pitch: 1.0,
+        volume: 1.0,
+        selectedText: '',
         voice: null
     }
 };
@@ -647,29 +649,10 @@ function initAccessibilityControls() {
 function initSpeechSynthesis() {
     const readerTextEl = document.getElementById('karaoke-reader-text');
     if (!readerTextEl) return;
-
-    // Parse sentences
-    const rawText = readerTextEl.getAttribute('data-reader-raw') || readerTextEl.innerText;
-    AccessEdState.speech.sentences = rawText.match(/[^.!?]+[.!?]+/g) || [rawText];
-
-    // Wrap sentences in spans for highlighting
-    readerTextEl.innerHTML = AccessEdState.speech.sentences
-        .map((sentence, idx) => `<span class="reader-sentence" data-idx="${idx}">${sentence.trim()} </span>`)
-        .join('');
-
-    // Load voices
-    if (window.speechSynthesis) {
-        window.speechSynthesis.onvoiceschanged = () => {
-            const voiceSelect = document.getElementById('tts-voice-select');
-            if (voiceSelect) {
-                const voices = window.speechSynthesis.getVoices();
-                voiceSelect.innerHTML = voices
-                    .filter(v => v.lang.startsWith('en') || v.lang.startsWith('hi'))
-                    .map(v => `<option value="${v.name}">${v.name} (${v.lang})</option>`)
-                    .join('');
-            }
-        };
-    }
+    if (!window.speechSynthesis) { setSpeechStatus('Speech synthesis is not supported in this browser.'); return; }
+    loadSpeechVoices();
+    window.speechSynthesis.onvoiceschanged = loadSpeechVoices;
+    setReaderContent(extractReadablePageText(), 'current page');
 
     // Play/Pause Button
     const playBtn = document.getElementById('tts-play-btn');
@@ -679,13 +662,13 @@ function initSpeechSynthesis() {
 
     // Skip Buttons
     document.getElementById('tts-prev-btn')?.addEventListener('click', () => {
-        stopSpeech();
+        stopSpeech(false);
         AccessEdState.speech.currentSentenceIdx = Math.max(0, AccessEdState.speech.currentSentenceIdx - 1);
         speakCurrentSentence();
     });
 
     document.getElementById('tts-next-btn')?.addEventListener('click', () => {
-        stopSpeech();
+        stopSpeech(false);
         AccessEdState.speech.currentSentenceIdx = Math.min(AccessEdState.speech.sentences.length - 1, AccessEdState.speech.currentSentenceIdx + 1);
         speakCurrentSentence();
     });
@@ -700,6 +683,15 @@ function initSpeechSynthesis() {
     document.getElementById('tts-pitch-slider')?.addEventListener('input', (e) => {
         AccessEdState.speech.pitch = parseFloat(e.target.value);
     });
+    document.getElementById('tts-volume-slider')?.addEventListener('input', e => {
+        AccessEdState.speech.volume = parseFloat(e.target.value);
+        const label = document.getElementById('tts-volume-label');
+        if (label) label.textContent = `${Math.round(AccessEdState.speech.volume * 100)}%`;
+    });
+    document.addEventListener('selectionchange', () => {
+        const selected = window.getSelection()?.toString().trim();
+        if (selected) AccessEdState.speech.selectedText = selected;
+    });
 
     // Keyboard Shortcuts (Space to play/pause, Left/Right for sentence)
     window.addEventListener('keydown', (e) => {
@@ -712,12 +704,41 @@ function initSpeechSynthesis() {
             } else if (e.code === 'ArrowLeft') {
                 document.getElementById('tts-prev-btn')?.click();
             }
+
+function setSpeechStatus(message) { const status = document.getElementById('tts-status'); if (status) status.textContent = message || ''; }
+function loadSpeechVoices() {
+    const select = document.getElementById('tts-voice-select');
+    if (!select) return;
+    const voices = window.speechSynthesis.getVoices().filter(v => /^(en|hi)([-_]|$)/i.test(v.lang));
+    select.innerHTML = voices.length ? voices.map(v => `<option value="${lmsEscape(v.name)}">${lmsEscape(v.name)} (${lmsEscape(v.lang)})</option>`).join('') : '<option value="">No English or Hindi voices available</option>';
+    if (!voices.length) setSpeechStatus('No English or Hindi browser voices are available.');
+}
+function splitSpeechText(text) { return String(text || '').replace(/\s+/g, ' ').trim().match(/[^.!?。！？]+[.!?。！？]+|[^.!?。！？]+$/g)?.map(x => x.trim()).filter(Boolean) || []; }
+function setReaderContent(text, source) {
+    stopSpeech(false);
+    const sentences = splitSpeechText(text);
+    AccessEdState.speech.sentences = sentences;
+    AccessEdState.speech.currentSentenceIdx = 0;
+    const host = document.getElementById('karaoke-reader-text');
+    if (host) { host.replaceChildren(); sentences.forEach((sentence, index) => { const span = document.createElement('span'); span.className = 'reader-sentence'; span.dataset.idx = index; span.textContent = `${sentence} `; host.appendChild(span); }); }
+    const sourceLabel = document.getElementById('tts-source-label'); if (sourceLabel) sourceLabel.textContent = `Source: ${source}`;
+    const counter = document.getElementById('tts-sentence-counter'); if (counter) counter.textContent = sentences.length ? `Sentence 1 of ${sentences.length}` : 'No content loaded';
+    setSpeechStatus(sentences.length ? `${sentences.length} sentences ready.` : 'No readable content found.');
+}
+function readSelectedText() { const selected = AccessEdState.speech.selectedText || window.getSelection()?.toString().trim(); if (!selected) { setSpeechStatus('Select text in the lesson or resource first.'); return; } setReaderContent(selected, 'selected text'); speakCurrentSentence(); }
+function extractReadablePageText() {
+    const active = document.querySelector('.screen-view.active'); if (!active) return '';
+    if (activeLesson?.content && active.id === 'screen-course-details') return `${activeLesson.title}. ${activeLesson.content}`;
+    const clone = active.cloneNode(true);
+    clone.querySelectorAll('nav, header, aside, button, input, select, textarea, script, style, [aria-hidden="true"], .learning-catalog-controls, #karaoke-reader-text, #tts-status').forEach(e => e.remove());
+    return clone.innerText || clone.textContent || '';
+}
         }
     });
 }
 
 function toggleSpeech() {
-    if (!AccessEdState.accessibility.readAloud) { alert('Read aloud is turned off in your accessibility settings.'); return; }
+    if (!AccessEdState.accessibility.readAloud) { setSpeechStatus('Read aloud is disabled in Accessibility Settings.'); return; }
     if (AccessEdState.speech.isPlaying) {
         pauseSpeech();
     } else if (AccessEdState.speech.isPaused && window.speechSynthesis) {
@@ -733,7 +754,7 @@ function toggleSpeech() {
 
 function speakCurrentSentence() {
     if (!window.speechSynthesis) {
-        alert('Web Speech API is not supported in this browser.');
+        setSpeechStatus('Speech synthesis is not supported in this browser.');
         return;
     }
 
@@ -751,6 +772,7 @@ function speakCurrentSentence() {
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     utterance.rate = AccessEdState.speech.rate;
     utterance.pitch = AccessEdState.speech.pitch;
+    utterance.volume = AccessEdState.speech.volume;
 
     const voiceSelect = document.getElementById('tts-voice-select');
     if (voiceSelect && voiceSelect.value) {
@@ -758,6 +780,8 @@ function speakCurrentSentence() {
         utterance.voice = voices.find(v => v.name === voiceSelect.value) || null;
     }
 
+    utterance.onstart = () => setSpeechStatus(`Reading sentence ${idx + 1} of ${sentences.length}.`);
+    utterance.onerror = event => setSpeechStatus(`Speech could not be completed: ${event.error || 'voice unavailable'}.`);
     utterance.onend = () => {
         if (AccessEdState.speech.currentSentenceIdx < sentences.length - 1) {
             AccessEdState.speech.currentSentenceIdx++;
@@ -790,12 +814,12 @@ function pauseSpeech() {
     }
 }
 
-function stopSpeech() {
+function stopSpeech(resetPosition = true) {
     if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
         AccessEdState.speech.isPlaying = false;
         AccessEdState.speech.isPaused = false;
-        AccessEdState.speech.currentSentenceIdx = 0;
+        if (resetPosition) AccessEdState.speech.currentSentenceIdx = 0;
         const playBtn = document.getElementById('tts-play-btn');
         if (playBtn) playBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
     }
@@ -1000,10 +1024,17 @@ async function lmsJson(url, options) {
     const response = await lmsFetch(url, options);
     if (!response.ok) {
         if (response.status === 401) throw new Error('Please sign in to use this feature.');
-        const problem = await response.json().catch(() => null);
+        const body = await response.text();
+        let problem = null;
+        try { problem = body ? JSON.parse(body) : null; } catch { problem = null; }
         throw new Error(problem?.message || problem?.title || `Request failed (${response.status}).`);
     }
-    return response.status === 204 ? null : response.json();
+    if (response.status === 204) return null;
+    const body = await response.text();
+    if (!body.trim()) return null;
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('json')) return body;
+    try { return JSON.parse(body); } catch { throw new Error('The server returned invalid JSON. Please try again.'); }
 }
 
 async function lmsBoot() {
@@ -1376,13 +1407,7 @@ async function lmsOpenLesson(id) {
         const bookmarkButton = document.getElementById('lesson-bookmark'); bookmarkButton.disabled = false; bookmarkButton.textContent = lesson.isBookmarked ? 'Remove bookmark' : 'Bookmark lesson';
         document.getElementById('lesson-breadcrumb').textContent = `${lesson.courseTitle} · ${isDirectVideo ? `Resume video at ${lesson.mediaPositionSeconds}s` : `Reading progress ${lesson.progressPercent}%`}`;
         if (!isDirectVideo) requestAnimationFrame(() => { const content = document.getElementById('lesson-content'); content.scrollTop = Math.round((content.scrollHeight - content.clientHeight) * lesson.progressPercent / 100); });
-        const reader = document.getElementById('karaoke-reader-text');
-        if (reader) {
-            const raw = lesson.content || lesson.title;
-            AccessEdState.speech.sentences = raw.match(/[^.!?]+[.!?]+/g) || [raw];
-            AccessEdState.speech.currentSentenceIdx = 0;
-            reader.innerHTML = AccessEdState.speech.sentences.map((sentence, index) => `<span class="reader-sentence" data-idx="${index}">${lmsEscape(sentence.trim())} </span>`).join('');
-        }
+        setReaderContent(`${lesson.title}. ${lesson.content || ''}`, `lesson: ${lesson.title}`);
         stopLearningTimer();
         if (!isDirectVideo) startLearningTimer();
         document.getElementById('lesson-content').onscroll = null;

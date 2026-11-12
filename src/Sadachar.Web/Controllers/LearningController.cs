@@ -244,7 +244,7 @@ public class LearningController(ApplicationDbContext db, IWebHostEnvironment env
         if (await db.Enrollments.AnyAsync(e => e.UserId == UserId && e.CourseId == courseId, ct)) return Conflict(new { message = "Already enrolled." });
         db.Enrollments.Add(new Enrollment { UserId = UserId, CourseId = courseId });
         await db.SaveChangesAsync(ct);
-        return Ok();
+        return Ok(new { enrolled = true, courseId });
     }
 
     [HttpGet("lessons/{lessonId:guid}")]
@@ -293,7 +293,7 @@ public class LearningController(ApplicationDbContext db, IWebHostEnvironment env
             Score = request.Score, IsCompleted = request.IsCompleted,
             Topic = string.IsNullOrWhiteSpace(request.Topic) ? null : request.Topic[..Math.Min(100, request.Topic.Length)] });
         await db.SaveChangesAsync(ct);
-        return Ok();
+        return Ok(new { recorded = true });
     }
 
     [AllowAnonymous]
