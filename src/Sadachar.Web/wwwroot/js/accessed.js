@@ -39,6 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initSpeechSynthesis();
     initKanbanBoard();
     initApiInteractions();
+    initHomeNavigation();
+    loadPublicLandingHighlights();
+    const year = document.getElementById('home-year');
+    if (year) year.textContent = new Date().getFullYear();
     loadCurrentAccount();
 });
 
@@ -56,6 +60,7 @@ function navigateToScreen(screenId) {
 
     const targetScreen = document.getElementById(screenId);
     if (targetScreen) {
+        document.body.classList.toggle('public-landing', screenId === 'screen-landing');
         targetScreen.classList.add('active');
         AccessEdState.currentScreen = screenId;
         if (screenId === 'screen-course-details' && activeLesson && !activeLesson.isCompleted && !activeVideo) startLearningTimer();
@@ -77,6 +82,238 @@ function navigateToScreen(screenId) {
             announcement.innerText = `Navigated to ${screenTitle}`;
         }
     }
+}
+
+function initHomeNavigation() {
+    const menuButton = document.querySelector('.home-menu-toggle');
+    const nav = document.getElementById('home-nav');
+    menuButton?.addEventListener('click', () => {
+        const expanded = menuButton.getAttribute('aria-expanded') === 'true';
+        menuButton.setAttribute('aria-expanded', String(!expanded));
+        menuButton.setAttribute('aria-label', expanded ? 'Open navigation' : 'Close navigation');
+        nav?.classList.toggle('is-open', !expanded);
+    });
+    nav?.querySelectorAll('a').forEach(link => link.addEventListener('click', event => {
+        nav.classList.remove('is-open');
+        menuButton?.setAttribute('aria-expanded', 'false');
+        menuButton?.setAttribute('aria-label', 'Open navigation');
+        const destination = link.dataset.navScreen;
+        if (!destination) return;
+        event.preventDefault();
+        navigateHomeDestination(destination);
+    }));
+    document.getElementById('home-personalized')?.addEventListener('click', event => {
+        const action = event.target.closest('[data-home-destination]');
+        if (!action || !AccessEdState.currentUser) return;
+        event.preventDefault();
+        navigateHomeDestination(action.dataset.homeDestination);
+    });
+    document.querySelectorAll('[data-open-learning-catalog]').forEach(link => link.addEventListener('click', event => {
+        event.preventDefault();
+        navigateToScreen('screen-resources');
+        Promise.all([lmsLoadCourses(), lmsLoadResources()]).catch(error => console.error('Catalog could not be loaded.', error));
+        window.setTimeout(() => document.getElementById(link.getAttribute('href') === '#resource-search' ? 'resource-search' : 'available-courses-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+    }));
+    document.querySelectorAll('[data-return-home]').forEach(link => link.addEventListener('click', event => {
+        event.preventDefault();
+        navigateToScreen('screen-landing');
+    }));
+    document.querySelectorAll('[data-home-access-proxy]').forEach(button => button.addEventListener('click', () => {
+        document.getElementById(button.dataset.homeAccessProxy)?.click();
+    }));
+    document.querySelectorAll('[data-home-font-toggle]').forEach(button => button.addEventListener('click', () => {
+        AccessEdState.accessibility.fontFamily = AccessEdState.accessibility.fontFamily === 'dyslexia' ? 'default' : 'dyslexia';
+        applyAccessibilitySettings();
+        button.setAttribute('aria-pressed', String(AccessEdState.accessibility.fontFamily === 'dyslexia'));
+    }));
+
+    document.querySelectorAll('#home-hero-cta').forEach(link => link.addEventListener('click', event => {
+        if (!AccessEdState.currentUser) return;
+        event.preventDefault();
+        if (['parent', 'volunteer'].includes(AccessEdState.currentRole)) {
+            document.getElementById('home-personalized')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
+        }
+        const screen = ({ student: 'screen-student-dash', teacher: 'screen-teacher-dash', admin: 'screen-admin-dash', auditor: 'screen-compliance' })[AccessEdState.currentRole];
+        navigateToScreen(screen || 'screen-student-dash');
+    }));
+    document.getElementById('home-support-cta')?.addEventListener('click', event => {
+        if (!AccessEdState.currentUser) return;
+        event.preventDefault();
+        navigateToScreen('screen-support');
+    });
+}
+
+function navigateHomeDestination(destination) {
+    const roleScreens = { student: 'screen-student-dash', teacher: 'screen-teacher-dash', admin: 'screen-admin-dash', auditor: 'screen-compliance' };
+    let screen = 'screen-student-dash';
+    let targetId = null;
+    if (destination === 'dashboard') {
+        if (['parent', 'volunteer'].includes(AccessEdState.currentRole)) {
+            document.getElementById('home-personalized')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
+        }
+        screen = roleScreens[AccessEdState.currentRole] || 'screen-student-dash';
+    }
+    else if (destination === 'home') { document.getElementById('home-personalized')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    else if (destination === 'learning') {
+        screen = AccessEdState.currentRole === 'student' ? 'screen-student-dash' : 'screen-resources';
+        if (AccessEdState.currentRole === 'student') targetId = 'continue-heading';
+    } else if (destination === 'notifications') {
+        if (['parent', 'volunteer'].includes(AccessEdState.currentRole)) {
+            const section = document.querySelector(`#home-personalized [data-role-section="${AccessEdState.currentRole === 'parent' ? 'Notifications' : 'Upcoming activities'}"]`);
+            document.getElementById('home-personalized')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            window.setTimeout(() => section?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+            return;
+        }
+        screen = roleScreens[AccessEdState.currentRole] || 'screen-student-dash';
+        targetId = AccessEdState.currentRole === 'student' ? 'announcements-heading' : null;
+    }
+    else if (destination === 'courses') { screen = 'screen-resources'; targetId = 'available-courses-heading'; }
+    else if (destination === 'accessibility') { screen = 'screen-accessibility-settings'; targetId = 'screen6-heading'; }
+    else if (destination === 'support') { screen = 'screen-support'; targetId = 'screen8-heading'; }
+    else if (destination === 'compliance') { screen = 'screen-compliance'; targetId = 'screen11-heading'; }
+    else if (destination === 'profile') { window.location.assign('/Account/Profile'); return; }
+    navigateToScreen(screen);
+    if (targetId) window.setTimeout(() => document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+}
+
+function setHomeQuickActions(role) {
+    const host = document.getElementById('home-quick-actions');
+    if (!host) return;
+    const actionsByRole = {
+        Student: [['Continue learning', 'learning'], ['Browse courses', 'courses'], ['Get support', 'support']],
+        Parent: [['Children’s progress', 'home'], ['Notifications', 'notifications'], ['Support center', 'support']],
+        Volunteer: [['Assigned students', 'home'], ['Upcoming activities', 'home'], ['Support center', 'support']],
+        Educator: [['Educator workspace', 'dashboard'], ['Manage courses', 'courses'], ['Compliance center', 'compliance']],
+        Admin: [['Admin overview', 'dashboard'], ['Manage courses', 'courses'], ['Compliance center', 'compliance']],
+        Auditor: [['Compliance reviews', 'compliance'], ['Governance support', 'support'], ['Learning resources', 'courses']]
+    };
+    const actions = actionsByRole[role] || [['My dashboard', 'dashboard'], ['Browse courses', 'courses'], ['View profile', 'profile']];
+    host.innerHTML = actions.map(([label, destination], index) => `<a class="home-quick-action" href="#${destination}" data-home-destination="${destination}"><span class="home-quick-action-number">0${index + 1}</span><span>${lmsEscape(label)}</span><span class="home-quick-action-arrow" aria-hidden="true">→</span></a>`).join('');
+}
+
+async function renderHomePersonalization(data) {
+    if (!AccessEdState.currentUser) return;
+    const stats = data.stats;
+    const statsHost = document.getElementById('home-personal-stats');
+    const recommendationsHost = document.getElementById('home-personal-course-list');
+    if (statsHost && stats) {
+        const newAnnouncements = data.announcements.filter(item => !item.isRead).length;
+        const values = [
+            ['Enrolled courses', stats.enrolledCourses],
+            ['Overall progress', `${stats.overallProgress}%`],
+            ['Pending assignments', stats.pendingAssignments],
+            ['New updates', newAnnouncements]
+        ];
+        statsHost.innerHTML = values.map(([label, value]) => `<article class="home-personal-stat"><strong>${lmsEscape(value)}</strong><span>${lmsEscape(label)}</span></article>`).join('');
+    }
+    if (!recommendationsHost) return;
+    const recommendationTitle = document.getElementById('home-recommendations-title');
+    const recommendationNote = document.getElementById('home-recommendations-note');
+    if (recommendationTitle) recommendationTitle.textContent = 'Recommended lessons';
+    if (recommendationNote) recommendationNote.textContent = 'Continue with the next incomplete lesson in your enrolled courses.';
+    const lessons = data.recommendedLessons || [];
+    recommendationsHost.innerHTML = lessons.length ? lessons.map(lesson => `<article class="home-personal-course"><div><span class="home-personal-course-subject">${lmsEscape(lesson.subject || 'Learning')}</span><h4>${lmsEscape(lesson.title)}</h4><p>Continue in ${lmsEscape(lesson.courseTitle)}.</p></div><button class="home-personal-course-link" type="button" data-resume-lesson="${lesson.id}">Start lesson <span aria-hidden="true">→</span></button></article>`).join('') : '<p class="home-personal-empty">Enroll in a course to get lesson recommendations here.</p>';
+    recommendationsHost.querySelectorAll('[data-resume-lesson]').forEach(button => button.addEventListener('click', () => lmsOpenLesson(button.dataset.resumeLesson)));
+    renderRoleSection('Enrolled courses and progress', (data.courses || []).length
+        ? `<div class="home-role-list">${data.courses.map(course => `<article class="home-role-row home-role-progress-row"><div><strong>${lmsEscape(course.title)}</strong><small>${course.completed} of ${course.lessons.length} lessons complete</small><div class="home-progress-track" role="img" aria-label="${course.progress}% complete"><span style="width:${course.progress}%"></span></div></div><span class="home-role-score">${course.progress}%</span></article>`).join('')}</div>`
+        : '<p class="home-personal-empty">You are not enrolled in a course yet. Browse the course catalog to get started.</p>');
+    renderRoleSection('Pending activities', (data.pendingActivities || []).length
+        ? `<div class="home-role-list">${data.pendingActivities.map(activity => `<article class="home-role-row"><div><strong>${lmsEscape(activity.title)}</strong><small>Assignment due ${new Date(activity.dueAtUtc).toLocaleString()}</small></div><a class="home-role-link" href="#learning" data-home-destination="learning">View course <span aria-hidden="true">→</span></a></article>`).join('')}</div>`
+        : '<p class="home-personal-empty">No pending course activities right now.</p>');
+
+}
+
+function renderRoleSection(title, body) {
+    const main = document.querySelector('#home-personalized .home-personal-main');
+    if (!main) return;
+    main.querySelector(`[data-role-section="${CSS.escape(title)}"]`)?.remove();
+    const section = document.createElement('section');
+    section.className = 'home-role-section';
+    section.dataset.roleSection = title;
+    const heading = document.createElement('h3');
+    heading.textContent = title;
+    section.append(heading);
+    const content = document.createElement('div');
+    content.innerHTML = body;
+    section.append(content);
+    main.append(section);
+}
+
+async function renderParentHome(data) {
+    const title = document.getElementById('home-recommendations-title');
+    const note = document.getElementById('home-recommendations-note');
+    const list = document.getElementById('home-personal-course-list');
+    const stats = document.getElementById('home-personal-stats');
+    const statsTitle = document.getElementById('home-learning-summary-title');
+    if (statsTitle) statsTitle.textContent = 'Family overview';
+    if (title) title.textContent = 'Children’s learning progress';
+    if (note) note.textContent = 'Course completion from your linked children’s learning activity.';
+    const children = data.children || [];
+    const progress = data.progress || [];
+    if (list) list.innerHTML = progress.length ? progress.map(item => `<article class="home-personal-course"><div><span class="home-personal-course-subject">${lmsEscape(item.studentName)}</span><h4>${lmsEscape(item.courseTitle)}</h4><p>${item.completedLessons} of ${item.totalLessons} lessons complete.</p></div><div class="home-progress-track" role="img" aria-label="${item.progressPercent}% complete"><span style="width:${item.progressPercent}%"></span></div></article>`).join('') : '<p class="home-personal-empty">No enrolled courses are available for your linked children yet.</p>';
+    const unread = (data.notifications || []).reduce((sum, item) => sum + item.unreadChildren, 0);
+    if (stats) stats.innerHTML = [['Linked children', children.length], ['Enrolled courses', progress.length], ['Recent reports', (data.reports || []).length], ['Unread updates', unread]].map(([label, value]) => `<article class="home-personal-stat"><strong>${lmsEscape(value)}</strong><span>${lmsEscape(label)}</span></article>`).join('');
+    renderRoleSection('Recent learning reports', (data.reports || []).length
+        ? `<div class="home-role-list">${data.reports.map(report => `<article class="home-role-row"><div><strong>${lmsEscape(report.studentName)} · ${lmsEscape(report.title)}</strong><small>${lmsEscape(report.topic)} · ${new Date(report.attemptedAtUtc).toLocaleDateString()}</small></div><span class="home-role-score">${report.score}%</span></article>`).join('')}</div>`
+        : '<p class="home-personal-empty">No assessment reports have been recorded for your linked children yet.</p>');
+    renderRoleSection('Notifications', (data.notifications || []).length
+        ? `<div class="home-role-list">${data.notifications.map(item => `<article class="home-role-row"><div><strong>${lmsEscape(item.title)}</strong><small>${lmsEscape(item.body)} · ${item.unreadChildren} child${item.unreadChildren === 1 ? '' : 'ren'} have not read this update</small></div></article>`).join('')}</div>`
+        : '<p class="home-personal-empty">There are no unread announcements for your linked children.</p>');
+}
+
+async function renderVolunteerHome(data) {
+    const title = document.getElementById('home-recommendations-title');
+    const note = document.getElementById('home-recommendations-note');
+    const list = document.getElementById('home-personal-course-list');
+    const stats = document.getElementById('home-personal-stats');
+    const statsTitle = document.getElementById('home-learning-summary-title');
+    if (statsTitle) statsTitle.textContent = 'Volunteer overview';
+    if (title) title.textContent = 'Assigned students';
+    if (note) note.textContent = 'Students and course progress within your current assignments.';
+    const students = data.students || [];
+    const progress = data.progress || [];
+    const names = [...new Set(students.map(student => student.fullName))];
+    if (list) list.innerHTML = names.length ? names.map(name => {
+        const courses = progress.filter(item => item.studentName === name);
+        return `<article class="home-personal-course"><div><span class="home-personal-course-subject">Assigned student</span><h4>${lmsEscape(name)}</h4><p>${courses.length ? courses.map(course => `${lmsEscape(course.courseTitle)} · ${course.progressPercent}%`).join('<br>') : 'No enrolled course progress recorded yet.'}</p></div></article>`;
+    }).join('') : '<p class="home-personal-empty">You do not have any student assignments yet.</p>';
+    const activities = data.upcomingActivities || [];
+    const tasks = data.pendingSupportTasks || [];
+    if (stats) stats.innerHTML = [['Assigned students', students.length], ['Upcoming activities', activities.length], ['Pending support tasks', tasks.length], ['Course records', progress.length]].map(([label, value]) => `<article class="home-personal-stat"><strong>${lmsEscape(value)}</strong><span>${lmsEscape(label)}</span></article>`).join('');
+    renderRoleSection('Upcoming activities', activities.length
+        ? `<div class="home-role-list">${activities.map(item => `<article class="home-role-row"><div><strong>${lmsEscape(item.title)}</strong><small>${new Date(item.startsAtUtc).toLocaleString()} · ${lmsEscape(item.studentName || item.type)}${item.accessNotes ? ` · ${lmsEscape(item.accessNotes)}` : ''}</small></div></article>`).join('')}</div>`
+        : '<p class="home-personal-empty">No upcoming activities are scheduled for you or your assigned students.</p>');
+    renderRoleSection('Pending support tasks', tasks.length
+        ? `<div class="home-role-list">${tasks.map(item => `<article class="home-role-row"><div><strong>${lmsEscape(item.studentName)}</strong><small>Opened ${new Date(item.createdAt).toLocaleDateString()} · Support request #${lmsEscape(item.ticketId)}</small></div><span class="home-role-status">${lmsEscape(item.status)}</span></article>`).join('')}</div>`
+        : '<p class="home-personal-empty">No open support requests are assigned to your students.</p>');
+}
+
+function markHomeLearningUnavailable() {
+    const statsHost = document.getElementById('home-personal-stats');
+    const recommendationsHost = document.getElementById('home-personal-course-list');
+    if (statsHost) statsHost.innerHTML = '<p class="home-personal-empty">Learning information is temporarily unavailable.</p>';
+    if (recommendationsHost) recommendationsHost.innerHTML = '<p class="home-personal-empty">Recommendations are temporarily unavailable.</p>';
+}
+
+async function loadPublicLandingHighlights() {
+    const coursesHost = document.getElementById('landing-course-list');
+    const resourcesHost = document.getElementById('landing-resource-list');
+    if (!coursesHost || !resourcesHost) return;
+
+    const courseRequest = fetch('/api/learning/courses?publicOnly=true', { credentials: 'same-origin' })
+        .then(response => { if (!response.ok) throw new Error(`Courses request failed (${response.status}).`); return response.json(); })
+        .then(courses => {
+            coursesHost.innerHTML = courses.length ? courses.slice(0, 3).map((course, index) => `<article class="home-course-card"><span class="home-course-icon course-tone-${index + 1}" aria-hidden="true">${['✧', '◈', '⌘'][index % 3]}</span><span class="home-card-eyebrow">${lmsEscape(course.subject || 'Learning')}</span><h3>${lmsEscape(course.title)}</h3><p>${lmsEscape(course.description || 'Explore this accessible learning experience at your own pace.')}</p><div class="home-card-meta"><span>${course.lessons?.length ?? 0} lessons</span><span>${lmsEscape(course.subject || 'Open learning')}</span></div></article>`).join('') : '<p class="home-empty-state">There are no published courses yet. New learning opportunities will appear here.</p>';
+        }).catch(error => { console.error('Published courses could not be loaded.', error); coursesHost.innerHTML = '<p class="home-empty-state">Courses are temporarily unavailable. Please check back soon.</p>'; });
+
+    const resourceRequest = fetch('/api/learning/resources?page=1&pageSize=3&sort=recent&publicOnly=true', { credentials: 'same-origin' })
+        .then(response => { if (!response.ok) throw new Error(`Resources request failed (${response.status}).`); return response.json(); })
+        .then(page => {
+            resourcesHost.innerHTML = page.items.length ? page.items.map((resource, index) => `<article class="home-resource-card"><span class="home-resource-icon resource-tone-${index + 1}" aria-hidden="true">${['▤', '◉', '✦'][index % 3]}</span><div><span class="home-card-eyebrow">${lmsEscape(resource.type || 'Learning resource')}</span><h3>${lmsEscape(resource.title)}</h3><p>${lmsEscape(resource.description || 'An accessible resource for your learning journey.')}</p><span class="home-resource-subject">${lmsEscape(resource.subject || resource.category || 'Sadachar resource')}</span></div></article>`).join('') : '<p class="home-empty-state">There are no published resources yet. Accessible materials will appear here as they are added.</p>';
+        }).catch(error => { console.error('Published resources could not be loaded.', error); resourcesHost.innerHTML = '<p class="home-empty-state">Resources are temporarily unavailable. Please check back soon.</p>'; });
+    await Promise.all([courseRequest, resourceRequest]);
 }
 
 async function loadCurrentAccount() {
@@ -106,6 +343,8 @@ function applyCurrentAccount(user) {
 
     const roleMap = {
         Student: 'student',
+        Parent: 'parent',
+        Volunteer: 'volunteer',
         Educator: 'teacher',
         Admin: 'admin',
         Auditor: 'auditor'
@@ -133,6 +372,33 @@ function applyCurrentAccount(user) {
         .join('') || 'G';
     const roleLabel = user ? user.role : 'Not signed in';
 
+    const canManageOwnSupportRequests = user && ['Student', 'Educator'].includes(user.role);
+    const grievanceForm = document.getElementById('portal-grievance-form');
+    const supportFormColumn = grievanceForm?.closest('.col-lg-6');
+    if (supportFormColumn) supportFormColumn.hidden = !canManageOwnSupportRequests;
+    const supportHelpColumn = document.getElementById('support-help-column');
+    if (supportHelpColumn) {
+        supportHelpColumn.classList.toggle('col-lg-6', Boolean(canManageOwnSupportRequests));
+        supportHelpColumn.classList.toggle('col-lg-12', !canManageOwnSupportRequests);
+    }
+    const supportPanel = document.getElementById('support-requests-panel');
+    if (supportPanel) supportPanel.hidden = !user || !['Student', 'Educator', 'Admin', 'Auditor'].includes(user.role);
+    const supportGuidance = document.getElementById('support-role-guidance');
+    if (supportGuidance) {
+        const guidanceByRole = {
+            Guest: 'Sign in with a student or educator account to submit and track support requests.',
+            Parent: 'Use your family overview to follow your linked children’s learning. Students submit accessibility support requests from their own accounts.',
+            Volunteer: 'Use your volunteer overview to coordinate support for assigned students. Students submit accessibility support requests from their own accounts.'
+        };
+        const guidance = guidanceByRole[user?.role || 'Guest'];
+        supportGuidance.hidden = !guidance;
+        supportGuidance.textContent = guidance || '';
+    }
+    const auditButton = document.getElementById('portal-trigger-sla');
+    if (auditButton) auditButton.hidden = !user || !['Admin', 'Auditor'].includes(user.role);
+    const supportHeading = document.querySelector('#support-requests-panel h3');
+    if (supportHeading && user && ['Admin', 'Auditor'].includes(user.role)) supportHeading.textContent = 'Support requests and SLA status';
+
     const nameElement = document.getElementById('sidebar-user-name');
     const roleElement = document.getElementById('sidebar-user-role');
     const avatarElement = document.getElementById('sidebar-user-avatar');
@@ -153,6 +419,22 @@ function applyCurrentAccount(user) {
     if (profileNameInput) profileNameInput.value = user?.fullName || '';
     if (profileEmailInput) profileEmailInput.value = user?.email || '';
 
+    const personalized = document.getElementById('home-personalized');
+    if (personalized) personalized.hidden = !user;
+    const personalName = document.getElementById('home-personal-name');
+    const personalRole = document.getElementById('home-personal-role');
+    if (personalName) personalName.textContent = user?.fullName || '';
+    if (personalRole) personalRole.textContent = user?.role || '';
+    if (user) setHomeQuickActions(user.role);
+    else {
+        const actions = document.getElementById('home-quick-actions');
+        const stats = document.getElementById('home-personal-stats');
+        const recommendations = document.getElementById('home-personal-course-list');
+        if (actions) actions.replaceChildren();
+        if (stats) stats.replaceChildren();
+        if (recommendations) recommendations.replaceChildren();
+    }
+
     const dashboardHeading = document.getElementById('screen3-heading');
     if (dashboardHeading && user && role === 'student') {
         dashboardHeading.textContent = `Welcome, ${displayName}`;
@@ -166,9 +448,29 @@ function applyCurrentAccount(user) {
         accountLink.href = user ? '/Account/Profile' : '/Account/Login';
     }
 
-    navigateToScreen(user
-        ? ({ student: 'screen-student-dash', teacher: 'screen-teacher-dash', admin: 'screen-admin-dash', auditor: 'screen-compliance' })[role]
-        : 'screen-landing');
+    document.querySelectorAll('[data-auth-nav]').forEach(link => {
+        link.hidden = link.dataset.authNav === 'authenticated' ? !user : Boolean(user);
+    });
+    const logoutToken = document.getElementById('home-logout-token');
+    if (logoutToken) logoutToken.value = lmsCsrfToken || '';
+    document.querySelectorAll('#home-hero-cta').forEach(link => {
+        link.href = user ? '#workspace' : '/Account/Register';
+        if (user) link.dataset.homeWorkspace = 'true';
+        else delete link.dataset.homeWorkspace;
+        const span = link.querySelector('span');
+        const label = link.id === 'home-hero-cta' ? (user ? 'Open your workspace' : 'Start your journey') : (user ? 'Open workspace' : 'Get started');
+        if (span) { link.firstChild.textContent = `${label} `; }
+        else link.textContent = label;
+    });
+    const supportCta = document.getElementById('home-support-cta');
+    if (supportCta) {
+        supportCta.href = user ? '#open-support' : '/Account/Login?returnUrl=%2F%23support';
+        const span = supportCta.querySelector('span');
+        if (span) supportCta.firstChild.textContent = user ? 'Open support ' : 'Visit support ';
+    }
+
+    navigateToScreen('screen-landing');
+    if (user && window.location.hash === '#support') navigateToScreen('screen-support');
 }
 
 function initScreenNavigation() {
@@ -255,6 +557,7 @@ function loadAccessibilitySettings() {
         }
     }
     applyAccessibilitySettings();
+    document.querySelectorAll('[data-home-font-toggle]').forEach(button => button.setAttribute('aria-pressed', String(AccessEdState.accessibility.fontFamily === 'dyslexia')));
 }
 
 function initAccessibilityControls() {
@@ -695,7 +998,11 @@ const lmsFetch = async (url, options = {}) => {
 
 async function lmsJson(url, options) {
     const response = await lmsFetch(url, options);
-    if (!response.ok) throw new Error(response.status === 401 ? 'Please sign in to use this feature.' : `Request failed (${response.status}).`);
+    if (!response.ok) {
+        if (response.status === 401) throw new Error('Please sign in to use this feature.');
+        const problem = await response.json().catch(() => null);
+        throw new Error(problem?.message || problem?.title || `Request failed (${response.status}).`);
+    }
     return response.status === 204 ? null : response.json();
 }
 
@@ -704,16 +1011,22 @@ async function lmsBoot() {
         const tokenResponse = await fetch('/api/account/csrf', { credentials: 'same-origin' });
         if (tokenResponse.ok) lmsCsrfToken = (await tokenResponse.json()).requestToken;
         const accountResponse = await fetch('/api/account/me', { credentials: 'same-origin' });
-        if (!accountResponse.ok) { applyCurrentAccount(null); return; }
+        if (accountResponse.status === 401) {
+            applyCurrentAccount(null);
+            await Promise.all([lmsLoadCourses(), lmsLoadResources()]);
+            if (!lmsControlsReady) { lmsSetupControls(); lmsControlsReady = true; }
+            return;
+        }
+        if (!accountResponse.ok) throw new Error(`Account lookup failed (${accountResponse.status}).`);
         const account = await accountResponse.json();
         applyCurrentAccount(account);
-        const requestForm = document.getElementById('portal-grievance-form');
-        if (requestForm) requestForm.closest('.col-lg-6').hidden = account.role === 'Admin' || account.role === 'Auditor';
         await lmsLoadPreferences();
         await Promise.all([lmsLoadDashboard(), lmsLoadCourses(), lmsLoadResources(), loadGrievanceTable(), lmsLoadAdmin(), lmsLoadCompliance(), lmsLoadProfile()]);
         if (!lmsControlsReady) { lmsSetupControls(); lmsControlsReady = true; }
     } catch (error) {
         console.error('Sadachar could not load the account workspace.', error);
+        if (error.message === 'Please sign in to use this feature.') applyCurrentAccount(null);
+        else if (AccessEdState.currentUser) markHomeLearningUnavailable();
         const live = document.getElementById('screen-announcer');
         if (live) live.textContent = error.message;
     }
@@ -721,12 +1034,27 @@ async function lmsBoot() {
 
 async function lmsLoadDashboard() {
     if (!AccessEdState.currentUser) return;
+    const role = AccessEdState.currentUser.role;
+    if (role === 'Parent') {
+        const parentData = await lmsJson('/api/learning/parent-home');
+        await renderParentHome(parentData);
+        return;
+    }
+    if (role === 'Volunteer') {
+        const volunteerData = await lmsJson('/api/learning/volunteer-home');
+        await renderVolunteerHome(volunteerData);
+        return;
+    }
+    if (role !== 'Student') return;
     const data = await lmsJson('/api/learning/dashboard');
+    await renderHomePersonalization(data);
     const stats = data.stats;
     for (const [id, value] of Object.entries({ 'stat-enrolled': stats.enrolledCourses, 'stat-resources': stats.accessibleResources,
         'stat-streak': `${stats.readingStreak} days`, 'stat-tickets': stats.openSupportTickets,
         'stat-completed': stats.completedCourses, 'stat-in-progress': stats.inProgressCourses,
-        'stat-hours': stats.learningHours, 'stat-progress': `${stats.overallProgress}%` })) {
+        'stat-hours': stats.learningHours, 'stat-progress': `${stats.overallProgress}%`,
+        'stat-viewed-resources': stats.viewedResources, 'stat-bookmarked-resources': stats.bookmarkedResources,
+        'stat-completed-resources': stats.completedResources })) {
         const element = document.getElementById(id); if (element) element.textContent = value;
     }
     const pending = document.getElementById('stat-pending'); if (pending) pending.textContent = stats.pendingAssignments;
@@ -794,7 +1122,7 @@ async function lmsLoadDashboard() {
 }
 
 async function lmsLoadProfile() {
-    if (!AccessEdState.currentUser) return;
+    if (AccessEdState.currentUser?.role !== 'Student') return;
     const saved = await lmsJson('/api/learning/bookmarks');
     const host = document.getElementById('saved-resources'); if (!host) return;
     const items = [...saved.resources, ...saved.lessons];
@@ -802,11 +1130,23 @@ async function lmsLoadProfile() {
 }
 
 async function lmsLoadCourses() {
-    if (!AccessEdState.currentUser) return;
-    const courses = await lmsJson('/api/learning/courses');
+    const role = AccessEdState.currentUser?.role || 'Guest';
+    const query = new URLSearchParams();
+    if (role === 'Guest') query.set('publicOnly', 'true');
+    const search = document.getElementById('course-search')?.value.trim();
+    const subject = document.getElementById('course-subject')?.value.trim();
+    const enrollment = document.getElementById('course-enrollment')?.value;
+    if (search) query.set('q', search);
+    if (subject) query.set('subject', subject);
+    if (enrollment && role === 'Student') query.set('enrollment', enrollment);
+    const courses = await lmsJson(`/api/learning/courses?${query}`);
     const host = document.getElementById('available-courses-list');
     if (!host) return;
-    host.innerHTML = courses.length ? courses.map(course => `<article class="col-md-6" data-course-id="${course.id}"><div class="accessed-card h-100"><h3 class="h6 fw-bold">${lmsEscape(course.title)}</h3><p>${lmsEscape(course.subject)}</p><p class="small">${lmsEscape(course.description)}</p><p class="small">${course.lessons.length} lessons · ${course.isPublished ? 'Published' : 'Draft'}</p>${course.isEnrolled ? (course.lessons.map(lesson => `<button class="course-secondary me-1 mb-1" data-open-lesson="${lesson.id}">${lmsEscape(lesson.title)}</button>`).join('') || '<span>Lessons will appear here when published.</span>') : (course.isPublished && AccessEdState.currentUser.role === 'Student' ? `<button class="hero-cta" data-enroll-course="${course.id}">Enroll</button>` : '')}${['Admin', 'Educator'].includes(AccessEdState.currentUser.role) ? `<div class="mt-2"><button class="course-secondary" data-edit-course="${course.id}">Edit</button>${AccessEdState.currentUser.role === 'Admin' ? `<button class="course-secondary ms-2" data-delete-course="${course.id}">Delete</button>` : ''}</div>` : ''}</div></article>`).join('') : '<p class="text-muted">No courses are available yet.</p>';
+    const enrollmentFilter = document.getElementById('course-enrollment-filter-wrap');
+    if (enrollmentFilter) enrollmentFilter.hidden = role !== 'Student';
+    const resultCount = document.getElementById('course-results-count');
+    if (resultCount) resultCount.textContent = `${courses.length} course${courses.length === 1 ? '' : 's'}`;
+    host.innerHTML = courses.length ? courses.map(course => `<article class="col-md-6 col-lg-4" data-course-id="${course.id}"><div class="accessed-card learning-course-card h-100"><span class="status-chip audio-badge">${lmsEscape(course.subject || 'Learning')}${course.isEnrolled && role === 'Student' ? ' · Enrolled' : ''}</span><h3 class="h5 fw-bold mt-3">${lmsEscape(course.title)}</h3><p>${lmsEscape(course.description)}</p><p class="small text-muted">${course.lessons.length} lesson${course.lessons.length === 1 ? '' : 's'}</p>${role === 'Student' && course.isEnrolled ? (course.lessons.map(lesson => `<button class="course-secondary me-1 mb-1" data-open-lesson="${lesson.id}">${lmsEscape(lesson.title)}</button>`).join('') || '<span class="text-muted">Lessons will appear here when published.</span>') : role === 'Student' && course.isPublished ? `<button class="hero-cta" data-enroll-course="${course.id}">Enroll in course</button>` : role === 'Guest' ? `<a class="course-secondary learning-card-action" href="/Account/Login">Sign in as a student to enroll</a><ul class="learning-lesson-preview">${course.lessons.map(lesson => `<li>${lmsEscape(lesson.title)}</li>`).join('')}</ul>` : `<p class="small text-muted mb-0">Course enrollment and lesson progress are managed by students.</p><ul class="learning-lesson-preview">${course.lessons.map(lesson => `<li>${lmsEscape(lesson.title)}</li>`).join('')}</ul>`}${['Admin', 'Educator'].includes(role) ? `<div class="mt-2"><button class="course-secondary" data-edit-course="${course.id}">Edit</button>${role === 'Admin' ? `<button class="course-secondary ms-2" data-delete-course="${course.id}">Delete</button>` : ''}</div>` : ''}</div></article>`).join('') : '<p class="text-muted">No published courses match these filters.</p>';
     host.querySelectorAll('[data-open-lesson]').forEach(button => button.addEventListener('click', () => lmsOpenLesson(button.dataset.openLesson)));
     host.querySelectorAll('[data-enroll-course]').forEach(button => button.addEventListener('click', async () => {
         try { await lmsJson(`/api/learning/courses/${button.dataset.enrollCourse}/enroll`, { method: 'POST' }); await Promise.all([lmsLoadCourses(), lmsLoadDashboard()]); }
@@ -837,7 +1177,7 @@ async function lmsLoadCourses() {
             courseCard.append(quizList);
         }
     }
-    if (['Admin', 'Educator'].includes(AccessEdState.currentUser.role)) {
+    if (['Admin', 'Educator'].includes(role)) {
         for (const course of courses) {
             const card = host.querySelector('article[data-course-id="' + course.id + '"] .accessed-card');
             if (!card || !course.lessons.length) continue;
@@ -852,7 +1192,7 @@ async function lmsLoadCourses() {
                         await lmsJson(`/api/learning/admin/lessons/${lesson.id}`, { method: 'PUT', body: JSON.stringify({ title, content, order: current.order, durationMinutes: current.durationMinutes, videoUrl: current.videoUrl, transcriptUrl: current.transcriptUrl }) }); await lmsLoadCourses();
                     } catch (error) { alert(error.message); }
                 }); editor.append(edit);
-                if (AccessEdState.currentUser.role === 'Admin') {
+                if (role === 'Admin') {
                     const remove = document.createElement('button'); remove.className = 'course-secondary'; remove.textContent = 'Delete lesson'; remove.addEventListener('click', async () => {
                         if (!confirm(`Delete ${lesson.title}?`)) return;
                         try { await lmsJson(`/api/learning/admin/lessons/${lesson.id}`, { method: 'DELETE' }); await lmsLoadCourses(); }
@@ -864,13 +1204,13 @@ async function lmsLoadCourses() {
         }
     }
     const adminPanel = document.getElementById('admin-content-panel');
-    if (adminPanel) adminPanel.hidden = !['Admin', 'Educator'].includes(AccessEdState.currentUser.role);
+    if (adminPanel) adminPanel.hidden = !['Admin', 'Educator'].includes(role);
     ['lesson-course', 'quiz-course', 'assignment-course'].forEach(id => { const select = document.getElementById(id); if (select) select.innerHTML = courses.map(course => `<option value="${course.id}">${lmsEscape(course.title)}</option>`).join(''); });
-    const announcementForm = document.getElementById('admin-announcement-form'); if (announcementForm) announcementForm.hidden = AccessEdState.currentUser.role !== 'Admin';
-    const scheduleForm = document.getElementById('admin-schedule-form'); if (scheduleForm) scheduleForm.hidden = !['Admin', 'Educator'].includes(AccessEdState.currentUser.role);
-    const assignmentForm = document.getElementById('admin-assignment-form'); if (assignmentForm) assignmentForm.hidden = !['Admin', 'Educator'].includes(AccessEdState.currentUser.role);
-    const lessonForm = document.getElementById('admin-lesson-form'); if (lessonForm) lessonForm.hidden = !['Admin', 'Educator'].includes(AccessEdState.currentUser.role);
-    const quizForm = document.getElementById('admin-quiz-form'); if (quizForm) quizForm.hidden = !['Admin', 'Educator'].includes(AccessEdState.currentUser.role);
+    const announcementForm = document.getElementById('admin-announcement-form'); if (announcementForm) announcementForm.hidden = role !== 'Admin';
+    const scheduleForm = document.getElementById('admin-schedule-form'); if (scheduleForm) scheduleForm.hidden = !['Admin', 'Educator'].includes(role);
+    const assignmentForm = document.getElementById('admin-assignment-form'); if (assignmentForm) assignmentForm.hidden = !['Admin', 'Educator'].includes(role);
+    const lessonForm = document.getElementById('admin-lesson-form'); if (lessonForm) lessonForm.hidden = !['Admin', 'Educator'].includes(role);
+    const quizForm = document.getElementById('admin-quiz-form'); if (quizForm) quizForm.hidden = !['Admin', 'Educator'].includes(role);
     const educatorList = document.getElementById('educator-course-list'); if (educatorList) educatorList.innerHTML = courses.map(c => `<p>${lmsEscape(c.title)} · ${c.lessons.length} lessons</p>`).join('') || '<p>No published courses yet.</p>';
     const resourceCourse = document.getElementById('resource-course');
     if (resourceCourse) { const selected = resourceCourse.value; resourceCourse.innerHTML = '<option value="">All courses</option>' + courses.map(c => `<option value="${c.id}">${lmsEscape(c.title)}</option>`).join(''); resourceCourse.value = selected; }
@@ -884,6 +1224,38 @@ async function lmsLoadAdmin() {
         const users = await lmsJson('/api/learning/admin/users'); const host = document.getElementById('admin-users-list');
         host.innerHTML = users.map(user => `<tr><td>${lmsEscape(user.fullName)}</td><td>${lmsEscape(user.email)}</td><td>${lmsEscape(user.role)}</td><td>${user.enrolledCourses}</td><td>${user.isActive ? 'Active' : 'Inactive'} <button class="course-secondary" data-user-id="${user.id}" data-active="${!user.isActive}">${user.isActive ? 'Deactivate' : 'Activate'}</button></td></tr>`).join('') || '<tr><td colspan="5">No accounts yet.</td></tr>';
         host.querySelectorAll('[data-user-id]').forEach(button => button.addEventListener('click', async () => { await lmsJson(`/api/learning/admin/users/${encodeURIComponent(button.dataset.userId)}/active`, { method: 'PUT', body: JSON.stringify(button.dataset.active === 'true') }); await lmsLoadAdmin(); }));
+        const populateAccountOptions = (selectId, role) => {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            const previous = select.value;
+            const eligible = users.filter(user => user.isActive && user.role === role);
+            select.innerHTML = `<option value="">Select ${role.toLowerCase()}</option>` + eligible.map(user => `<option value="${lmsEscape(user.id)}">${lmsEscape(user.fullName)} · ${lmsEscape(user.email)}</option>`).join('');
+            if (eligible.some(user => user.id === previous)) select.value = previous;
+        };
+        populateAccountOptions('admin-parent-account', 'Parent');
+        populateAccountOptions('admin-parent-student', 'Student');
+        populateAccountOptions('admin-volunteer-account', 'Volunteer');
+        populateAccountOptions('admin-volunteer-student', 'Student');
+        const parentLinkForm = document.getElementById('admin-parent-link-form');
+        if (parentLinkForm) parentLinkForm.onsubmit = async event => {
+            event.preventDefault();
+            const feedback = document.getElementById('admin-parent-link-feedback');
+            try {
+                await lmsJson('/api/learning/admin/parent-students', { method: 'POST', body: JSON.stringify({ parentUserId: document.getElementById('admin-parent-account').value, studentUserId: document.getElementById('admin-parent-student').value }) });
+                feedback.textContent = 'Parent and student linked.';
+                parentLinkForm.reset();
+            } catch (error) { feedback.textContent = error.message; }
+        };
+        const volunteerLinkForm = document.getElementById('admin-volunteer-link-form');
+        if (volunteerLinkForm) volunteerLinkForm.onsubmit = async event => {
+            event.preventDefault();
+            const feedback = document.getElementById('admin-volunteer-link-feedback');
+            try {
+                await lmsJson('/api/learning/admin/volunteer-students', { method: 'POST', body: JSON.stringify({ volunteerUserId: document.getElementById('admin-volunteer-account').value, studentUserId: document.getElementById('admin-volunteer-student').value }) });
+                feedback.textContent = 'Volunteer assignment saved.';
+                volunteerLinkForm.reset();
+            } catch (error) { feedback.textContent = error.message; }
+        };
         const analytics = await lmsJson('/api/learning/admin/analytics');
         const scoreList = document.getElementById('admin-score-history'); scoreList.innerHTML = analytics.scores.length ? analytics.scores.map(s => `<p>${lmsEscape(s.student)} · ${lmsEscape(s.title)} (${lmsEscape(s.topic)}): ${s.score}% · ${new Date(s.attemptedAtUtc).toLocaleString()}</p>`).join('') : '<p>No quiz attempts have been recorded.</p>';
         document.getElementById('admin-course-enrollments').innerHTML = analytics.enrollments.length ? analytics.enrollments.map(c => `<p>${lmsEscape(c.title)} · ${c.total} enrollment${c.total === 1 ? '' : 's'}</p>`).join('') : '<p>No courses have been created.</p>';
@@ -913,25 +1285,58 @@ async function lmsStartQuiz(id) {
 }
 
 async function lmsLoadResources() {
-    if (!AccessEdState.currentUser) return;
+    const role = AccessEdState.currentUser?.role || 'Guest';
     const q = new URLSearchParams({ page: String(lmsPage), pageSize: '12', sort: document.getElementById('resource-sort')?.value || 'recent' });
+    if (role === 'Guest') q.set('publicOnly', 'true');
     const search = document.getElementById('resource-search')?.value.trim();
     const type = document.getElementById('resource-type')?.value;
     const subject = document.getElementById('resource-subject')?.value.trim();
     const courseId = document.getElementById('resource-course')?.value;
     const category = document.getElementById('resource-category')?.value.trim();
-    if (search) q.set('q', search); if (type) q.set('type', type); if (subject) q.set('subject', subject); if (courseId) q.set('courseId', courseId); if (category) q.set('category', category);
+    const difficulty = document.getElementById('resource-difficulty')?.value;
+    if (search) q.set('q', search); if (type) q.set('type', type); if (subject) q.set('subject', subject); if (courseId) q.set('courseId', courseId); if (category) q.set('category', category); if (difficulty) q.set('difficulty', difficulty);
     const page = await lmsJson(`/api/learning/resources?${q}`);
+    const recommendationHost = document.getElementById('resource-recommendations');
+    if (recommendationHost && role === 'Student') {
+        try {
+            const recommendations = await lmsJson('/api/learning/resources/recommendations');
+            recommendationHost.innerHTML = recommendations.length ? recommendations.map(item => `<article class="col-md-4"><div class="accessed-card h-100"><span class="status-chip audio-badge">${lmsEscape(item.type)} · ${lmsEscape(item.difficulty)}</span><h3 class="h6 fw-bold mt-2">${lmsEscape(item.title)}</h3><p class="small mb-0">${lmsEscape(item.subject)} · ${item.estimatedMinutes} min</p></div></article>`).join('') : '<p class="text-muted">Save or open a few resources to receive personalized recommendations.</p>';
+        } catch { recommendationHost.innerHTML = '<p class="text-muted">Recommendations are temporarily unavailable.</p>'; }
+    }
     lmsPageCount = Math.max(1, Math.ceil(page.total / page.pageSize));
+    const filters = page.filters || {};
+    const typeSelect = document.getElementById('resource-type');
+    if (typeSelect) {
+        const selected = typeSelect.value;
+        typeSelect.innerHTML = '<option value="">All types</option>' + (filters.types || []).map(value => `<option value="${lmsEscape(value)}">${lmsEscape(value)}</option>`).join('');
+        if ((filters.types || []).includes(selected)) typeSelect.value = selected;
+    }
+    const difficultySelect = document.getElementById('resource-difficulty');
+    if (difficultySelect) {
+        const selected = difficultySelect.value;
+        difficultySelect.innerHTML = '<option value="">All levels</option>' + (filters.difficulties || []).map(value => `<option value="${lmsEscape(value)}">${lmsEscape(value)}</option>`).join('');
+        if ((filters.difficulties || []).includes(selected)) difficultySelect.value = selected;
+    }
+    const subjectOptions = document.getElementById('resource-subject-options');
+    if (subjectOptions) subjectOptions.innerHTML = (filters.subjects || []).map(value => `<option value="${lmsEscape(value)}"></option>`).join('');
+    const categoryOptions = document.getElementById('resource-category-options');
+    if (categoryOptions) categoryOptions.innerHTML = (filters.categories || []).map(value => `<option value="${lmsEscape(value)}"></option>`).join('');
     const host = document.getElementById('resource-list');
-    host.innerHTML = page.items.length ? page.items.map(resource => `<article class="col-md-6 col-lg-4"><div class="accessed-card h-100"><span class="status-chip audio-badge">${lmsEscape(resource.type)}${resource.isPublished ? '' : ' · Draft'}</span><h2 class="h6 fw-bold mt-3">${lmsEscape(resource.title)}</h2><p class="small">${lmsEscape(resource.subject)} · ${lmsEscape(resource.category)}</p><p>${lmsEscape(resource.description)}</p>${resource.fileUrl ? `<a class="btn-accessed-primary" href="${lmsEscape(resource.fileUrl)}" target="_blank" rel="noopener" data-resource-open="${resource.id}">Open resource</a>` : '<span class="text-muted">No file attached</span>'}${resource.transcriptUrl ? `<a class="d-block mt-2" href="${lmsEscape(resource.transcriptUrl)}">Transcript</a>` : ''}${resource.isPublished ? `<button class="course-secondary ms-2" data-bookmark-resource="${resource.id}">${resource.isBookmarked ? 'Remove saved' : 'Save resource'}</button>` : ''}${['Admin', 'Educator'].includes(AccessEdState.currentUser.role) ? `<div class="mt-2"><button class="course-secondary" data-edit-resource="${resource.id}">Edit</button>${AccessEdState.currentUser.role === 'Admin' ? `<button class="course-secondary ms-2" data-delete-resource="${resource.id}">Delete</button>` : ''}</div>` : ''}</div></article>`).join('') : '<p class="text-muted">No matching resources have been published.</p>';
-    host.querySelectorAll('[data-bookmark-resource]').forEach(button => button.addEventListener('click', async () => { await lmsJson(`/api/learning/resources/${button.dataset.bookmarkResource}/bookmark`, { method: 'POST' }); await lmsLoadResources(); }));
+    host.innerHTML = page.items.length ? page.items.map(resource => `<article class="col-md-6 col-lg-4"><div class="accessed-card learning-resource-card h-100">${resource.thumbnailUrl ? `<img class="img-fluid rounded mb-3" src="${lmsEscape(resource.thumbnailUrl)}" alt="" loading="lazy">` : ''}<span class="status-chip audio-badge">${lmsEscape(resource.type)} · ${lmsEscape(resource.difficulty)}${resource.isPublished ? '' : ' · Draft'}</span><h3 class="h5 fw-bold mt-3">${lmsEscape(resource.title)}</h3><p class="small">${lmsEscape(resource.subject)} · ${lmsEscape(resource.category)} · ${resource.estimatedMinutes} min</p><p>${lmsEscape(resource.description)}</p><div class="progress mb-2" role="progressbar" aria-label="${lmsEscape(resource.title)} progress" aria-valuenow="${resource.progressPercent}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:${resource.progressPercent}%">${resource.progressPercent}%</div></div>${resource.fileUrl ? `<a class="btn-accessed-primary" href="${lmsEscape(resource.fileUrl)}" target="_blank" rel="noopener" ${role === 'Student' ? `data-resource-open="${resource.id}"` : ''}>${resource.isCompleted ? 'Review resource' : 'Open resource'}</a>` : '<span class="text-muted">No file attached</span>'}${resource.transcriptUrl ? `<a class="d-block mt-2" href="${lmsEscape(resource.transcriptUrl)}" target="_blank" rel="noopener">Open transcript</a>` : ''}${role === 'Student' && resource.isPublished ? `<button class="course-secondary ms-2" data-resource-complete="${resource.id}" aria-pressed="${resource.isCompleted}">${resource.isCompleted ? 'Mark incomplete' : 'Mark complete'}</button><button class="course-secondary ms-2" data-bookmark-resource="${resource.id}" aria-pressed="${resource.isBookmarked}">${resource.isBookmarked ? 'Remove saved' : 'Save resource'}</button>` : ''}${['Admin', 'Educator'].includes(role) ? `<div class="mt-2"><button class="course-secondary" data-edit-resource="${resource.id}">Edit</button>${role === 'Admin' ? `<button class="course-secondary ms-2" data-delete-resource="${resource.id}">Delete</button>` : ''}</div>` : ''}</div></article>`).join('') : '<p class="text-muted">No matching published resources have been found.</p>';
+    host.querySelectorAll('[data-bookmark-resource]').forEach(button => button.addEventListener('click', async () => {
+        try { await lmsJson(`/api/learning/resources/${button.dataset.bookmarkResource}/bookmark`, { method: 'POST' }); await lmsLoadResources(); }
+        catch (error) { alert(error.message); }
+    }));
     host.querySelectorAll('[data-resource-open]').forEach(link => link.addEventListener('click', () => lmsJson('/api/learning/activities', { method: 'POST', body: JSON.stringify({ resourceId: link.dataset.resourceOpen, type: 'resource-opened', progressSeconds: 0, isCompleted: false }) }).catch(console.error)));
+    host.querySelectorAll('[data-resource-complete]').forEach(button => button.addEventListener('click', async () => {
+        try { await lmsJson('/api/learning/activities', { method: 'POST', body: JSON.stringify({ resourceId: button.dataset.resourceComplete, type: 'resource-completed', progressSeconds: 0, progressPercent: button.getAttribute('aria-pressed') === 'true' ? 0 : 100, isCompleted: button.getAttribute('aria-pressed') !== 'true' }) }); await lmsLoadResources(); }
+        catch (error) { alert(error.message); }
+    }));
     host.querySelectorAll('[data-edit-resource]').forEach(button => button.addEventListener('click', async () => {
         const resource = page.items.find(item => item.id === button.dataset.editResource); if (!resource) return;
         const title = prompt('Resource title', resource.title); if (!title?.trim()) return;
         const isPublished = confirm('Publish this resource? Choose Cancel to keep it as a draft.');
-        try { await lmsJson(`/api/learning/admin/resources/${resource.id}`, { method: 'PUT', body: JSON.stringify({ title, description: resource.description, type: resource.type, category: resource.category, subject: resource.subject, fileUrl: resource.fileUrl, fileName: resource.fileName, transcriptUrl: resource.transcriptUrl, courseId: resource.courseId, isPublished }) }); await lmsLoadResources(); }
+        try { await lmsJson(`/api/learning/admin/resources/${resource.id}`, { method: 'PUT', body: JSON.stringify({ title, description: resource.description, type: resource.type, category: resource.category, subject: resource.subject, fileUrl: resource.fileUrl, fileName: resource.fileName, transcriptUrl: resource.transcriptUrl, thumbnailUrl: resource.thumbnailUrl, accessibilityNotes: resource.accessibilityNotes, difficulty: resource.difficulty || 'Beginner', estimatedMinutes: resource.estimatedMinutes || 15, courseId: resource.courseId, isPublished }) }); await lmsLoadResources(); }
         catch (error) { alert(error.message); }
     }));
     host.querySelectorAll('[data-delete-resource]').forEach(button => button.addEventListener('click', async () => {
@@ -994,11 +1399,19 @@ async function lmsOpenLesson(id) {
 
 function lmsSetupControls() {
     document.getElementById('notification-button')?.addEventListener('click', () => {
-        if (!AccessEdState.currentUser) { navigateToScreen('screen-login'); return; }
-        navigateToScreen('screen-student-dash'); document.getElementById('announcement-list')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (!AccessEdState.currentUser) { window.location.assign('/Account/Login'); return; }
+        navigateHomeDestination('notifications');
     });
     const reloadResources = () => { lmsPage = 1; lmsLoadResources().catch(console.error); };
-    ['resource-type', 'resource-subject', 'resource-sort', 'resource-course', 'resource-category'].forEach(id => document.getElementById(id)?.addEventListener('change', reloadResources));
+    const reloadCourses = () => lmsLoadCourses().catch(error => {
+        const host = document.getElementById('available-courses-list');
+        if (host) host.innerHTML = `<p class="text-muted">${lmsEscape(error.message)}</p>`;
+    });
+    const debounced = callback => { let timer; return () => { clearTimeout(timer); timer = setTimeout(callback, 250); }; };
+    ['course-search', 'course-subject'].forEach(id => document.getElementById(id)?.addEventListener('input', debounced(reloadCourses)));
+    document.getElementById('course-enrollment')?.addEventListener('change', reloadCourses);
+    ['resource-type', 'resource-difficulty', 'resource-subject', 'resource-sort', 'resource-course', 'resource-category'].forEach(id => document.getElementById(id)?.addEventListener('change', reloadResources));
+    ['resource-subject', 'resource-category'].forEach(id => document.getElementById(id)?.addEventListener('input', debounced(reloadResources)));
     document.getElementById('resource-search')?.addEventListener('input', (() => { let timer; return () => { clearTimeout(timer); timer = setTimeout(reloadResources, 250); }; })());
     document.getElementById('resources-previous')?.addEventListener('click', () => { if (lmsPage > 1) { lmsPage--; lmsLoadResources(); } });
     document.getElementById('resources-next')?.addEventListener('click', () => { if (lmsPage < lmsPageCount) { lmsPage++; lmsLoadResources(); } });
@@ -1025,10 +1438,15 @@ function lmsSetupControls() {
         try {
             let uploaded = {};
             const file = document.getElementById('new-resource-file').files[0];
-            if (file) { const form = new FormData(); form.append('file', file); uploaded = await lmsJson('/api/learning/admin/upload', { method: 'POST', body: form }); }
-            await lmsJson('/api/learning/admin/resources', { method: 'POST', body: JSON.stringify({ title: document.getElementById('new-resource-title').value, description: '', type: document.getElementById('new-resource-type').value, category: '', subject: document.getElementById('new-resource-subject').value, fileUrl: uploaded.fileUrl || null, fileName: uploaded.fileName || null, transcriptUrl: null, courseId: null, isPublished: true }) });
+            if (file) { const form = new FormData(); form.append('file', file); uploaded = await lmsJson('/api/learning/admin/resources/upload', { method: 'POST', body: form }); }
+            await lmsJson('/api/learning/admin/resources', { method: 'POST', body: JSON.stringify({ title: document.getElementById('new-resource-title').value, description: '', type: document.getElementById('new-resource-type').value, category: '', subject: document.getElementById('new-resource-subject').value, fileUrl: uploaded.url || null, fileName: uploaded.fileName || null, transcriptUrl: null, courseId: null, isPublished: true, difficulty: 'Beginner', estimatedMinutes: 15 }) });
             event.target.reset(); feedback.textContent = 'Resource published.'; await lmsLoadResources();
         } catch (error) { feedback.textContent = error.message; }
+    });
+    document.getElementById('admin-category-form')?.addEventListener('submit', async event => {
+        event.preventDefault(); const feedback = document.getElementById('admin-form-feedback');
+        try { await lmsJson('/api/learning/admin/categories', { method: 'POST', body: JSON.stringify({ name: document.getElementById('new-resource-category').value, description: document.getElementById('new-resource-category-description').value, isActive: true }) }); event.target.reset(); feedback.textContent = 'Category added.'; await lmsLoadResources(); }
+        catch (error) { feedback.textContent = error.message; }
     });
     document.getElementById('admin-lesson-form')?.addEventListener('submit', async event => {
         event.preventDefault(); const feedback = document.getElementById('admin-form-feedback');

@@ -7,71 +7,102 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"] - Sadachar</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="/css/accessed.css" />
+    <meta name="theme-color" content="#f7f5ff" />
+    <title>@ViewData["Title"] · Sadachar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/auth.css" />
 </head>
-<body>
-    <main class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-sm-10 col-md-7 col-lg-5">
-                <a class="text-decoration-none" href="/">← Sadachar home</a>
-                <section class="accessed-card mt-3" aria-labelledby="login-heading">
-                    <h1 id="login-heading" class="h2">Welcome back</h1>
-                    <p class="text-muted">Sign in to your Sadachar account.</p>
-
-                    <form asp-action="Login" method="post">
-                        <input asp-for="ReturnUrl" type="hidden" />
-                        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-
-                        <fieldset class="mb-3">
-                            <legend class="fs-6 fw-semibold">Level of access</legend>
-                            <div class="d-flex gap-4">
-                                <div class="form-check">
-                                    <input asp-for="Role" class="form-check-input" type="radio" value="@UserRole.Student" id="role-student" />
-                                    <label class="form-check-label" for="role-student">Student</label>
-                                </div>
-                                <div class="form-check">
-                                    <input asp-for="Role" class="form-check-input" type="radio" value="@UserRole.Educator" id="role-educator" />
-                                    <label class="form-check-label" for="role-educator">Teacher / Educator</label>
-                                </div>
-                                <div class="form-check">
-                                    <input asp-for="Role" class="form-check-input" type="radio" value="@UserRole.Admin" id="role-admin" />
-                                    <label class="form-check-label" for="role-admin">Administrator</label>
-                                </div>
-                                <div class="form-check">
-                                    <input asp-for="Role" class="form-check-input" type="radio" value="@UserRole.Auditor" id="role-auditor" />
-                                    <label class="form-check-label" for="role-auditor">Auditor</label>
-                                </div>
-                            </div>
-                        </fieldset>
-
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label"></label>
-                            <input asp-for="Email" class="accessed-input" autocomplete="username" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label asp-for="Password" class="form-label"></label>
-                            <input asp-for="Password" class="accessed-input" autocomplete="current-password" />
-                            <span asp-validation-for="Password" class="text-danger"></span>
-                        </div>
-                        <div class="form-check mb-3">
-                            <input asp-for="RememberMe" class="form-check-input" />
-                            <label asp-for="RememberMe" class="form-check-label"></label>
-                        </div>
-                        <button type="submit" class="btn-accessed-primary w-100">Sign in</button>
-                    </form>
-
-                    <p class="mt-4 mb-0 text-center">
-                        New student? <a asp-action="Register">Create a student account</a>
-                    </p>
-                    <p class="small text-muted mt-3 mb-0">
-                        Educator accounts are created by the institution administrator. Choosing Educator here does not grant educator access.
-                    </p>
-                </section>
+<body class="auth-page">
+    <a class="skip-link" href="#auth-form">Skip to sign in</a>
+    <main class="auth-shell">
+        <section class="welcome-panel" aria-labelledby="welcome-title">
+            <a class="brand" href="/" aria-label="Sadachar home">
+                <span class="brand-mark" aria-hidden="true">s</span>
+                <span>sadachar</span>
+            </a>
+            <div class="welcome-copy">
+                <span class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span> LEARNING, WITHOUT LIMITS</span>
+                <h1 id="welcome-title">Every mind has a place to <span>flourish.</span></h1>
+                <p>A more welcoming world of learning starts with belonging. Pick up where you left off and keep growing.</p>
             </div>
-        </div>
+            <div class="illustration-wrap">
+                <div class="orbit orbit-one" aria-hidden="true"></div>
+                <div class="orbit orbit-two" aria-hidden="true"></div>
+                <span class="sparkle sparkle-one" aria-hidden="true">✦</span>
+                <span class="sparkle sparkle-two" aria-hidden="true">✳</span>
+                <div class="illustration-card">
+                    <svg class="learning-art" viewBox="0 0 520 350" role="img" aria-labelledby="art-title art-desc">
+                        <title id="art-title">Students learning together</title>
+                        <desc id="art-desc">Three diverse students share an open book, with a wheelchair user included in the group.</desc>
+                        <ellipse cx="262" cy="311" rx="190" ry="17" fill="#ded6f7" />
+                        <path d="M137 276c9-43 49-70 95-65l28 4 19 92H138z" fill="#8f72d8" />
+                        <path d="M145 280c5-44 42-72 86-68l22 4 20 90H143z" fill="#9679df" />
+                        <path d="M180 176c0-27 20-48 46-48s46 21 46 48v14h-92z" fill="#34294e" />
+                        <ellipse cx="226" cy="181" rx="35" ry="41" fill="#c78362" />
+                        <path d="M190 176c4-32 23-48 46-48 21 0 37 14 41 41-18-8-28-20-35-31-11 17-29 28-52 32z" fill="#302743" />
+                        <path d="M211 187c5 4 10 4 15 0" fill="none" stroke="#603d38" stroke-width="3" stroke-linecap="round" />
+                        <path d="M239 187c5 4 10 4 15 0" fill="none" stroke="#603d38" stroke-width="3" stroke-linecap="round" />
+                        <path d="M228 204c7 6 15 6 22 0" fill="none" stroke="#fff0e8" stroke-width="3" stroke-linecap="round" />
+                        <path d="M118 286c-3-42 25-73 61-77 20-3 38 5 50 17l-4 91H125z" fill="#f1bd58" />
+                        <circle cx="151" cy="189" r="31" fill="#e0a17c" />
+                        <path d="M119 185c2-28 18-43 39-43 18 0 30 12 33 31-20 2-34-5-44-18-6 13-16 23-28 30z" fill="#493953" />
+                        <path d="M130 194c4 3 8 3 12 0m18 0c4 3 8 3 12 0" fill="none" stroke="#6b4740" stroke-width="2.5" stroke-linecap="round" />
+                        <path d="M142 208c6 5 12 5 18 0" fill="none" stroke="#fff5eb" stroke-width="2.5" stroke-linecap="round" />
+                        <path d="M304 282c-7-46 17-77 52-84l41 8 16 92H301z" fill="#6eb7b1" />
+                        <circle cx="365" cy="185" r="32" fill="#8c563f" />
+                        <path d="M333 185c0-27 12-43 34-43 18 0 30 13 30 32-21 0-37-7-47-21-2 12-7 23-17 32z" fill="#25283b" />
+                        <path d="M345 191c4 3 8 3 12 0m17 0c4 3 8 3 12 0" fill="none" stroke="#4c302b" stroke-width="2.5" stroke-linecap="round" />
+                        <path d="M354 205c6 5 12 5 18 0" fill="none" stroke="#f3dfcf" stroke-width="2.5" stroke-linecap="round" />
+                        <circle cx="372" cy="280" r="46" fill="none" stroke="#53657c" stroke-width="6" />
+                        <circle cx="372" cy="280" r="7" fill="#53657c" />
+                        <path d="M345 241h-34l-14 39m29-38 20 45h43m-43-45h27l13 38" fill="none" stroke="#53657c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M214 249c16-15 38-15 54-1l35 31c5 4 7 11 3 16-4 5-10 6-16 2l-37-24v25c0 8-6 13-13 13h-70c-8 0-12-8-7-14l51-48z" fill="#fffdf9" stroke="#6f5c9d" stroke-width="3" />
+                        <path d="M250 248v46" stroke="#c7bee0" stroke-width="3" />
+                        <path d="M227 262h13m-13 9h13m28-9h13m-13 9h13" stroke="#a79bc7" stroke-width="3" stroke-linecap="round" />
+                        <circle cx="405" cy="108" r="28" fill="#fff" />
+                        <path d="m405 92 4 11 11 4-11 4-4 11-4-11-11-4 11-4z" fill="#9a7bdb" />
+                    </svg>
+                    <div class="art-caption"><span class="caption-icon" aria-hidden="true">✦</span><span><strong>Different strengths. One community.</strong><small>Room to learn, grow and belong.</small></span></div>
+                </div>
+            </div>
+            <div class="welcome-footer"><span>Thoughtfully designed for every learner</span><span aria-hidden="true">·</span><span>Accessible by nature</span></div>
+        </section>
+
+        <section class="form-panel" aria-labelledby="login-heading">
+            <div class="mobile-brand"><span class="brand-mark" aria-hidden="true">s</span><span>sadachar</span></div>
+            <div class="auth-card">
+                <div class="form-heading">
+                    <span class="form-kicker">YOUR LEARNING SPACE</span>
+                    <h2 id="login-heading">Welcome back</h2>
+                    <p>Sign in to continue your journey.</p>
+                </div>
+                <form asp-action="Login" method="post" id="auth-form" novalidate>
+                    <input asp-for="ReturnUrl" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert" tabindex="-1"></div>
+                    <div class="field-group">
+                        <label asp-for="Email" class="field-label"></label>
+                        <input asp-for="Email" class="auth-input" type="email" autocomplete="username" placeholder="you@example.com" aria-describedby="Email-error" required />
+                        <span asp-validation-for="Email" class="field-error" id="Email-error"></span>
+                    </div>
+                    <div class="field-group">
+                        <div class="label-row"><label asp-for="Password" class="field-label"></label><a asp-action="ForgotPassword" class="text-link forgot-link">Forgot password?</a></div>
+                        <div class="password-wrap">
+                            <input asp-for="Password" class="auth-input password-input" autocomplete="current-password" placeholder="Enter your password" aria-describedby="Password-error" required />
+                            <button class="password-toggle" type="button" data-password-toggle="Password" aria-controls="Password" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg><span class="toggle-label">Show</span></button>
+                        </div>
+                        <span asp-validation-for="Password" class="field-error" id="Password-error"></span>
+                    </div>
+                    <div class="form-options"><label class="check-label"><input asp-for="RememberMe" /><span class="custom-check" aria-hidden="true"></span><span>Remember me</span></label></div>
+                    <button class="submit-button" type="submit"><span>Sign in</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+                </form>
+                <p class="auth-switch">New to Sadachar? <a asp-action="Register" class="text-link">Create an account <span aria-hidden="true">→</span></a></p>
+                <div class="secure-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.9 8.2 7 10 4.1-1.8 7-5.4 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg><span>Your information is private and secure</span></div>
+            </div>
+            <footer class="form-footer"><a href="/" class="text-link">← Back to Sadachar</a><span>Made for learning without limits</span></footer>
+        </section>
     </main>
+    <script src="/js/auth.js" defer></script>
 </body>
 </html>

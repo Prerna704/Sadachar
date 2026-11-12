@@ -23,6 +23,7 @@ public class LearningController(ApplicationDbContext db, IWebHostEnvironment env
     }
 
     [HttpGet("dashboard")]
+    [Authorize(Roles = "Student")]
     public async Task<IActionResult> Dashboard(CancellationToken ct)
     {
         var id = UserId;
@@ -68,6 +69,10 @@ public class LearningController(ApplicationDbContext db, IWebHostEnvironment env
         var lastLessonActivity = await activities.Where(a => a.LessonId != null).OrderByDescending(a => a.OccurredAtUtc)
             .Select(a => new { a.CourseId, a.LessonId }).FirstOrDefaultAsync(ct);
         var resources = await db.LearningResources.CountAsync(r => r.IsPublished, ct);
+        var viewedResources = await db.LearningActivities.Where(a => a.UserId == id && a.ResourceId != null).Select(a => a.ResourceId).Distinct().CountAsync(ct);
+        var bookmarkedResources = await db.ResourceBookmarks.CountAsync(b => b.UserId == id, ct);
+        var completedResources = await db.LearningActivities.Where(a => a.UserId == id && a.ResourceId != null && a.IsCompleted).Select(a => a.ResourceId).Distinct().CountAsync(ct);
+        var resourceProgress = await db.LearningActivities.Where(a => a.UserId == id && a.ResourceId != null).Select(a => (int?)(a.ProgressPercent ?? 0)).DefaultIfEmpty().AverageAsync(ct);
         var pendingAssignments = await db.Assignments.Where(a => a.IsPublished && enrollments.Contains(a.CourseId) && a.DueAtUtc >= DateTime.UtcNow)
             .CountAsync(a => !db.AssignmentSubmissions.Any(s => s.AssignmentId == a.Id && s.UserId == id), ct);
         var assessments = await db.Assignments.Where(a => a.IsPublished && enrollments.Contains(a.CourseId) && a.DueAtUtc >= DateTime.UtcNow)
@@ -77,31 +82,162 @@ public class LearningController(ApplicationDbContext db, IWebHostEnvironment env
             .Select(a => new { a.Id, a.Title, a.Body, a.PublishedAtUtc, IsRead = db.AnnouncementReads.Any(r => r.UserId == id && r.AnnouncementId == a.Id) }).ToListAsync(ct);
         var schedule = await db.ScheduleEvents.Where(e => (e.UserId == null || e.UserId == id) && e.StartsAtUtc >= DateTime.UtcNow)
             .OrderBy(e => e.StartsAtUtc).Take(5).ToListAsync(ct);
+        var recommendedLessons = activeCourses.SelectMany(course => course.Lessons
+                .Where(lesson => lesson.Id == course.ResumeLessonId)
+                .Select(lesson => new { lesson.Id, lesson.Title, CourseId = course.Id, CourseTitle = course.Title, course.Subject }))
+            .Take(5).ToList();
+        var pendingActivities = assessments.Where(a => !a.IsSubmitted)
+            .Select(a => new { a.Id, a.Title, Type = "Assignment", DueAtUtc = a.DueAtUtc, a.CourseId }).ToList();
         return Ok(new {
             Courses = activeCourses,
             Stats = new { EnrolledCourses = courses.Count, CompletedCourses = activeCourses.Count(c => c.Progress == 100),
                 InProgressCourses = activeCourses.Count(c => c.Progress is > 0 and < 100), AccessibleResources = resources,
                 LearningHours = Math.Round((await activities.SumAsync(a => (long)a.ProgressSeconds, ct)) / 3600d, 1),
+                ViewedResources = viewedResources, BookmarkedResources = bookmarkedResources, CompletedResources = completedResources,
+                ResourceProgress = Convert.ToInt32(resourceProgress ?? 0d),
                 ReadingStreak = streak, OverallProgress = totalLessons == 0 ? 0 : (int)Math.Round(100d * completedLessons / totalLessons),
                 PendingAssignments = pendingAssignments, UpcomingAssessments = assessments.Count, OpenSupportTickets = tickets },
             WeeklyActivity = weekly, ScoreTrend = scoreTrend, TopicPerformance = topicPerformance,
             Recommendations = recommendations,
             RecentLesson = lastLessonActivity, Assessments = assessments, Schedule = schedule,
-            Announcements = announcementRows, LastActivityUtc = lastActivity
+            Announcements = announcementRows, LastActivityUtc = lastActivity,
+            RecommendedLessons = recommendedLessons, PendingActivities = pendingActivities
         });
     }
 
-    [HttpGet("courses")]
-    public async Task<IActionResult> Courses(CancellationToken ct)
+    [HttpGet("parent-home")]
+    [Authorize(Roles = "Parent")]
+    public async Task<IActionResult> ParentHome(CancellationToken ct)
     {
-        var id = UserId;
-        var query = db.Courses.AsNoTracking().Where(c => c.IsPublished || IsStaff);
+        var parentId = UserId;
+        var children = await db.ParentStudentLinks.AsNoTracking()
+            .Where(link => link.ParentUserId == parentId)
+            .Join(db.Users.AsNoTracking().Where(user => user.IsActive && user.Role == Sadachar.Core.Enums.UserRole.Student),
+                link => link.StudentUserId, user => user.Id,
+                (link, user) => new { user.Id, user.FullName })
+            .Distinct().ToListAsync(ct);
+        var childIds = children.Select(child => child.Id).ToArray();
+
+        var courses = await db.Enrollments.AsNoTracking().Where(enrollment => childIds.Contains(enrollment.UserId))
+            .Join(db.Courses.AsNoTracking(), enrollment => enrollment.CourseId, course => course.Id,
+                (enrollment, course) => new {
+                    StudentId = enrollment.UserId, CourseId = course.Id, CourseTitle = course.Title,
+                    TotalLessons = db.Lessons.Count(lesson => lesson.CourseId == course.Id),
+                    CompletedLessons = db.LearningActivities.Where(activity => activity.UserId == enrollment.UserId && activity.CourseId == course.Id && activity.IsCompleted && activity.LessonId != null)
+                        .Select(activity => activity.LessonId).Distinct().Count()
+                }).ToListAsync(ct);
+        var studentNames = children.ToDictionary(child => child.Id, child => child.FullName);
+        var progress = courses.Select(course => new {
+            StudentId = course.StudentId,
+            StudentName = studentNames[course.StudentId],
+            course.CourseId,
+            course.CourseTitle,
+            course.TotalLessons,
+            course.CompletedLessons,
+            ProgressPercent = course.TotalLessons == 0 ? 0 : (int)Math.Round(100d * course.CompletedLessons / course.TotalLessons)
+        }).ToList();
+
+        var reports = await db.QuizAttempts.AsNoTracking().Where(attempt => childIds.Contains(attempt.UserId))
+            .Join(db.Quizzes.AsNoTracking(), attempt => attempt.QuizId, quiz => quiz.Id,
+                (attempt, quiz) => new { attempt.UserId, quiz.Title, quiz.Topic, attempt.Score, attempt.AttemptedAtUtc })
+            .OrderByDescending(report => report.AttemptedAtUtc).Take(10).ToListAsync(ct);
+        var notifications = await db.Announcements.AsNoTracking().Where(announcement => announcement.IsPublished)
+            .Select(announcement => new {
+                announcement.Id, announcement.Title, announcement.Body, announcement.PublishedAtUtc,
+                UnreadForChildren = db.AnnouncementReads.Count(read => read.AnnouncementId == announcement.Id && childIds.Contains(read.UserId))
+            }).Where(item => childIds.Length > 0 && childIds.Length > item.UnreadForChildren)
+            .OrderByDescending(item => item.PublishedAtUtc).Take(5).ToListAsync(ct);
+
+        return Ok(new {
+            Children = children.Select(child => new { child.Id, child.FullName }),
+            Progress = progress,
+            Reports = reports.Select(report => new {
+                StudentName = studentNames[report.UserId], report.Title, report.Topic, report.Score, report.AttemptedAtUtc
+            }),
+            Notifications = notifications.Select(notification => new {
+                notification.Id, notification.Title, notification.Body, notification.PublishedAtUtc,
+                UnreadChildren = childIds.Length - notification.UnreadForChildren
+            })
+        });
+    }
+
+    [HttpGet("volunteer-home")]
+    [Authorize(Roles = "Volunteer")]
+    public async Task<IActionResult> VolunteerHome(CancellationToken ct)
+    {
+        var volunteerId = UserId;
+        var students = await db.VolunteerStudentAssignments.AsNoTracking()
+            .Where(assignment => assignment.VolunteerUserId == volunteerId)
+            .Join(db.Users.AsNoTracking().Where(user => user.IsActive && user.Role == Sadachar.Core.Enums.UserRole.Student),
+                assignment => assignment.StudentUserId, user => user.Id,
+                (assignment, user) => new { user.Id, user.FullName })
+            .Distinct().ToListAsync(ct);
+        var studentIds = students.Select(student => student.Id).ToArray();
+        var names = students.ToDictionary(student => student.Id, student => student.FullName);
+        var courseIds = await db.Enrollments.AsNoTracking().Where(enrollment => studentIds.Contains(enrollment.UserId))
+            .Select(enrollment => enrollment.CourseId).Distinct().ToArrayAsync(ct);
+        var progress = await db.Enrollments.AsNoTracking().Where(enrollment => studentIds.Contains(enrollment.UserId))
+            .Join(db.Courses.AsNoTracking(), enrollment => enrollment.CourseId, course => course.Id,
+                (enrollment, course) => new {
+                    StudentId = enrollment.UserId, CourseTitle = course.Title,
+                    TotalLessons = db.Lessons.Count(lesson => lesson.CourseId == course.Id),
+                    CompletedLessons = db.LearningActivities.Where(activity => activity.UserId == enrollment.UserId && activity.CourseId == course.Id && activity.IsCompleted && activity.LessonId != null)
+                        .Select(activity => activity.LessonId).Distinct().Count()
+                }).ToListAsync(ct);
+        var activities = await db.ScheduleEvents.AsNoTracking()
+            .Where(item => item.StartsAtUtc >= DateTime.UtcNow &&
+                (item.UserId == volunteerId || (item.UserId == null && item.CourseId == null) ||
+                 (item.UserId != null && studentIds.Contains(item.UserId)) ||
+                 (item.CourseId != null && courseIds.Contains(item.CourseId.Value))))
+            .OrderBy(item => item.StartsAtUtc).Take(10)
+            .Select(item => new { item.Id, item.Title, item.Type, item.StartsAtUtc, item.EndsAtUtc, item.AccessNotes, item.UserId })
+            .ToListAsync(ct);
+        var tasks = await db.GrievanceTickets.AsNoTracking()
+            .Where(ticket => studentIds.Contains(ticket.StudentId) &&
+                (ticket.Status == Sadachar.Core.Enums.TicketStatus.Open || ticket.Status == Sadachar.Core.Enums.TicketStatus.InProgress || ticket.Status == Sadachar.Core.Enums.TicketStatus.Escalated))
+            .OrderBy(ticket => ticket.CreatedAt).Take(10)
+            .Select(ticket => new { ticket.TicketId, ticket.Status, ticket.CreatedAt, ticket.SLAExpiryDateTime, ticket.StudentId })
+            .ToListAsync(ct);
+
+        return Ok(new {
+            Students = students,
+            Progress = progress.Select(item => new {
+                StudentName = names[item.StudentId], item.CourseTitle, item.TotalLessons, item.CompletedLessons,
+                ProgressPercent = item.TotalLessons == 0 ? 0 : (int)Math.Round(100d * item.CompletedLessons / item.TotalLessons)
+            }),
+            UpcomingActivities = activities.Select(item => new {
+                item.Id, item.Title, item.Type, item.StartsAtUtc, item.EndsAtUtc, item.AccessNotes,
+                StudentName = item.UserId != null && names.TryGetValue(item.UserId, out var name) ? name : null
+            }),
+            PendingSupportTasks = tasks.Select(item => new {
+                item.TicketId, Status = item.Status.ToString(), item.CreatedAt, item.SLAExpiryDateTime,
+                StudentName = names[item.StudentId]
+            })
+        });
+    }
+
+    [AllowAnonymous]
+    [HttpGet("courses")]
+    public async Task<IActionResult> Courses([FromQuery] bool publicOnly = false, [FromQuery] string? q = null,
+        [FromQuery] string? subject = null, [FromQuery] string? enrollment = null, CancellationToken ct = default)
+    {
+        var isAuthenticated = User.Identity?.IsAuthenticated == true;
+        var id = isAuthenticated ? UserId : string.Empty;
+        var query = db.Courses.AsNoTracking().Where(c => c.IsPublished || (!publicOnly && IsStaff));
+        if (!string.IsNullOrWhiteSpace(q)) query = query.Where(c => c.Title.Contains(q) || c.Description.Contains(q) || c.Subject.Contains(q));
+        if (!string.IsNullOrWhiteSpace(subject)) query = query.Where(c => c.Subject.Contains(subject));
+        if (isAuthenticated && User.IsInRole(nameof(Sadachar.Core.Enums.UserRole.Student)))
+        {
+            if (enrollment == "enrolled") query = query.Where(c => db.Enrollments.Any(e => e.UserId == id && e.CourseId == c.Id));
+            else if (enrollment == "available") query = query.Where(c => !db.Enrollments.Any(e => e.UserId == id && e.CourseId == c.Id));
+        }
         return Ok(await query.OrderBy(c => c.Title).Select(c => new { c.Id, c.Title, c.Subject, c.Description,
-            IsPublished = c.IsPublished, IsEnrolled = db.Enrollments.Any(e => e.UserId == id && e.CourseId == c.Id),
+            IsPublished = c.IsPublished, IsEnrolled = isAuthenticated && db.Enrollments.Any(e => e.UserId == id && e.CourseId == c.Id),
             Lessons = c.Lessons.OrderBy(l => l.Order).Select(l => new { l.Id, l.Title, l.Order, l.DurationMinutes }).ToList() }).ToListAsync(ct));
     }
 
     [HttpPost("courses/{courseId:guid}/enroll")]
+    [Authorize(Roles = "Student")]
     public async Task<IActionResult> Enroll(Guid courseId, CancellationToken ct)
     {
         if (!await db.Courses.AnyAsync(c => c.Id == courseId && c.IsPublished, ct)) return NotFound();
@@ -123,6 +259,7 @@ public class LearningController(ApplicationDbContext db, IWebHostEnvironment env
     }
 
     [HttpPost("lessons/{lessonId:guid}/bookmark")]
+    [Authorize(Roles = "Student")]
     public async Task<IActionResult> BookmarkLesson(Guid lessonId, CancellationToken ct)
     {
         var lesson = await db.Lessons.FirstOrDefaultAsync(l => l.Id == lessonId, ct);
@@ -137,6 +274,7 @@ public class LearningController(ApplicationDbContext db, IWebHostEnvironment env
 
     public record ActivityRequest(Guid? LessonId, Guid? ResourceId, string Type, int ProgressSeconds, int? Score, bool IsCompleted, string? Topic, int? MediaPositionSeconds = null, int? ProgressPercent = null);
     [HttpPost("activities")]
+    [Authorize(Roles = "Student,Educator,Admin")]
     public async Task<IActionResult> RecordActivity(ActivityRequest request, CancellationToken ct)
     {
         if (request.ProgressSeconds < 0 || request.ProgressSeconds > 86400 || request.Score is not null || request.MediaPositionSeconds is < 0 or > 86400 || request.ProgressPercent is < 0 or > 100) return BadRequest();
@@ -158,26 +296,73 @@ public class LearningController(ApplicationDbContext db, IWebHostEnvironment env
         return Ok();
     }
 
+    [AllowAnonymous]
     [HttpGet("resources")]
     public async Task<IActionResult> Resources([FromQuery] string? q, [FromQuery] string? type, [FromQuery] string? subject,
-        [FromQuery] Guid? courseId, [FromQuery] string? category, [FromQuery] string? sort = "recent", [FromQuery] int page = 1, [FromQuery] int pageSize = 12, CancellationToken ct = default)
+        [FromQuery] Guid? courseId, [FromQuery] string? category, [FromQuery] string? difficulty, [FromQuery] string? sort = "recent", [FromQuery] int page = 1, [FromQuery] int pageSize = 12, [FromQuery] bool publicOnly = false, CancellationToken ct = default)
     {
         page = Math.Max(1, page); pageSize = Math.Clamp(pageSize, 1, 50);
-        var query = db.LearningResources.AsNoTracking().Where(r => r.IsPublished || IsStaff);
+        var visibleResources = db.LearningResources.AsNoTracking().Where(r => r.IsPublished || (!publicOnly && IsStaff));
+        var filterValues = await visibleResources.Select(resource => new { resource.Type, resource.Subject, resource.Category, resource.Difficulty })
+            .Distinct().ToListAsync(ct);
+        var query = visibleResources;
         if (!string.IsNullOrWhiteSpace(q)) query = query.Where(r => r.Title.Contains(q) || r.Description.Contains(q) || r.Subject.Contains(q));
         if (!string.IsNullOrWhiteSpace(type)) query = query.Where(r => r.Type == type);
         if (!string.IsNullOrWhiteSpace(subject)) query = query.Where(r => r.Subject == subject);
         if (courseId.HasValue) query = query.Where(r => r.CourseId == courseId.Value);
         if (!string.IsNullOrWhiteSpace(category)) query = query.Where(r => r.Category == category);
+        if (!string.IsNullOrWhiteSpace(difficulty)) query = query.Where(r => r.Difficulty == difficulty);
         var total = await query.CountAsync(ct);
         query = sort == "title" ? query.OrderBy(r => r.Title) : query.OrderByDescending(r => r.CreatedAtUtc);
+        var canBookmark = User.IsInRole(nameof(Sadachar.Core.Enums.UserRole.Student));
+        var userId = canBookmark ? UserId : string.Empty;
         var items = await query.Skip((page - 1) * pageSize).Take(pageSize).Select(r => new { r.Id, r.Title, r.Description,
-            r.Type, r.Category, r.Subject, r.FileUrl, r.FileName, r.TranscriptUrl, r.CourseId, r.CreatedAtUtc, r.IsPublished,
-            IsBookmarked = db.ResourceBookmarks.Any(b => b.UserId == UserId && b.ResourceId == r.Id) }).ToListAsync(ct);
-        return Ok(new { Items = items, Total = total, Page = page, PageSize = pageSize });
+            r.Type, r.Category, r.Subject, r.Difficulty, r.EstimatedMinutes, r.ThumbnailUrl, r.AccessibilityNotes,
+            r.FileUrl, r.FileName, r.TranscriptUrl, r.CourseId, r.CreatedAtUtc, r.IsPublished,
+            IsBookmarked = canBookmark && db.ResourceBookmarks.Any(b => b.UserId == userId && b.ResourceId == r.Id),
+            IsCompleted = canBookmark && db.LearningActivities.Any(a => a.UserId == userId && a.ResourceId == r.Id && a.IsCompleted),
+            ProgressPercent = canBookmark ? (db.LearningActivities.Where(a => a.UserId == userId && a.ResourceId == r.Id).OrderByDescending(a => a.OccurredAtUtc).Select(a => a.ProgressPercent).FirstOrDefault() ?? 0) : 0 }).ToListAsync(ct);
+        return Ok(new {
+            Items = items, Total = total, Page = page, PageSize = pageSize,
+            Filters = new {
+                Types = filterValues.Select(value => value.Type).Where(value => !string.IsNullOrWhiteSpace(value)).Distinct().OrderBy(value => value),
+                Subjects = filterValues.Select(value => value.Subject).Where(value => !string.IsNullOrWhiteSpace(value)).Distinct().OrderBy(value => value),
+                Categories = filterValues.Select(value => value.Category).Where(value => !string.IsNullOrWhiteSpace(value)).Distinct().OrderBy(value => value),
+                Difficulties = filterValues.Select(value => value.Difficulty).Where(value => !string.IsNullOrWhiteSpace(value)).Distinct().OrderBy(value => value)
+            }
+        });
+    }
+
+    [HttpGet("resources/{resourceId:guid}")]
+    public async Task<IActionResult> Resource(Guid resourceId, CancellationToken ct)
+    {
+        var resource = await db.LearningResources.AsNoTracking().FirstOrDefaultAsync(r => r.Id == resourceId && (r.IsPublished || IsStaff), ct);
+        if (resource is null) return NotFound();
+        var isStudent = User.IsInRole(nameof(Sadachar.Core.Enums.UserRole.Student));
+        var latest = isStudent ? await db.LearningActivities.Where(a => a.UserId == UserId && a.ResourceId == resourceId).OrderByDescending(a => a.OccurredAtUtc).FirstOrDefaultAsync(ct) : null;
+        return Ok(new { resource.Id, resource.Title, resource.Description, resource.Type, resource.Category, resource.Subject,
+            resource.Difficulty, resource.EstimatedMinutes, resource.ThumbnailUrl, resource.AccessibilityNotes, resource.FileUrl,
+            resource.FileName, resource.TranscriptUrl, resource.CreatedAtUtc, IsBookmarked = isStudent && await db.ResourceBookmarks.AnyAsync(b => b.UserId == UserId && b.ResourceId == resourceId, ct),
+            ProgressPercent = latest?.ProgressPercent ?? 0, IsCompleted = latest?.IsCompleted ?? false });
+    }
+
+    [HttpGet("resources/recommendations")]
+    [Authorize(Roles = "Student")]
+    public async Task<IActionResult> Recommendations(CancellationToken ct)
+    {
+        var id = UserId;
+        var preferredSubjects = await db.LearningActivities.Where(a => a.UserId == id && a.ResourceId != null && a.Topic != null)
+            .GroupBy(a => a.Topic!).OrderByDescending(g => g.Count()).Select(g => g.Key).Take(3).ToListAsync(ct);
+        var bookmarked = db.ResourceBookmarks.Where(b => b.UserId == id).Select(b => b.ResourceId);
+        var items = await db.LearningResources.AsNoTracking().Where(r => r.IsPublished && !bookmarked.Contains(r.Id) &&
+                (preferredSubjects.Count == 0 || preferredSubjects.Contains(r.Subject)))
+            .OrderByDescending(r => preferredSubjects.Contains(r.Subject)).ThenByDescending(r => r.CreatedAtUtc).Take(6)
+            .Select(r => new { r.Id, r.Title, r.Subject, r.Category, r.Type, r.Difficulty, r.EstimatedMinutes }).ToListAsync(ct);
+        return Ok(items);
     }
 
     [HttpPost("resources/{resourceId:guid}/bookmark")]
+    [Authorize(Roles = "Student")]
     public async Task<IActionResult> Bookmark(Guid resourceId, CancellationToken ct)
     {
         if (!await db.LearningResources.AnyAsync(r => r.Id == resourceId && r.IsPublished, ct)) return NotFound();
@@ -189,6 +374,7 @@ public class LearningController(ApplicationDbContext db, IWebHostEnvironment env
     }
 
     [HttpGet("bookmarks")]
+    [Authorize(Roles = "Student")]
     public async Task<IActionResult> Bookmarks(CancellationToken ct)
     {
         var resources = await db.ResourceBookmarks.Where(b => b.UserId == UserId)
@@ -357,16 +543,18 @@ public class LearningController(ApplicationDbContext db, IWebHostEnvironment env
         db.Lessons.Add(lesson); await db.SaveChangesAsync(ct); return Created($"/api/learning/lessons/{lesson.Id}", lesson);
     }
 
-    public record ResourceInput(string Title, string Description, string Type, string Category, string Subject, string? FileUrl, string? FileName, string? TranscriptUrl, Guid? CourseId, bool IsPublished);
+    public record ResourceInput(string Title, string Description, string Type, string Category, string Subject, string? FileUrl, string? FileName, string? TranscriptUrl, Guid? CourseId, bool IsPublished,
+        string Difficulty = "Beginner", int EstimatedMinutes = 15, string? ThumbnailUrl = null, string? AccessibilityNotes = null);
     [HttpPost("admin/resources")]
     [Authorize(Roles = "Admin,Educator")]
     public async Task<IActionResult> CreateResource(ResourceInput input, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(input.Title) || input.Title.Length > 200 || string.IsNullOrWhiteSpace(input.Type) || input.Type.Length > 60 || input.Description?.Length > 1000 || input.Category?.Length > 100 || input.Subject?.Length > 100 || input.FileName?.Length > 260 || !IsSafeContentUrl(input.FileUrl) || (input.TranscriptUrl is not null && !IsSafeContentUrl(input.TranscriptUrl))) return BadRequest();
+        if (!ValidResourceInput(input)) return BadRequest();
         if (input.CourseId is Guid courseId && !await db.Courses.AnyAsync(c => c.Id == courseId, ct)) return BadRequest();
         var r = new LearningResource { Title = input.Title.Trim(), Description = input.Description ?? "", Type = input.Type,
-            Category = input.Category ?? "", Subject = input.Subject ?? "", FileUrl = input.FileUrl, FileName = input.FileName,
-            TranscriptUrl = input.TranscriptUrl, CourseId = input.CourseId, IsPublished = input.IsPublished };
+            Category = input.Category ?? "", Subject = input.Subject ?? "", Difficulty = input.Difficulty, EstimatedMinutes = input.EstimatedMinutes,
+            FileUrl = input.FileUrl, FileName = input.FileName, TranscriptUrl = input.TranscriptUrl, ThumbnailUrl = input.ThumbnailUrl,
+            AccessibilityNotes = input.AccessibilityNotes, CourseId = input.CourseId, IsPublished = input.IsPublished };
         db.LearningResources.Add(r); await db.SaveChangesAsync(ct); return Created($"/api/learning/resources/{r.Id}", r);
     }
 
@@ -375,9 +563,10 @@ public class LearningController(ApplicationDbContext db, IWebHostEnvironment env
     public async Task<IActionResult> UpdateResource(Guid id, ResourceInput input, CancellationToken ct)
     {
         var r = await db.LearningResources.FindAsync([id], ct); if (r is null) return NotFound();
-        if (string.IsNullOrWhiteSpace(input.Title) || input.Title.Length > 200 || string.IsNullOrWhiteSpace(input.Type) || input.Type.Length > 60 || input.Description?.Length > 1000 || input.Category?.Length > 100 || input.Subject?.Length > 100 || input.FileName?.Length > 260 || !IsSafeContentUrl(input.FileUrl) || (input.TranscriptUrl is not null && !IsSafeContentUrl(input.TranscriptUrl))) return BadRequest();
+        if (!ValidResourceInput(input)) return BadRequest();
         r.Title = input.Title.Trim(); r.Description = input.Description ?? ""; r.Type = input.Type; r.Category = input.Category ?? "";
-        r.Subject = input.Subject ?? ""; r.FileUrl = input.FileUrl; r.FileName = input.FileName; r.TranscriptUrl = input.TranscriptUrl;
+        r.Subject = input.Subject ?? ""; r.Difficulty = input.Difficulty; r.EstimatedMinutes = input.EstimatedMinutes;
+        r.FileUrl = input.FileUrl; r.FileName = input.FileName; r.TranscriptUrl = input.TranscriptUrl; r.ThumbnailUrl = input.ThumbnailUrl; r.AccessibilityNotes = input.AccessibilityNotes;
         r.CourseId = input.CourseId; r.IsPublished = input.IsPublished; await db.SaveChangesAsync(ct); return NoContent();
     }
 
@@ -388,6 +577,64 @@ public class LearningController(ApplicationDbContext db, IWebHostEnvironment env
         var r = await db.LearningResources.FindAsync([id], ct); if (r is null) return NotFound();
         db.LearningActivities.RemoveRange(await db.LearningActivities.Where(a => a.ResourceId == id).ToListAsync(ct));
         db.LearningResources.Remove(r); await db.SaveChangesAsync(ct); return NoContent();
+    }
+
+    private static bool ValidResourceInput(ResourceInput input) =>
+        !string.IsNullOrWhiteSpace(input.Title) && input.Title.Length <= 200 && !string.IsNullOrWhiteSpace(input.Type) && input.Type.Length <= 60 &&
+        input.Description?.Length <= 1000 && input.Category?.Length <= 100 && input.Subject?.Length <= 100 && input.FileName?.Length <= 260 &&
+        input.EstimatedMinutes is > 0 and <= 1440 && new[] { "Beginner", "Intermediate", "Advanced" }.Contains(input.Difficulty) &&
+        input.AccessibilityNotes?.Length <= 500 && IsSafeContentUrl(input.FileUrl) &&
+        (input.TranscriptUrl is null || IsSafeContentUrl(input.TranscriptUrl)) && (input.ThumbnailUrl is null || IsSafeContentUrl(input.ThumbnailUrl));
+
+    public record CategoryInput(string Name, string Description, bool IsActive = true);
+    [HttpGet("admin/categories")]
+    [Authorize(Roles = "Admin,Educator")]
+    public async Task<IActionResult> Categories(CancellationToken ct) => Ok(await db.ResourceCategories.AsNoTracking().OrderBy(c => c.Name).ToListAsync(ct));
+
+    [HttpPost("admin/categories")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreateCategory(CategoryInput input, CancellationToken ct)
+    {
+        var name = input.Name?.Trim();
+        if (string.IsNullOrWhiteSpace(name) || name.Length > 100 || await db.ResourceCategories.AnyAsync(c => c.Name == name, ct)) return BadRequest();
+        var category = new ResourceCategory { Name = name, Description = input.Description?.Trim() ?? "", IsActive = input.IsActive };
+        db.ResourceCategories.Add(category); await db.SaveChangesAsync(ct); return Created($"/api/learning/admin/categories/{category.Id}", category);
+    }
+
+    [HttpPut("admin/categories/{id:guid}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateCategory(Guid id, CategoryInput input, CancellationToken ct)
+    {
+        var category = await db.ResourceCategories.FindAsync([id], ct); if (category is null) return NotFound();
+        var name = input.Name?.Trim();
+        if (string.IsNullOrWhiteSpace(name) || name.Length > 100 || await db.ResourceCategories.AnyAsync(c => c.Id != id && c.Name == name, ct)) return BadRequest();
+        category.Name = name; category.Description = input.Description?.Trim() ?? ""; category.IsActive = input.IsActive; await db.SaveChangesAsync(ct); return NoContent();
+    }
+
+    [HttpDelete("admin/categories/{id:guid}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteCategory(Guid id, CancellationToken ct)
+    {
+        var category = await db.ResourceCategories.FindAsync([id], ct); if (category is null) return NotFound();
+        if (await db.LearningResources.AnyAsync(r => r.Category == category.Name, ct)) return Conflict(new { message = "Move resources to another category before deleting it." });
+        db.ResourceCategories.Remove(category); await db.SaveChangesAsync(ct); return NoContent();
+    }
+
+    [HttpPost("admin/resources/upload")]
+    [Authorize(Roles = "Admin,Educator")]
+    [RequestSizeLimit(25 * 1024 * 1024)]
+    public async Task<IActionResult> UploadResource([FromForm] IFormFile file, CancellationToken ct)
+    {
+        if (file is null) return BadRequest(new { message = "Choose a file to upload." });
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var allowed = new[] { ".pdf", ".mp4", ".webm", ".mp3", ".wav", ".docx", ".xlsx" };
+        if (file.Length is <= 0 or > 25 * 1024 * 1024 || !allowed.Contains(extension)) return BadRequest(new { message = "Unsupported or oversized file." });
+        var directory = Path.Combine(environment.WebRootPath ?? Path.Combine(environment.ContentRootPath, "wwwroot"), "uploads", "resources");
+        Directory.CreateDirectory(directory);
+        var storedName = $"{Guid.NewGuid():N}{extension}";
+        await using var stream = System.IO.File.Create(Path.Combine(directory, storedName));
+        await file.CopyToAsync(stream, ct);
+        return Ok(new { Url = $"/uploads/resources/{storedName}", FileName = Path.GetFileName(file.FileName), Size = file.Length });
     }
 
     public record AnnouncementInput(string Title, string Body, bool IsPublished);
@@ -434,6 +681,66 @@ public class LearningController(ApplicationDbContext db, IWebHostEnvironment env
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Users(CancellationToken ct) => Ok(await db.Users.AsNoTracking()
         .Select(u => new { u.Id, u.FullName, u.Email, u.Role, u.IsActive, EnrolledCourses = db.Enrollments.Count(e => e.UserId == u.Id) }).ToListAsync(ct));
+
+    public record StudentRelationshipInput(string ParentUserId, string StudentUserId);
+    [HttpPost("admin/parent-students")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> LinkParentStudent(StudentRelationshipInput input, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(input.ParentUserId) || string.IsNullOrWhiteSpace(input.StudentUserId) || input.ParentUserId == input.StudentUserId)
+            return BadRequest(new { message = "Choose a parent and a different student account." });
+        var validAccounts = await db.Users.CountAsync(user => user.IsActive &&
+            ((user.Id == input.ParentUserId && user.Role == Sadachar.Core.Enums.UserRole.Parent) ||
+             (user.Id == input.StudentUserId && user.Role == Sadachar.Core.Enums.UserRole.Student)), ct);
+        if (validAccounts != 2) return BadRequest(new { message = "The selected accounts must be active parent and student accounts." });
+        if (await db.ParentStudentLinks.AnyAsync(link => link.ParentUserId == input.ParentUserId && link.StudentUserId == input.StudentUserId, ct))
+            return Conflict(new { message = "That parent and student are already linked." });
+        var link = new ParentStudentLink { ParentUserId = input.ParentUserId, StudentUserId = input.StudentUserId };
+        db.ParentStudentLinks.Add(link);
+        await db.SaveChangesAsync(ct);
+        return Created($"/api/learning/admin/parent-students/{link.Id}", new { link.Id, link.ParentUserId, link.StudentUserId, link.LinkedAtUtc });
+    }
+
+    [HttpDelete("admin/parent-students/{id:guid}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UnlinkParentStudent(Guid id, CancellationToken ct)
+    {
+        var link = await db.ParentStudentLinks.FindAsync([id], ct);
+        if (link is null) return NotFound();
+        db.ParentStudentLinks.Remove(link);
+        await db.SaveChangesAsync(ct);
+        return NoContent();
+    }
+
+    public record VolunteerAssignmentInput(string VolunteerUserId, string StudentUserId);
+    [HttpPost("admin/volunteer-students")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AssignVolunteerStudent(VolunteerAssignmentInput input, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(input.VolunteerUserId) || string.IsNullOrWhiteSpace(input.StudentUserId) || input.VolunteerUserId == input.StudentUserId)
+            return BadRequest(new { message = "Choose a volunteer and a different student account." });
+        var validAccounts = await db.Users.CountAsync(user => user.IsActive &&
+            ((user.Id == input.VolunteerUserId && user.Role == Sadachar.Core.Enums.UserRole.Volunteer) ||
+             (user.Id == input.StudentUserId && user.Role == Sadachar.Core.Enums.UserRole.Student)), ct);
+        if (validAccounts != 2) return BadRequest(new { message = "The selected accounts must be active volunteer and student accounts." });
+        if (await db.VolunteerStudentAssignments.AnyAsync(assignment => assignment.VolunteerUserId == input.VolunteerUserId && assignment.StudentUserId == input.StudentUserId, ct))
+            return Conflict(new { message = "That volunteer is already assigned to the student." });
+        var assignment = new VolunteerStudentAssignment { VolunteerUserId = input.VolunteerUserId, StudentUserId = input.StudentUserId };
+        db.VolunteerStudentAssignments.Add(assignment);
+        await db.SaveChangesAsync(ct);
+        return Created($"/api/learning/admin/volunteer-students/{assignment.Id}", new { assignment.Id, assignment.VolunteerUserId, assignment.StudentUserId, assignment.AssignedAtUtc });
+    }
+
+    [HttpDelete("admin/volunteer-students/{id:guid}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UnassignVolunteerStudent(Guid id, CancellationToken ct)
+    {
+        var assignment = await db.VolunteerStudentAssignments.FindAsync([id], ct);
+        if (assignment is null) return NotFound();
+        db.VolunteerStudentAssignments.Remove(assignment);
+        await db.SaveChangesAsync(ct);
+        return NoContent();
+    }
 
     [HttpGet("admin/overview")]
     [Authorize(Roles = "Admin")]

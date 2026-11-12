@@ -12,8 +12,9 @@
 
     <!-- AccessEd / Sadachar Design Tokens & Styles -->
     <link rel="stylesheet" href="/css/accessed.css?v=dashboard-redesign-1">
+    <link rel="stylesheet" href="/css/home.css?v=learning-catalog-1">
 </head>
-<body data-role="public">
+<body class="public-landing" data-role="public">
 
     <!-- Screen Reader Announcer -->
     <div id="screen-announcer" class="visually-hidden" aria-live="polite"></div>
@@ -35,6 +36,12 @@
                     <div>
                         <div class="fw-bold fs-5 brand-title" style="letter-spacing: -0.5px;">Sadachar</div>
                         <small class="text-muted d-block" style="font-size: 0.72rem; line-height: 1;">AccessEd v1.0</small>
+                    </div>
+
+                    <div class="dashboard-metrics" aria-label="Resource activity">
+                        <article class="metric-card metric-blue"><div><strong id="stat-viewed-resources">0</strong><span>Resources Viewed</span></div></article>
+                        <article class="metric-card metric-green"><div><strong id="stat-bookmarked-resources">0</strong><span>Resources Bookmarked</span></div></article>
+                        <article class="metric-card metric-orange"><div><strong id="stat-completed-resources">0</strong><span>Resources Completed</span></div></article>
                     </div>
                 </a>
 
@@ -132,94 +139,36 @@
                 <!-- ==============================================================
                      SCREEN 1: LANDING PAGE (Public / Overview)
                      ============================================================== -->
-                <section id="screen-landing" class="screen-view active" aria-labelledby="screen1-heading">
-                    <div class="row align-items-center g-4 my-3">
-                        <div class="col-lg-7">
-                            <span class="status-chip forest mb-3">
-                                <i class="bi bi-award-fill"></i> Built around WCAG 2.2 AA Principles
-                            </span>
-                            <h1 id="screen1-heading" class="display-5 fw-bold mb-3" style="color: var(--ink);">
-                                Education that adapts to <span style="color: var(--terracotta);">every learner.</span>
-                            </h1>
-                            <p class="lead mb-4" style="color: var(--muted); font-size: 1.15rem;">
-                                <strong>Sadachar</strong> brings accessible learning resources, real-time assistive speech tools, and transparent statutory governance together in one unified platform for specially-abled students and institutions.
-                            </p>
-                            <div class="d-flex flex-wrap gap-3 mb-4">
-                                <a class="btn-accessed-primary" href="/Account/Login">
-                                    Start Learning <i class="bi bi-arrow-right"></i>
-                                </a>
-                                <button class="btn-accessed-secondary" onclick="navigateToScreen('screen-course-details')">
-                                    <i class="bi bi-play-circle"></i> Watch Overview
-                                </button>
-                            </div>
-
-                            <!-- Stat Counters -->
-                            <div class="row g-3 pt-2">
-                                <div class="col-4">
-                                    <div class="p-3 bg-white rounded border border-2 border-dark text-center" style="box-shadow: 2px 2px 0 var(--ink);">
-                                        <div class="display-6 fw-bold" style="color: var(--terracotta);">Accessible</div>
-                                        <small class="fw-semibold text-muted">Needs Supported</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="p-3 bg-white rounded border border-2 border-dark text-center" style="box-shadow: 2px 2px 0 var(--ink);">
-                                        <div class="display-6 fw-bold" style="color: var(--forest);">Inclusive</div>
-                                        <small class="fw-semibold text-muted">Learning Workspaces</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="p-3 bg-white rounded border border-2 border-dark text-center" style="box-shadow: 2px 2px 0 var(--ink);">
-                                        <div class="display-6 fw-bold" style="color: var(--plum);">72h</div>
-                                        <small class="fw-semibold text-muted">Grievance SLA</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Live Feature Preview Card -->
-                        <div class="col-lg-5">
-                            <div class="accessed-card" style="background: #FFF;">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="status-chip audio-badge"><i class="bi bi-soundwave"></i> Listening mode</span>
-                                    <span class="status-chip ready"><i class="bi bi-badge-cc"></i> Captions on</span>
-                                </div>
-                                <h3 class="h5 fw-bold mb-2">Find your next lesson</h3>
-                                <p class="small text-muted mb-3" style="line-height: 1.6;">
-                                    Browse published courses and accessible learning resources. Your enrolled courses and lesson progress appear on your dashboard.
-                                </p>
-                                <button class="btn-accessed-primary" onclick="navigateToScreen('screen-library')"><i class="bi bi-collection me-2"></i>Browse courses and resources</button>
-                                <div class="text-end">
-                                    <small class="badge bg-light text-dark border">Speed 1.0×</small>
-                                </div>
-                            </div>
-                        </div>
+                <section id="screen-landing" class="screen-view active public-home" aria-labelledby="screen1-heading">
+                    <header class="home-header">
+                        <a class="home-brand" href="/" aria-label="Sadachar home"><img src="/images/logo.jpg" alt=""><span>Sadachar</span></a>
+                        <nav class="home-nav" id="home-nav" aria-label="Main navigation">
+                            <a href="/" aria-current="page">Home</a><a href="#home-about">About</a><a href="#home-courses">Courses</a><a href="#home-resources">Resources</a><a href="#home-accessibility">Accessibility</a><a href="#home-support">Support</a>
+                            <a href="/Account/Login" data-auth-nav="guest">Sign In</a><a class="home-nav-cta" href="/Account/Register" data-auth-nav="guest">Get Started <span aria-hidden="true">→</span></a>
+                            <a href="#dashboard" data-auth-nav="authenticated" data-nav-screen="dashboard" hidden>My Dashboard</a><a href="#learning" data-auth-nav="authenticated" data-nav-screen="learning" hidden>My Learning</a><a href="#notifications" data-auth-nav="authenticated" data-nav-screen="notifications" hidden>Notifications</a><a href="/Account/Profile" data-auth-nav="authenticated" hidden>Profile</a>
+                            <form id="home-logout-form" class="home-nav-logout-form" action="/Account/Logout" method="post" data-auth-nav="authenticated" hidden><input id="home-logout-token" type="hidden" name="__RequestVerificationToken" value=""><button class="home-nav-logout" type="submit">Log out</button></form>
+                        </nav>
+                        <div class="home-access-tools" role="group" aria-label="Quick accessibility controls"><button type="button" data-home-access-proxy="quick-font-decrease" aria-label="Decrease text size" title="Decrease text size">A−</button><button type="button" data-home-access-proxy="quick-font-reset" aria-label="Reset text size" title="Reset text size">A</button><button type="button" data-home-access-proxy="quick-font-increase" aria-label="Increase text size" title="Increase text size">A+</button><button type="button" data-home-font-toggle aria-pressed="false" aria-label="Toggle dyslexia-friendly font" title="Toggle dyslexia-friendly font">Aa</button><button type="button" data-home-access-proxy="quick-contrast-btn" aria-label="Switch color theme" title="Switch color theme">◐</button></div>
+                        <div class="home-nav-actions"><button class="home-menu-toggle" type="button" aria-expanded="false" aria-controls="home-nav" aria-label="Open navigation"><span></span><span></span><span></span></button></div>
+                    </header>
+                    <section class="home-personalized" id="home-personalized" aria-labelledby="home-personalized-title" hidden>
+                        <div class="home-personal-header"><div><span class="home-section-kicker">YOUR SADACHAR SPACE</span><h2 id="home-personalized-title">Welcome back, <span id="home-personal-name"></span></h2><p><span id="home-personal-role"></span><span aria-hidden="true"> · </span>Your learning at a glance.</p></div><a class="home-profile-link" href="/Account/Profile">View profile <span aria-hidden="true">→</span></a></div>
+                        <div class="home-personal-grid"><div class="home-personal-main"><section aria-labelledby="home-quick-actions-title"><div class="home-personal-subhead"><h3 id="home-quick-actions-title">Quick actions</h3></div><div class="home-quick-actions" id="home-quick-actions"></div></section><section class="home-personal-recommendations" aria-labelledby="home-recommendations-title"><div class="home-personal-subhead"><div><h3 id="home-recommendations-title">Recommended courses</h3><p id="home-recommendations-note">Based on published courses and your learning activity.</p></div><a href="#courses" data-home-destination="courses">Explore all <span aria-hidden="true">→</span></a></div><div class="home-personal-course-list" id="home-personal-course-list" aria-live="polite"><p class="home-personal-loading">Loading your learning information…</p></div></section></div><aside class="home-personal-stats" aria-labelledby="home-learning-summary-title"><h3 id="home-learning-summary-title">Your learning</h3><div id="home-personal-stats" aria-live="polite"><p class="home-personal-loading">Loading your learning information…</p></div></aside></div>
+                    </section>
+                    <div class="home-hero" id="home-top">
+                        <div class="home-hero-copy"><span class="home-eyebrow"><span aria-hidden="true">✦</span> INCLUSIVE LEARNING, BUILT AROUND YOU</span><h1 id="screen1-heading">A place where <span>every learner</span> can thrive.</h1><p>Sadachar brings accessible learning, supportive tools and a welcoming community together—so each learner can find their own way forward.</p><div class="home-hero-actions"><a class="home-primary-button" id="home-hero-cta" href="/Account/Register">Start your journey <span aria-hidden="true">→</span></a><a class="home-secondary-button" href="#home-courses">Explore learning <span aria-hidden="true">↓</span></a></div><div class="home-trust-note"><span class="home-trust-icon" aria-hidden="true">✓</span><span>Designed with accessibility at the heart of learning</span></div></div>
+                        <div class="home-hero-art" aria-label="Illustration of an inclusive learning community"><div class="home-art-orbit home-art-orbit-one"></div><div class="home-art-orbit home-art-orbit-two"></div><span class="home-art-spark home-spark-one" aria-hidden="true">✦</span><span class="home-art-spark home-spark-two" aria-hidden="true">✳</span><div class="home-art-card"><div class="home-art-scene" role="img" aria-label="Three students learn together around an open book; one uses a wheelchair."><div class="home-art-sun"></div><div class="home-character character-one"><span class="character-head"></span><span class="character-body"></span></div><div class="home-character character-two"><span class="character-head"></span><span class="character-body"></span></div><div class="home-character character-three"><span class="character-head"></span><span class="character-body"></span><span class="wheelchair-wheel"></span></div><div class="home-open-book"><span></span><span></span></div></div><div class="home-art-caption"><span class="home-art-caption-icon" aria-hidden="true">✦</span><span><strong>Different strengths. One community.</strong><small>Room to learn, grow and belong.</small></span></div></div><div class="home-floating-note"><span aria-hidden="true">◉</span><span><strong>Learning that adapts</strong><small>More ways to take part</small></span></div></div>
+                        <a class="home-scroll-cue" href="#home-about"><span>Discover Sadachar</span><i aria-hidden="true">↓</i></a>
                     </div>
-
-                    <!-- 3 Feature Pillars -->
-                    <div class="row g-4 mt-2">
-                        <div class="col-md-4">
-                            <div class="accessed-card h-100">
-                                <div class="fs-2 text-warning mb-2"><i class="bi bi-eye"></i></div>
-                                <h3 class="h5 fw-bold">Adaptive Reading</h3>
-                                <p class="text-muted small mb-0">Font size, spacing, high-contrast, and dyslexia-friendly typography (Lexend) that remembers each student's profile.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="accessed-card h-100">
-                                <div class="fs-2 text-danger mb-2"><i class="bi bi-megaphone"></i></div>
-                                <h3 class="h5 fw-bold">Listen & Caption</h3>
-                                <p class="text-muted small mb-0">Synchronized sentence-by-sentence text-to-speech with audio speed control and captioned lecture archives.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="accessed-card h-100">
-                                <div class="fs-2 text-success mb-2"><i class="bi bi-shield-check"></i></div>
-                                <h3 class="h5 fw-bold">Governed Support</h3>
-                                <p class="text-muted small mb-0">Autonomous 72-Hour SLA grievance resolution with automatic ombudsman escalation and DPDP Act 2023 privacy protection.</p>
-                            </div>
-                        </div>
-                    </div>
+                    <section class="home-section home-about" id="home-about" aria-labelledby="home-about-title"><div class="home-section-heading"><span class="home-section-kicker">A LITTLE ABOUT US</span><h2 id="home-about-title">Learning should open doors for everyone.</h2></div><div class="home-about-grid"><p class="home-about-lead">Sadachar is an inclusive education platform made to help learners with different abilities access learning with greater confidence and independence.</p><div class="home-about-copy"><p>We bring accessible resources, assistive learning tools and a clear path to support into one welcoming space. Students, parents and volunteers can be part of a community built around dignity, participation and possibility.</p><a href="#home-how" class="home-inline-link">See how Sadachar works <span aria-hidden="true">→</span></a></div></div><div class="home-values"><article><span aria-hidden="true">✧</span><h3>Belonging first</h3><p>Every learner deserves to feel welcome, respected and included.</p></article><article><span aria-hidden="true">⌘</span><h3>Choice and independence</h3><p>Helpful options let people shape a learning experience that works for them.</p></article><article><span aria-hidden="true">♡</span><h3>Support that listens</h3><p>Clear ways to raise barriers help keep access part of the conversation.</p></article></div></section>
+                    <section class="home-section home-catalog" id="home-courses" aria-labelledby="home-courses-title"><div class="home-section-heading home-section-heading-row"><div><span class="home-section-kicker">LEARN SOMETHING NEW</span><h2 id="home-courses-title">Featured courses</h2><p>Explore courses published by the Sadachar learning community.</p></div><a class="home-inline-link" href="#available-courses-heading" data-open-learning-catalog>Browse all courses <span aria-hidden="true">→</span></a></div><div class="home-course-grid" id="landing-course-list" aria-live="polite"><p class="home-loading">Loading published courses…</p></div></section>
+                    <section class="home-section home-resources" id="home-resources" aria-labelledby="home-resources-title"><div class="home-section-heading home-section-heading-row"><div><span class="home-section-kicker">TOOLS FOR EVERY KIND OF LEARNER</span><h2 id="home-resources-title">Learning resources</h2><p>Accessible materials make it easier to find a way into every topic.</p></div><a class="home-inline-link" href="#resource-search" data-open-learning-catalog>Search all resources <span aria-hidden="true">→</span></a></div><div class="home-resource-grid" id="landing-resource-list" aria-live="polite"><p class="home-loading">Loading published resources…</p></div></section>
+                    <section class="home-section home-accessibility" id="home-accessibility" aria-labelledby="home-accessibility-title"><div class="home-section-heading home-section-heading-centered"><span class="home-section-kicker">ACCESS IS PART OF THE DESIGN</span><h2 id="home-accessibility-title">Make the space work for you.</h2><p>Useful tools are close at hand, so more learners can read, listen and focus in the way that suits them.</p></div><div class="home-access-grid"><article><span class="home-access-icon" aria-hidden="true">Aa</span><h3>Comfortable reading</h3><p>Adjust text size and line spacing, or choose a dyslexia-friendly font.</p></article><article><span class="home-access-icon" aria-hidden="true">◐</span><h3>Clearer contrast</h3><p>Switch contrast and color themes to make content easier to see.</p></article><article><span class="home-access-icon" aria-hidden="true">♫</span><h3>Listen and follow along</h3><p>Use read-aloud controls to listen to learning text at your pace.</p></article><article><span class="home-access-icon" aria-hidden="true">⌨</span><h3>Keyboard friendly</h3><p>Navigate core experiences with a keyboard and clear focus indicators.</p></article></div></section>
+                    <section class="home-section home-how" id="home-how" aria-labelledby="home-how-title"><div class="home-section-heading"><span class="home-section-kicker">A SIMPLE WAY TO BEGIN</span><h2 id="home-how-title">Your path, at your pace.</h2></div><div class="home-steps"><article><span class="home-step-number">01</span><div><h3>Join the community</h3><p>Create an account as a student, parent or volunteer to enter the learning space.</p></div></article><article><span class="home-step-number">02</span><div><h3>Make it yours</h3><p>Set helpful reading and display preferences whenever you need them.</p></div></article><article><span class="home-step-number">03</span><div><h3>Explore and grow</h3><p>Find published courses and resources, and keep track of your learning as you go.</p></div></article></div></section>
+                    <section class="home-support" id="home-support" aria-labelledby="home-support-title"><div><span class="home-section-kicker">HERE WHEN YOU NEED US</span><h2 id="home-support-title">Every barrier deserves to be heard.</h2><p>Sadachar includes a dedicated support and grievance space for reporting accessibility barriers and following their progress.</p></div><a class="home-support-button" id="home-support-cta" href="/Account/Login?returnUrl=%2F%23support">Visit support <span aria-hidden="true">→</span></a></section>
+                    <footer class="home-footer"><a class="home-footer-brand" href="#home-top"><span class="home-footer-mark" aria-hidden="true">s</span>Sadachar</a><p>Education without barriers. Built around every learner.</p><nav aria-label="Footer navigation"><a href="#home-about">About</a><a href="#home-courses">Courses</a><a href="#home-resources">Resources</a><a href="#home-accessibility">Accessibility</a><a href="#home-support">Support</a><a href="/Account/Login">Sign in</a></nav><small>© <span id="home-year"></span> Sadachar · Learning with dignity, access and belonging.</small></footer>
                 </section>
+
 
                 <!-- ==============================================================
                      SCREEN 2: LOGIN & REGISTER
@@ -366,16 +315,18 @@
                      SCREEN 4: ACCESSIBLE LEARNING RESOURCES
                      ============================================================== -->
                 <section id="screen-resources" class="screen-view" aria-labelledby="screen4-heading">
-  <div class="mb-4"><h1 id="screen4-heading" class="h3 fw-bold mb-1">Accessible Learning Resources</h1><p class="text-muted small">Search published learning materials and browse the course catalog.</p></div>
-  <div class="row g-3 mb-3"><div class="col-md-6"><label class="visually-hidden" for="resource-search">Search resources</label><input type="search" id="resource-search" class="accessed-input" placeholder="Search resources"></div><div class="col-md-3"><label class="visually-hidden" for="resource-type">Resource type</label><select id="resource-type" class="accessed-select"><option value="">All types</option><option>PDF notes</option><option>E-book</option><option>Video lecture</option><option>Audio lesson</option><option>Recorded lecture</option><option>Interactive quiz</option><option>Practice exercise</option><option>Assignment</option><option>Study guide</option><option>Sign-language video</option><option>Large print</option><option>Dyslexia-friendly</option></select></div><div class="col-md-3"><label class="visually-hidden" for="resource-sort">Sort resources</label><select id="resource-sort" class="accessed-select"><option value="recent">Recently added</option><option value="title">Title</option></select></div></div>
-  <div class="row g-3 mb-3"><div class="col-md-6"><label class="visually-hidden" for="resource-subject">Filter by subject</label><input id="resource-subject" class="accessed-input" placeholder="Filter by subject"></div><div class="col-md-3"><label class="visually-hidden" for="resource-course">Filter by course</label><select id="resource-course" class="accessed-select"><option value="">All courses</option></select></div><div class="col-md-3"><label class="visually-hidden" for="resource-category">Filter by category</label><input id="resource-category" class="accessed-input" placeholder="Filter by category"></div></div>
-  <div id="resource-list" class="row g-4" aria-live="polite"><p class="text-muted">Sign in to browse resources.</p></div>
-  <nav class="d-flex justify-content-center gap-3 mt-4" aria-label="Resource pages"><button class="btn-accessed-secondary" id="resources-previous">Previous</button><span id="resource-page-label" class="align-self-center"></span><button class="btn-accessed-secondary" id="resources-next">Next</button></nav>
-  <section class="dashboard-panel mt-4" aria-labelledby="available-courses-heading"><div class="panel-heading"><h2 id="available-courses-heading">Course catalog</h2></div><div id="available-courses-list" class="row g-3"></div></section>
-  <section class="dashboard-panel mt-4" id="quiz-panel" hidden aria-labelledby="quiz-heading"><h2 id="quiz-heading" class="h5">Quiz</h2><form id="quiz-form"></form><div id="quiz-feedback" role="status"></div></section>
+    <a class="learning-home-link" href="#home-top" data-return-home>← Back to Sadachar home</a><div class="mb-4"><h1 id="screen4-heading" class="h3 fw-bold mb-1">Courses and Learning Resources</h1><p class="text-muted small">Browse published learning opportunities. Students can enroll, continue lessons and save useful resources.</p></div>
+  <div class="learning-catalog-controls" aria-label="Course catalog filters"><div><label for="course-search">Search courses</label><input type="search" id="course-search" class="accessed-input" placeholder="Title, subject or keyword"></div><div><label for="course-subject">Course subject</label><input type="search" id="course-subject" class="accessed-input" placeholder="Filter by subject"></div><div id="course-enrollment-filter-wrap" hidden><label for="course-enrollment">Enrollment</label><select id="course-enrollment" class="accessed-select"><option value="">All courses</option><option value="enrolled">My enrolled courses</option><option value="available">Available to enroll</option></select></div></div>
+  <section class="dashboard-panel mb-4" aria-labelledby="available-courses-heading"><div class="panel-heading"><h2 id="available-courses-heading">Course catalog</h2><span id="course-results-count" class="text-muted small" aria-live="polite"></span></div><div id="available-courses-list" class="row g-3" aria-live="polite"><p class="text-muted">Loading published courses...</p></div></section>
+  <div class="mb-3"><h2 class="h4 fw-bold">Learning resources</h2><p class="text-muted small">Search and filter published materials. Students can save resources to their profile.</p></div>
+  <div class="learning-catalog-controls resource-catalog-controls" aria-label="Learning resource filters"><div><label for="resource-search">Search resources</label><input type="search" id="resource-search" class="accessed-input" placeholder="Title, description or subject"></div><div><label for="resource-type">Resource type</label><select id="resource-type" class="accessed-select"><option value="">All types</option></select></div><div><label for="resource-difficulty">Difficulty</label><select id="resource-difficulty" class="accessed-select"><option value="">All levels</option></select></div><div><label for="resource-sort">Sort resources</label><select id="resource-sort" class="accessed-select"><option value="recent">Recently added</option><option value="title">Title</option></select></div><div><label for="resource-subject">Subject</label><input id="resource-subject" class="accessed-input" list="resource-subject-options" placeholder="All subjects"><datalist id="resource-subject-options"></datalist></div><div><label for="resource-course">Course</label><select id="resource-course" class="accessed-select"><option value="">All courses</option></select></div><div><label for="resource-category">Category</label><input id="resource-category" class="accessed-input" list="resource-category-options" placeholder="All categories"><datalist id="resource-category-options"></datalist></div></div>
+  <section class="dashboard-panel mb-4" aria-labelledby="resource-discovery-heading"><div class="panel-heading"><h2 id="resource-discovery-heading">For your learning journey</h2><span class="text-muted small">Based on your saved and viewed subjects</span></div><div id="resource-recommendations" class="row g-3"><p class="text-muted">Sign in as a student to receive recommendations.</p></div></section>
+  <div id="resource-list" class="row g-4" aria-live="polite"><p class="text-muted">Loading published resources...</p></div>
+  <nav class="d-flex justify-content-center gap-3 mt-4" aria-label="Resource pages"><button class="btn-accessed-secondary" id="resources-previous">Previous</button><span id="resource-page-label" class="align-self-center"></span><button class="btn-accessed-secondary" id="resources-next">Next</button></nav>  <section class="dashboard-panel mt-4" id="quiz-panel" hidden aria-labelledby="quiz-heading"><h2 id="quiz-heading" class="h5">Quiz</h2><form id="quiz-form"></form><div id="quiz-feedback" role="status"></div></section>
   <section class="dashboard-panel mt-4" id="admin-content-panel" hidden aria-labelledby="admin-content-heading"><div class="panel-heading"><h2 id="admin-content-heading">Publish course or resource</h2></div>
     <form id="admin-course-form" class="mb-4"><h3 class="h6">Create course</h3><div class="row g-2"><div class="col-md-3"><label class="visually-hidden" for="new-course-title">Course title</label><input id="new-course-title" class="accessed-input" placeholder="Course title" required></div><div class="col-md-3"><label class="visually-hidden" for="new-course-subject">Subject</label><input id="new-course-subject" class="accessed-input" placeholder="Subject" required></div><div class="col-md-4"><label class="visually-hidden" for="new-course-description">Description</label><input id="new-course-description" class="accessed-input" placeholder="Description"></div><div class="col-md-2"><button class="btn-accessed-primary w-100">Create course</button></div></div></form>
-    <form id="admin-resource-form"><h3 class="h6">Add resource</h3><div class="row g-2"><div class="col-md-3"><label class="visually-hidden" for="new-resource-title">Resource title</label><input id="new-resource-title" class="accessed-input" placeholder="Title" required></div><div class="col-md-2"><label class="visually-hidden" for="new-resource-type">Resource type</label><select id="new-resource-type" class="accessed-select"><option>PDF notes</option><option>E-book</option><option>Video lecture</option><option>Audio lesson</option><option>Recorded lecture</option><option>Study guide</option><option>Sign-language video</option><option>Large print</option><option>Dyslexia-friendly</option></select></div><div class="col-md-2"><label class="visually-hidden" for="new-resource-subject">Subject</label><input id="new-resource-subject" class="accessed-input" placeholder="Subject"></div><div class="col-md-3"><label class="visually-hidden" for="new-resource-file">Upload learning file</label><input id="new-resource-file" class="accessed-input" type="file" accept=".pdf,.epub,.mp3,.mp4,.txt,.docx,.vtt,.srt"></div><div class="col-md-2"><button class="btn-accessed-primary w-100">Publish resource</button></div></div></form>
+    <form id="admin-resource-form"><h3 class="h6">Add resource</h3><div class="row g-2"><div class="col-md-3"><label class="visually-hidden" for="new-resource-title">Resource title</label><input id="new-resource-title" class="accessed-input" placeholder="Title" required></div><div class="col-md-2"><label class="visually-hidden" for="new-resource-type">Resource type</label><select id="new-resource-type" class="accessed-select"><option>PDF study material</option><option>Worksheet</option><option>Quiz</option><option>Video tutorial</option><option>Audio lesson</option><option>External website</option><option>Interactive exercise</option></select></div><div class="col-md-2"><label class="visually-hidden" for="new-resource-subject">Subject</label><input id="new-resource-subject" class="accessed-input" placeholder="Subject"></div><div class="col-md-3"><label class="visually-hidden" for="new-resource-file">Upload learning file</label><input id="new-resource-file" class="accessed-input" type="file" accept=".pdf,.mp3,.wav,.mp4,.webm,.docx,.xlsx"></div><div class="col-md-2"><button class="btn-accessed-primary w-100">Publish resource</button></div></div></form>
+    <form id="admin-category-form" class="mt-3"><h3 class="h6">Manage resource category</h3><div class="row g-2"><div class="col-md-4"><label class="visually-hidden" for="new-resource-category">Category name</label><input id="new-resource-category" class="accessed-input" placeholder="Category name" required></div><div class="col-md-6"><label class="visually-hidden" for="new-resource-category-description">Category description</label><input id="new-resource-category-description" class="accessed-input" placeholder="Description"></div><div class="col-md-2"><button class="btn-accessed-secondary w-100">Add category</button></div></div></form>
     <form id="admin-lesson-form" class="mt-4"><h3 class="h6">Add lesson</h3><div class="row g-2"><div class="col-md-3"><label class="visually-hidden" for="lesson-course">Course</label><select class="accessed-select" id="lesson-course" required></select></div><div class="col-md-3"><label class="visually-hidden" for="lesson-title">Lesson title</label><input id="lesson-title" class="accessed-input" placeholder="Lesson title" required></div><div class="col-md-4"><label class="visually-hidden" for="lesson-text">Lesson text</label><input id="lesson-text" class="accessed-input" placeholder="Lesson text"></div><div class="col-md-1"><label class="visually-hidden" for="lesson-order">Order</label><input id="lesson-order" class="accessed-input" type="number" min="0" value="1" aria-label="Lesson order"></div><div class="col-md-1"><button class="btn-accessed-primary w-100">Add</button></div></div></form>
     <form id="admin-quiz-form" class="mt-4"><h3 class="h6">Create a quiz question</h3><div class="row g-2"><div class="col-md-2"><label class="visually-hidden" for="quiz-course">Course</label><select class="accessed-select" id="quiz-course" required></select></div><div class="col-md-2"><label class="visually-hidden" for="quiz-topic">Topic</label><input id="quiz-topic" class="accessed-input" placeholder="Topic" required></div><div class="col-md-3"><label class="visually-hidden" for="quiz-question">Question</label><input id="quiz-question" class="accessed-input" placeholder="Question" required></div><div class="col-md-3"><label class="visually-hidden" for="quiz-options">Options separated by |</label><input id="quiz-options" class="accessed-input" placeholder="Option 1 | Option 2" required></div><div class="col-md-1"><label class="visually-hidden" for="quiz-answer">Correct option number</label><input id="quiz-answer" class="accessed-input" type="number" min="1" value="1" required></div><div class="col-md-1"><button class="btn-accessed-primary w-100">Create</button></div></div></form>
     <form id="admin-assignment-form" class="mt-4"><h3 class="h6">Create assignment</h3><div class="row g-2"><div class="col-md-3"><label class="visually-hidden" for="assignment-course">Course</label><select class="accessed-select" id="assignment-course" required></select></div><div class="col-md-3"><label class="visually-hidden" for="assignment-title">Assignment title</label><input id="assignment-title" class="accessed-input" placeholder="Title" required></div><div class="col-md-3"><label class="visually-hidden" for="assignment-due">Due date</label><input id="assignment-due" class="accessed-input" type="datetime-local" required></div><div class="col-md-2"><label class="visually-hidden" for="assignment-description">Description</label><input id="assignment-description" class="accessed-input" placeholder="Instructions"></div><div class="col-md-1"><button class="btn-accessed-primary w-100">Add</button></div></div></form>
@@ -402,7 +353,7 @@
 
                     <div class="row g-4 mb-4">
                         <!-- Reading Controls -->
-                        <div class="col-lg-6">
+                        <div class="col-lg-6" id="support-help-column">
                             <div class="accessed-card bg-white h-100">
                                 <h3 class="h5 fw-bold mb-3"><i class="bi bi-type me-2"></i> Reading & Typography</h3>
 
@@ -565,7 +516,7 @@
                             <h1 id="screen8-heading" class="h3 fw-bold mb-1">Support & Grievance Portal</h1>
                             <p class="text-muted small mb-0">Report accessibility barriers, track status, and enforce the statutory <strong>72-Hour SLA</strong>.</p>
                         </div>
-                        <button id="portal-trigger-sla" class="btn-accessed-secondary btn-sm">
+                        <button id="portal-trigger-sla" class="btn-accessed-secondary btn-sm" hidden>
                             <i class="bi bi-arrow-repeat"></i> Trigger 72h SLA Audit
                         </button>
                     </div>
@@ -618,7 +569,7 @@
                     </div>
 
                     <!-- Requests Table -->
-                    <div class="accessed-card bg-white">
+                    <div class="accessed-card bg-white" id="support-requests-panel" hidden>
                         <h3 class="h5 fw-bold mb-3"><i class="bi bi-table me-2"></i> My Active Requests (72h SLA Tracker)</h3>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
@@ -634,6 +585,7 @@
                             </table>
                         </div>
                     </div>
+                    <div class="accessed-card bg-white" id="support-role-guidance" hidden aria-live="polite"></div>
                 </section>
 
                 <!-- ==============================================================
@@ -644,7 +596,7 @@
                 <!-- ============================================================== -->
                 <!-- SCREEN 10: ADMIN DASHBOARD -->
                 <!-- ============================================================== -->
-                <section id="screen-admin-dash" class="screen-view" aria-labelledby="screen10-heading"><h1 id="screen10-heading" class="h3 fw-bold mb-4">Administration</h1><div class="dashboard-metrics"><article class="metric-card"><div><strong id="admin-users-count">0</strong><span>Accounts</span></div></article><article class="metric-card"><div><strong id="admin-students-count">0</strong><span>Students</span></div></article><article class="metric-card"><div><strong id="admin-courses-count">0</strong><span>Courses</span></div></article><article class="metric-card"><div><strong id="admin-resources-count">0</strong><span>Published resources</span></div></article><article class="metric-card"><div><strong id="admin-enrollments-count">0</strong><span>Enrollments</span></div></article><article class="metric-card"><div><strong id="admin-assignments-count">0</strong><span>Upcoming assignments</span></div></article><article class="metric-card"><div><strong id="admin-tickets-count">0</strong><span>Open support tickets</span></div></article></div><section class="dashboard-panel mt-3"><div class="panel-heading"><h2>Accounts</h2></div><div class="table-responsive"><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Courses</th><th>Status</th></tr></thead><tbody id="admin-users-list"></tbody></table></div></section><p id="admin-overview-error" role="status"></p></section>
+                <section id="screen-admin-dash" class="screen-view" aria-labelledby="screen10-heading"><h1 id="screen10-heading" class="h3 fw-bold mb-4">Administration</h1><div class="dashboard-metrics"><article class="metric-card"><div><strong id="admin-users-count">0</strong><span>Accounts</span></div></article><article class="metric-card"><div><strong id="admin-students-count">0</strong><span>Students</span></div></article><article class="metric-card"><div><strong id="admin-courses-count">0</strong><span>Courses</span></div></article><article class="metric-card"><div><strong id="admin-resources-count">0</strong><span>Published resources</span></div></article><article class="metric-card"><div><strong id="admin-enrollments-count">0</strong><span>Enrollments</span></div></article><article class="metric-card"><div><strong id="admin-assignments-count">0</strong><span>Upcoming assignments</span></div></article><article class="metric-card"><div><strong id="admin-tickets-count">0</strong><span>Open support tickets</span></div></article></div><section class="dashboard-panel mt-3"><div class="panel-heading"><h2>Accounts</h2></div><div class="table-responsive"><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Courses</th><th>Status</th></tr></thead><tbody id="admin-users-list"></tbody></table></div></section><section class="dashboard-panel mt-3"><div class="panel-heading"><h2>Learning relationships</h2></div><p class="text-muted">Connect verified parent accounts to students and assign volunteers. Only active accounts with the matching roles can be linked.</p><div class="row g-3"><div class="col-lg-6"><form id="admin-parent-link-form" class="accessed-card"><h3 class="h6">Link a parent and student</h3><label class="form-label" for="admin-parent-account">Parent account</label><select class="accessed-input" id="admin-parent-account" required></select><label class="form-label mt-2" for="admin-parent-student">Student account</label><select class="accessed-input" id="admin-parent-student" required></select><button class="btn-accessed-primary mt-3">Save parent link</button><p class="small mt-2 mb-0" id="admin-parent-link-feedback" role="status"></p></form></div><div class="col-lg-6"><form id="admin-volunteer-link-form" class="accessed-card"><h3 class="h6">Assign a volunteer and student</h3><label class="form-label" for="admin-volunteer-account">Volunteer account</label><select class="accessed-input" id="admin-volunteer-account" required></select><label class="form-label mt-2" for="admin-volunteer-student">Student account</label><select class="accessed-input" id="admin-volunteer-student" required></select><button class="btn-accessed-primary mt-3">Save volunteer assignment</button><p class="small mt-2 mb-0" id="admin-volunteer-link-feedback" role="status"></p></form></div></div></section><p id="admin-overview-error" role="status"></p></section>
 
                 <!-- ============================================================== -->
                 <!-- SCREEN 11: COMPLIANCE MONITORING -->
@@ -730,6 +682,6 @@
     </nav>
 
     <!-- Core Interactive Script -->
-    <script src="/js/accessed.js?v=dashboard-redesign-1"></script>
+    <script src="/js/accessed.js?v=learning-catalog-1"></script>
 </body>
 </html>

@@ -118,6 +118,7 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     if (useInMemory) await context.Database.EnsureCreatedAsync();
     else await context.Database.MigrateAsync();
+    await ResourceCatalogSeeder.SeedAsync(context);
 
     var bootstrapEmail = builder.Configuration["BootstrapAdmin:Email"];
     var bootstrapPassword = builder.Configuration["BootstrapAdmin:Password"];

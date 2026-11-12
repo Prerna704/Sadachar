@@ -17,7 +17,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Course> Courses => Set<Course>();
     public DbSet<Lesson> Lessons => Set<Lesson>();
     public DbSet<LearningResource> LearningResources => Set<LearningResource>();
+    public DbSet<ResourceCategory> ResourceCategories => Set<ResourceCategory>();
     public DbSet<Enrollment> Enrollments => Set<Enrollment>();
+    public DbSet<ParentStudentLink> ParentStudentLinks => Set<ParentStudentLink>();
+    public DbSet<VolunteerStudentAssignment> VolunteerStudentAssignments => Set<VolunteerStudentAssignment>();
     public DbSet<LearningActivity> LearningActivities => Set<LearningActivity>();
     public DbSet<ResourceBookmark> ResourceBookmarks => Set<ResourceBookmark>();
     public DbSet<LessonBookmark> LessonBookmarks => Set<LessonBookmark>();
@@ -62,12 +65,19 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         });
 
         builder.Entity<Course>().HasIndex(x => x.IsPublished);
+        builder.Entity<ResourceCategory>().HasIndex(x => x.Name).IsUnique();
         builder.Entity<AccessibilityPreference>().Property(x => x.LineSpacing).HasPrecision(3, 2);
         builder.Entity<Lesson>().HasOne(x => x.Course).WithMany(x => x.Lessons).HasForeignKey(x => x.CourseId).OnDelete(DeleteBehavior.Cascade);
         builder.Entity<LearningResource>().HasOne<Course>().WithMany().HasForeignKey(x => x.CourseId).OnDelete(DeleteBehavior.SetNull);
         builder.Entity<Enrollment>().HasIndex(x => new { x.UserId, x.CourseId }).IsUnique();
         builder.Entity<Enrollment>().HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.Entity<Enrollment>().HasOne(x => x.Course).WithMany(x => x.Enrollments).HasForeignKey(x => x.CourseId).OnDelete(DeleteBehavior.Cascade);
+        builder.Entity<ParentStudentLink>().HasIndex(x => new { x.ParentUserId, x.StudentUserId }).IsUnique();
+        builder.Entity<ParentStudentLink>().HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.ParentUserId).OnDelete(DeleteBehavior.NoAction);
+        builder.Entity<ParentStudentLink>().HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.StudentUserId).OnDelete(DeleteBehavior.NoAction);
+        builder.Entity<VolunteerStudentAssignment>().HasIndex(x => new { x.VolunteerUserId, x.StudentUserId }).IsUnique();
+        builder.Entity<VolunteerStudentAssignment>().HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.VolunteerUserId).OnDelete(DeleteBehavior.NoAction);
+        builder.Entity<VolunteerStudentAssignment>().HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.StudentUserId).OnDelete(DeleteBehavior.NoAction);
         builder.Entity<LearningActivity>().HasIndex(x => new { x.UserId, x.OccurredAtUtc });
         builder.Entity<LearningActivity>().HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.Entity<LearningActivity>().HasOne<Course>().WithMany().HasForeignKey(x => x.CourseId).OnDelete(DeleteBehavior.NoAction);
