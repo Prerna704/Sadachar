@@ -1,0 +1,9 @@
+@model (string Text, string Variant, string Icon)
+
+<span class="pill-chip pill-chip-@Model.Variant" role="status">
+    @if (!string.IsNullOrEmpty(Model.Icon))
+    {
+        <i class="bi @Model.Icon" aria-hidden="true"></i>
+    }
+    <span>@Model.Text</span>
+</span>

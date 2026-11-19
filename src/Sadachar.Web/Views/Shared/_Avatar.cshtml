@@ -1,0 +1,209 @@
+@model string
+@{
+    var avatarName = (Model ?? "Lumo").Trim();
+    var lower = avatarName.ToLowerInvariant();
+}
+
+@if (lower.Contains("lumo") || lower == "lowvision" || lower == "vision")
+{
+    <!-- Lumo (Lime Blob, Low Vision: Big glasses + magnifier) -->
+    <svg viewBox="0 0 100 100" class="retro-avatar avatar-lumo" role="img" aria-label="Lumo: Lime fluffy creature with round glasses and magnifier (Low Vision guide)" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <filter id="fuzzy-lime" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+        <!-- Fuzzy Blob Body -->
+        <path d="M50 14 C75 12, 88 28, 86 52 C84 76, 74 88, 50 88 C26 88, 14 76, 14 52 C14 26, 26 14, 50 14 Z" fill="#A3E635" stroke="#3B2A26" stroke-width="3.5" filter="url(#fuzzy-lime)" />
+        <!-- Soft Belly patch -->
+        <ellipse cx="50" cy="58" rx="22" ry="18" fill="#BEF264" opacity="0.6" />
+        <!-- Round Glasses Frame -->
+        <circle cx="37" cy="45" r="13" fill="#FFFDF9" stroke="#3B2A26" stroke-width="3" />
+        <circle cx="63" cy="45" r="13" fill="#FFFDF9" stroke="#3B2A26" stroke-width="3" />
+        <path d="M50 45 L50 44" stroke="#3B2A26" stroke-width="3" stroke-linecap="round" />
+        <line x1="24" y1="45" x2="16" y2="43" stroke="#3B2A26" stroke-width="3" stroke-linecap="round" />
+        <line x1="76" y1="45" x2="84" y2="43" stroke="#3B2A26" stroke-width="3" stroke-linecap="round" />
+        <!-- Glossy Eyes inside lenses -->
+        <ellipse cx="37" cy="45" rx="5" ry="6" fill="#3B2A26" />
+        <circle cx="35" cy="43" r="2" fill="#FFFFFF" />
+        <ellipse cx="63" cy="45" rx="5" ry="6" fill="#3B2A26" />
+        <circle cx="61" cy="43" r="2" fill="#FFFFFF" />
+        <!-- Cheerful Smile -->
+        <path d="M44 65 Q50 71 56 65" stroke="#3B2A26" stroke-width="3" stroke-linecap="round" fill="none" />
+        <ellipse cx="28" cy="58" rx="4" ry="2.5" fill="#F4C7B3" />
+        <ellipse cx="72" cy="58" rx="4" ry="2.5" fill="#F4C7B3" />
+        <!-- Magnifying Glass Held in Paw -->
+        <circle cx="78" cy="70" r="9" fill="#FFF" fill-opacity="0.8" stroke="#3B2A26" stroke-width="3" />
+        <line x1="84" y1="76" x2="94" y2="86" stroke="#3B2A26" stroke-width="4.5" stroke-linecap="round" />
+        <circle cx="76" cy="68" r="2" fill="#FFFFFF" />
+        <!-- Little Paw -->
+        <circle cx="71" cy="74" r="5" fill="#84CC16" stroke="#3B2A26" stroke-width="2.5" />
+    </svg>
+}
+else if (lower.Contains("roly") || lower == "wheelchair" || lower == "mobility")
+{
+    <!-- Roly (Coral Blob, Wheelchair: Speedy wheels + energetic smile) -->
+    <svg viewBox="0 0 100 100" class="retro-avatar avatar-roly" role="img" aria-label="Roly: Coral furry blob creature in an active wheelchair (Mobility guide)" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <filter id="fuzzy-coral" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+        <!-- Wheelchair backrest -->
+        <path d="M22 36 L22 72 L42 72" stroke="#3B2A26" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+        <!-- Big Wheel -->
+        <circle cx="34" cy="74" r="18" fill="#FFFDF9" stroke="#3B2A26" stroke-width="3.5" />
+        <circle cx="34" cy="74" r="7" fill="#F0B429" stroke="#3B2A26" stroke-width="2.5" />
+        <line x1="34" y1="56" x2="34" y2="92" stroke="#3B2A26" stroke-width="2" />
+        <line x1="16" y1="74" x2="52" y2="74" stroke="#3B2A26" stroke-width="2" />
+        <line x1="21" y1="61" x2="47" y2="87" stroke="#3B2A26" stroke-width="2" />
+        <line x1="21" y1="87" x2="47" y2="61" stroke="#3B2A26" stroke-width="2" />
+        <!-- Front small wheel caster -->
+        <circle cx="68" cy="85" r="5" fill="#FAF4EA" stroke="#3B2A26" stroke-width="3" />
+        <!-- Furry Blob Body -->
+        <path d="M52 18 C72 16, 84 32, 82 54 C80 72, 68 76, 50 76 C36 76, 32 64, 34 46 C36 28, 40 20, 52 18 Z" fill="#F0654F" stroke="#3B2A26" stroke-width="3.5" filter="url(#fuzzy-coral)" />
+        <!-- Glossy Eyes -->
+        <ellipse cx="56" cy="38" rx="6" ry="7" fill="#3B2A26" />
+        <circle cx="54" cy="35" r="2.5" fill="#FFFFFF" />
+        <ellipse cx="74" cy="38" rx="6" ry="7" fill="#3B2A26" />
+        <circle cx="72" cy="35" r="2.5" fill="#FFFFFF" />
+        <!-- Open Cheerful Mouth -->
+        <path d="M60 52 Q66 61 72 52 Z" fill="#3B2A26" stroke="#3B2A26" stroke-width="2" />
+        <!-- Rosy Cheek -->
+        <ellipse cx="48" cy="46" rx="4" ry="2.5" fill="#F4C7B3" />
+        <ellipse cx="80" cy="46" rx="4" ry="2.5" fill="#F4C7B3" />
+        <!-- Paws steering -->
+        <ellipse cx="50" cy="58" rx="5" ry="4" fill="#C9531F" stroke="#3B2A26" stroke-width="2" />
+    </svg>
+}
+else if (lower.Contains("echo") || lower == "deaf" || lower == "hearing")
+{
+    <!-- Echo (Sky Blue Blob, Deaf/HOH: Hearing aid with sound/sign waves) -->
+    <svg viewBox="0 0 100 100" class="retro-avatar avatar-echo" role="img" aria-label="Echo: Sky blue fluffy creature with cozy hearing aid and sparkle sign wave (Deaf/HOH guide)" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <filter id="fuzzy-sky" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+        <!-- Sign/Sound Spark Waves -->
+        <path d="M82 22 Q90 32 82 42" fill="none" stroke="#F0B429" stroke-width="3" stroke-linecap="round" />
+        <path d="M89 16 Q100 32 89 48" fill="none" stroke="#C9531F" stroke-width="3" stroke-linecap="round" />
+        <!-- Blob Body -->
+        <path d="M48 16 C70 14, 82 26, 80 52 C78 74, 68 86, 48 86 C28 86, 18 74, 18 52 C18 28, 28 18, 48 16 Z" fill="#38BDF8" stroke="#3B2A26" stroke-width="3.5" filter="url(#fuzzy-sky)" />
+        <!-- Fluffy Tufts -->
+        <path d="M22 30 C15 32, 14 40, 20 44" fill="#0EA5E9" stroke="#3B2A26" stroke-width="2.5" />
+        <!-- Yellow Hearing Aid on Right Ear -->
+        <path d="M72 35 C78 30, 83 38, 80 47 C77 53, 73 53, 71 47" fill="#F0B429" stroke="#3B2A26" stroke-width="3" />
+        <path d="M72 44 Q68 46 66 45" stroke="#3B2A26" stroke-width="2.5" fill="none" />
+        <!-- Big Glossy Eyes -->
+        <ellipse cx="38" cy="44" rx="7" ry="8" fill="#3B2A26" />
+        <circle cx="36" cy="41" r="3" fill="#FFFFFF" />
+        <ellipse cx="58" cy="44" rx="7" ry="8" fill="#3B2A26" />
+        <circle cx="56" cy="41" r="3" fill="#FFFFFF" />
+        <!-- Warm Smile -->
+        <path d="M43 60 Q48 66 54 60" stroke="#3B2A26" stroke-width="3" stroke-linecap="round" fill="none" />
+        <!-- Cute Little Hand Signing / Waving -->
+        <path d="M20 62 Q12 60 16 52 Q22 52 24 58 Z" fill="#7DD3FC" stroke="#3B2A26" stroke-width="2.5" />
+    </svg>
+}
+else if (lower.Contains("dot") || lower == "dyslexia" || lower == "dyslexic" || lower == "neurodivergent")
+{
+    <!-- Dot (Mustard Blob, Dyslexia: Headphones + 'Aa' Reading badge) -->
+    <svg viewBox="0 0 100 100" class="retro-avatar avatar-dot" role="img" aria-label="Dot: Mustard furry creature wearing big teal headphones with Aa reading badge (Dyslexia guide)" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <filter id="fuzzy-mustard" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+        <!-- Headphone Band -->
+        <path d="M22 48 C22 18, 78 18, 78 48" stroke="#3B2A26" stroke-width="5" fill="none" stroke-linecap="round" />
+        <!-- Furry Blob Body -->
+        <path d="M50 18 C74 18, 84 30, 82 56 C80 76, 70 86, 50 86 C30 86, 18 76, 18 56 C18 32, 28 18, 50 18 Z" fill="#F0B429" stroke="#3B2A26" stroke-width="3.5" filter="url(#fuzzy-mustard)" />
+        <!-- Headphone Cups -->
+        <rect x="14" y="38" width="12" height="22" rx="6" fill="#2F7F78" stroke="#3B2A26" stroke-width="3" />
+        <rect x="74" y="38" width="12" height="22" rx="6" fill="#2F7F78" stroke="#3B2A26" stroke-width="3" />
+        <!-- Glossy Eyes -->
+        <ellipse cx="40" cy="46" rx="6" ry="7" fill="#3B2A26" />
+        <circle cx="38" cy="43" r="2.5" fill="#FFFFFF" />
+        <ellipse cx="60" cy="46" rx="6" ry="7" fill="#3B2A26" />
+        <circle cx="58" cy="43" r="2.5" fill="#FFFFFF" />
+        <!-- Focused Happy Mouth -->
+        <ellipse cx="50" cy="62" rx="4" ry="3" fill="#3B2A26" />
+        <!-- Dyslexia "Aa" Pill Badge pinned on tummy -->
+        <g transform="translate(34, 68)">
+            <rect x="0" y="0" width="32" height="18" rx="9" fill="#FFFDF9" stroke="#3B2A26" stroke-width="2.5" />
+            <text x="16" y="13" font-family="'Lexend', sans-serif" font-weight="700" font-size="11" fill="#C9531F" text-anchor="middle">Aa</text>
+        </g>
+    </svg>
+}
+else if (lower.Contains("brailly") || lower == "blind" || lower == "cane")
+{
+    <!-- Brailly (Plum Blob, Blind: Dark glasses, Braille dots pattern, tactile cane) -->
+    <svg viewBox="0 0 100 100" class="retro-avatar avatar-brailly" role="img" aria-label="Brailly: Plum fluffy creature with dark sunglasses, Braille dots, and tactile cane (Blind guide)" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <filter id="fuzzy-plum" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+        <!-- Furry Blob Body -->
+        <path d="M50 16 C74 16, 84 30, 82 54 C80 78, 68 88, 50 88 C30 88, 18 78, 18 54 C18 30, 26 16, 50 16 Z" fill="#831843" stroke="#3B2A26" stroke-width="3.5" filter="url(#fuzzy-plum)" />
+        <!-- Dark Cool Sunglasses -->
+        <path d="M26 38 L48 38 L46 52 L28 52 Z" fill="#3B2A26" stroke="#3B2A26" stroke-width="2" rx="4" />
+        <path d="M52 38 L74 38 L72 52 L54 52 Z" fill="#3B2A26" stroke="#3B2A26" stroke-width="2" rx="4" />
+        <line x1="48" y1="42" x2="52" y2="42" stroke="#FAF4EA" stroke-width="3" />
+        <!-- Sunglass Glare -->
+        <line x1="31" y1="41" x2="38" y2="49" stroke="#FFF" stroke-width="1.8" stroke-linecap="round" opacity="0.8" />
+        <line x1="57" y1="41" x2="64" y2="49" stroke="#FFF" stroke-width="1.8" stroke-linecap="round" opacity="0.8" />
+        <!-- Confident Smile -->
+        <path d="M44 62 Q50 67 56 62" stroke="#FAF4EA" stroke-width="3" stroke-linecap="round" fill="none" />
+        <!-- Braille 6-dot cell on chest (⠃⠗ = BR) -->
+        <circle cx="45" cy="72" r="2" fill="#F0B429" />
+        <circle cx="45" cy="77" r="2" fill="#F0B429" />
+        <circle cx="45" cy="82" r="1.5" fill="#9D174D" />
+        <circle cx="51" cy="72" r="1.5" fill="#9D174D" />
+        <circle cx="51" cy="77" r="1.5" fill="#9D174D" />
+        <circle cx="51" cy="82" r="1.5" fill="#9D174D" />
+        <!-- Tactile White Cane with red grip -->
+        <line x1="74" y1="58" x2="88" y2="92" stroke="#FAF4EA" stroke-width="3.5" stroke-linecap="round" />
+        <line x1="74" y1="58" x2="77" y2="65" stroke="#C9531F" stroke-width="3.5" stroke-linecap="round" />
+        <circle cx="88" cy="92" r="2.5" fill="#FAF4EA" stroke="#3B2A26" stroke-width="1.5" />
+    </svg>
+}
+else
+{
+    <!-- Pip (Mint Blob, Teacher / Faculty: Cap + Bowtie) -->
+    <svg viewBox="0 0 100 100" class="retro-avatar avatar-pip" role="img" aria-label="Pip: Mint fluffy educator creature with mortarboard graduation cap and bow tie (Faculty guide)" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <filter id="fuzzy-mint" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+        <!-- Teacher Graduation Cap -->
+        <polygon points="50,10 82,22 50,30 18,22" fill="#3B2A26" stroke="#3B2A26" stroke-width="2" />
+        <path d="M30 25 L30 33 Q50 40 70 33 L70 25" fill="#2A2320" stroke="#3B2A26" stroke-width="1.5" />
+        <!-- Tassel -->
+        <line x1="50" y1="20" x2="78" y2="30" stroke="#F0B429" stroke-width="2.5" />
+        <circle cx="79" cy="32" r="3" fill="#F0B429" />
+        <!-- Furry Blob Body -->
+        <path d="M50 30 C72 30, 84 40, 82 62 C80 80, 70 88, 50 88 C30 88, 20 80, 18 62 C16 40, 28 30, 50 30 Z" fill="#6EE7B7" stroke="#3B2A26" stroke-width="3.5" filter="url(#fuzzy-mint)" />
+        <!-- Glossy Curious Eyes -->
+        <ellipse cx="40" cy="50" rx="6" ry="7" fill="#3B2A26" />
+        <circle cx="38" cy="47" r="2.5" fill="#FFFFFF" />
+        <ellipse cx="60" cy="50" rx="6" ry="7" fill="#3B2A26" />
+        <circle cx="58" cy="47" r="2.5" fill="#FFFFFF" />
+        <!-- Warm Friendly Smile -->
+        <path d="M44 64 Q50 70 56 64" stroke="#3B2A26" stroke-width="3" stroke-linecap="round" fill="none" />
+        <ellipse cx="30" cy="56" rx="4" ry="2.5" fill="#A7F3D0" />
+        <ellipse cx="70" cy="56" rx="4" ry="2.5" fill="#A7F3D0" />
+        <!-- Dapper Bowtie -->
+        <polygon points="42,75 50,78 42,82" fill="#C9531F" stroke="#3B2A26" stroke-width="2" />
+        <polygon points="58,75 50,78 58,82" fill="#C9531F" stroke="#3B2A26" stroke-width="2" />
+        <circle cx="50" cy="78" r="3" fill="#F0B429" stroke="#3B2A26" stroke-width="1.5" />
+    </svg>
+}

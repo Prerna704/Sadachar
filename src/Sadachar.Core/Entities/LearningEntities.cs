@@ -5,13 +5,20 @@ namespace Sadachar.Core.Entities;
 public class Course
 {
     public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid CourseId { get => Id; set => Id = value; }
     [MaxLength(160)] public string Title { get; set; } = string.Empty;
     [MaxLength(100)] public string Subject { get; set; } = string.Empty;
+    [MaxLength(100)] public string Department { get; set; } = string.Empty;
+    [MaxLength(450)] public string? TeacherId { get; set; }
+    public int AccessibilityScore { get; set; } = 92;
+    [MaxLength(50)] public string ActiveTerm { get; set; } = "Autumn term";
     [MaxLength(2000)] public string Description { get; set; } = string.Empty;
-    public bool IsPublished { get; set; }
+    public bool IsPublished { get; set; } = true;
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public virtual ApplicationUser? Teacher { get; set; }
     public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
     public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+    public ICollection<Material> Materials { get; set; } = new List<Material>();
 }
 
 public class Lesson
@@ -58,6 +65,7 @@ public class ResourceCategory
 public class Enrollment
 {
     public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid EnrollmentId { get => Id; set => Id = value; }
     [MaxLength(450)] public string UserId { get; set; } = string.Empty;
     public Guid CourseId { get; set; }
     public DateTime EnrolledAtUtc { get; set; } = DateTime.UtcNow;

@@ -1,0 +1,15 @@
+@model (string Title, string Value, string Subtitle, string Icon, string Variant)
+
+<div class="retro-card stat-card stat-card-@Model.Variant d-flex align-items-center justify-content-between p-3" style="border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); border-radius: 16px; background: var(--paper-card);">
+    <div>
+        <span class="text-uppercase fw-bold text-muted d-block" style="font-size: 0.75rem; letter-spacing: 0.05em;">@Model.Title</span>
+        <div class="font-headline fs-2 fw-black my-1" style="color: var(--ink);">@Model.Value</div>
+        @if (!string.IsNullOrEmpty(Model.Subtitle))
+        {
+            <small class="fw-semibold text-muted" style="font-size: 0.78rem;">@Model.Subtitle</small>
+        }
+    </div>
+    <div class="stat-icon-blob d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--ink); background-color: var(--@(Model.Variant.Length > 0 ? Model.Variant : "mustard")); box-shadow: 2px 2px 0 var(--ink);">
+        <i class="bi @Model.Icon fs-4" style="color: var(--ink);" aria-hidden="true"></i>
+    </div>
+</div>

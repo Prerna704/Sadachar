@@ -1,0 +1,251 @@
+@model Sadachar.Web.ViewModels.AccessibilitySettingsViewModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "Accessibility Settings";
+}
+
+<div class="mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <div class="brush-blob brush-blob-sage" style="width: 54px; height: 54px; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 44px; height: 44px;">
+                @await Html.PartialAsync("_Avatar", "Lumo")
+            </div>
+        </div>
+        <div>
+            <h1 class="h2 fw-black mb-1 font-headline">Accessibility <span class="retro-accent">controls</span></h1>
+            <p class="text-muted mb-0 fw-semibold" style="font-size: 1rem;">Changes are saved to your profile and apply across every device</p>
+        </div>
+    </div>
+</div>
+
+<form asp-action="Save" method="post" id="accessibility-form">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="FontSize" id="input-font-size" />
+    <input type="hidden" asp-for="Typeface" id="input-typeface" />
+    <input type="hidden" asp-for="LineSpacing" id="input-line-spacing" />
+    <input type="hidden" asp-for="Theme" id="input-theme" />
+    <input type="hidden" asp-for="TtsSpeed" id="input-tts-speed" />
+
+    <div class="row g-4">
+        <!-- Settings Controls -->
+        <div class="col-lg-7">
+            <!-- Reading Settings -->
+            <div class="retro-card mb-4" style="background: var(--paper-card);">
+                <h2 class="h5 fw-black mb-4 pb-2 font-headline" style="border-bottom: 3px solid var(--ink);">
+                    <i class="bi bi-type me-2" aria-hidden="true"></i> Reading & Typography
+                </h2>
+
+                <!-- Text Size -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="fw-bold" for="font-size-slider">Text size · <span id="label-font-size" class="pill-chip pill-chip-mustard">@Model.FontSize%</span></label>
+                    </div>
+                    <input type="range" class="form-range" id="font-size-slider" min="100" max="160" step="10" value="@Model.FontSize" oninput="updateFontSize(this.value)" style="accent-color: var(--rust);" />
+                    <div class="d-flex justify-content-between text-muted fw-bold" style="font-size: 0.8rem;">
+                        <span>100% (Default)</span>
+                        <span>120%</span>
+                        <span>140%</span>
+                        <span>160% (Large)</span>
+                    </div>
+                </div>
+
+                <!-- Typeface -->
+                <div class="mb-4">
+                    <label class="fw-bold d-block mb-2">Typeface</label>
+                    <div class="d-flex flex-wrap gap-2" role="group" aria-label="Typeface selection">
+                        <button type="button" class="btn-retro-secondary fw-bold @(Model.Typeface == "default" ? "btn-retro-mustard" : "")" id="btn-font-default" onclick="updateTypeface('default')">
+                            Default (Playfair & DM Sans)
+                        </button>
+                        <button type="button" class="btn-retro-secondary fw-bold @(Model.Typeface == "dyslexia" ? "btn-retro-mustard" : "")" id="btn-font-dyslexia" onclick="updateTypeface('dyslexia')" style="font-family: 'Lexend', sans-serif;">
+                            Dyslexia-friendly (Lexend)
+                        </button>
+                        <button type="button" class="btn-retro-secondary fw-bold @(Model.Typeface == "mono" ? "btn-retro-mustard" : "")" id="btn-font-mono" onclick="updateTypeface('mono')" style="font-family: monospace;">
+                            Mono
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Line Spacing -->
+                <div class="mb-2">
+                    <label class="fw-bold d-block mb-2">Line spacing</label>
+                    <div class="d-flex gap-2" role="group" aria-label="Line spacing selection">
+                        <button type="button" class="btn-retro-secondary fw-bold @(Model.LineSpacing == "1.4" ? "btn-retro-mustard" : "")" id="btn-spacing-14" onclick="updateLineSpacing('1.4')" style="width: 72px;">
+                            1.4
+                        </button>
+                        <button type="button" class="btn-retro-secondary fw-bold @(Model.LineSpacing == "1.8" ? "btn-retro-mustard" : "")" id="btn-spacing-18" onclick="updateLineSpacing('1.8')" style="width: 72px;">
+                            1.8
+                        </button>
+                        <button type="button" class="btn-retro-secondary fw-bold @(Model.LineSpacing == "2.2" ? "btn-retro-mustard" : "")" id="btn-spacing-22" onclick="updateLineSpacing('2.2')" style="width: 72px;">
+                            2.2
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Display and Motion Settings -->
+            <div class="retro-card mb-4" style="background: var(--paper-card);">
+                <h2 class="h5 fw-black mb-4 pb-2 font-headline" style="border-bottom: 3px solid var(--ink);">
+                    <i class="bi bi-palette me-2" aria-hidden="true"></i> Display & Motion
+                </h2>
+
+                <!-- Theme Selection -->
+                <div class="mb-4">
+                    <label class="fw-bold d-block mb-2">Theme</label>
+                    <div class="d-flex flex-wrap gap-2" role="group" aria-label="Theme selection">
+                        <button type="button" class="btn-retro-secondary fw-bold @(Model.Theme == "paper" ? "btn-retro-mustard" : "")" id="btn-theme-paper" onclick="updateTheme('paper')">
+                            Paper Warm (#FAF4EA)
+                        </button>
+                        <button type="button" class="btn-retro-secondary fw-bold @(Model.Theme == "light" ? "btn-retro-mustard" : "")" id="btn-theme-light" onclick="updateTheme('light')">
+                            Light
+                        </button>
+                        <button type="button" class="btn-retro-secondary fw-bold @(Model.Theme == "high-contrast" ? "btn-retro-mustard" : "")" id="btn-theme-high" onclick="updateTheme('high-contrast')">
+                            High Contrast (#000 & Gold)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Toggles -->
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-center justify-content-between p-2" style="background: var(--paper); border: 2.5px solid var(--ink); border-radius: 12px;">
+                        <div>
+                            <label asp-for="ReduceMotion" class="fw-bold d-block">Reduce motion</label>
+                            <small class="text-muted fw-semibold">Disable smooth transitions and animated indicators</small>
+                        </div>
+                        <div class="form-check form-switch fs-4">
+                            <input asp-for="ReduceMotion" class="form-check-input" role="switch" style="cursor: pointer; accent-color: var(--rust);" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between p-2" style="background: var(--paper); border: 2.5px solid var(--ink); border-radius: 12px;">
+                        <div>
+                            <label asp-for="VisibleFocus" class="fw-bold d-block">Visible focus outlines</label>
+                            <small class="text-muted fw-semibold">Enhance keyboard navigation with a bold 3px focus ring</small>
+                        </div>
+                        <div class="form-check form-switch fs-4">
+                            <input asp-for="VisibleFocus" class="form-check-input" role="switch" checked style="cursor: pointer; accent-color: var(--rust);" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between p-2" style="background: var(--paper); border: 2.5px solid var(--ink); border-radius: 12px;">
+                        <div>
+                            <label asp-for="UnderlineLinks" class="fw-bold d-block">Underline links</label>
+                            <small class="text-muted fw-semibold">Ensure interactive links are identified by underline as well as color</small>
+                        </div>
+                        <div class="form-check form-switch fs-4">
+                            <input asp-for="UnderlineLinks" class="form-check-input" role="switch" style="cursor: pointer; accent-color: var(--rust);" onchange="toggleUnderlineLinks(this.checked)" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-retro-primary py-3 px-5 fs-6 w-100">
+                <i class="bi bi-save me-1" aria-hidden="true"></i> Save and apply site-wide
+            </button>
+        </div>
+
+        <!-- Live Preview Panel -->
+        <div class="col-lg-5">
+            <div class="retro-card sticky-top" style="top: 24px; background: var(--paper-card);">
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 3px solid var(--ink);">
+                    <h2 class="h5 fw-black mb-0 font-headline">Live preview</h2>
+                    <span class="pill-chip pill-chip-mustard">Real-time</span>
+                </div>
+
+                <div id="live-preview-box" class="p-4" style="background: var(--paper); border: 3px solid var(--ink); border-radius: 14px; box-shadow: 4px 4px 0 var(--ink); min-height: 200px;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="pill-chip pill-chip-teal py-0 px-2" style="font-size: 0.72rem;">Preview</span>
+                    </div>
+                    <h3 class="h5 fw-black mb-3 font-headline">Inclusive Education</h3>
+                    <p id="live-preview-text" class="mb-3" style="font-size: 1.15rem; line-height: @Model.LineSpacing;">
+                        Every learner deserves materials that are clear, readable and comfortable.
+                    </p>
+                    <p class="text-muted mb-3" style="font-size: 0.95rem;">
+                        Assistive technology tools like screen readers, high-contrast modes, and text-to-speech bridge the barrier between knowledge and understanding.
+                    </p>
+                    <div>
+                        <a href="#test" class="fw-bold" style="color: var(--rust);">Test sample link</a>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3" style="background: var(--paper); border: 2.5px solid var(--ink); border-radius: 12px;">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="bi bi-cloud-check-fill text-success" aria-hidden="true"></i>
+                        <span class="fw-bold" style="font-size: 0.88rem;">Device Synchronization</span>
+                    </div>
+                    <small class="text-muted d-block fw-semibold" style="font-size: 0.82rem;">
+                        Settings are synchronized with your database profile and saved in local storage for instant zero-flash rendering.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        function updateFontSize(val) {
+            document.getElementById('label-font-size').innerText = val + '%';
+            document.getElementById('input-font-size').value = val;
+            document.getElementById('live-preview-text').style.fontSize = (val / 100 * 1.15) + 'rem';
+            document.documentElement.style.fontSize = (val / 100 * 16) + 'px';
+            localStorage.setItem('accessed_font_size', val);
+        }
+
+        function updateTypeface(type) {
+            document.getElementById('input-typeface').value = type;
+            document.getElementById('btn-font-default').classList.toggle('btn-retro-mustard', type === 'default');
+            document.getElementById('btn-font-dyslexia').classList.toggle('btn-retro-mustard', type === 'dyslexia');
+            document.getElementById('btn-font-mono').classList.toggle('btn-retro-mustard', type === 'mono');
+
+            const preview = document.getElementById('live-preview-box');
+            preview.style.fontFamily = type === 'dyslexia' ? "'Lexend', sans-serif" : type === 'mono' ? "monospace" : "var(--font-body)";
+
+            document.body.classList.remove('font-dyslexia', 'font-mono');
+            if (type === 'dyslexia') document.body.classList.add('font-dyslexia');
+            else if (type === 'mono') document.body.classList.add('font-mono');
+
+            localStorage.setItem('accessed_typeface', type);
+        }
+
+        function updateLineSpacing(val) {
+            document.getElementById('input-line-spacing').value = val;
+            document.getElementById('btn-spacing-14').classList.toggle('btn-retro-mustard', val === '1.4');
+            document.getElementById('btn-spacing-18').classList.toggle('btn-retro-mustard', val === '1.8');
+            document.getElementById('btn-spacing-22').classList.toggle('btn-retro-mustard', val === '2.2');
+            document.getElementById('live-preview-text').style.lineHeight = val;
+            localStorage.setItem('accessed_spacing', val);
+        }
+
+        function updateTheme(theme) {
+            document.getElementById('input-theme').value = theme;
+            document.getElementById('btn-theme-paper').classList.toggle('btn-retro-mustard', theme === 'paper');
+            document.getElementById('btn-theme-light').classList.toggle('btn-retro-mustard', theme === 'light');
+            document.getElementById('btn-theme-high').classList.toggle('btn-retro-mustard', theme === 'high-contrast');
+
+            document.body.classList.remove('theme-paper', 'theme-light', 'theme-dark', 'theme-high-contrast');
+            document.body.classList.add('theme-' + theme);
+
+            const preview = document.getElementById('live-preview-box');
+            if (theme === 'high-contrast') {
+                preview.style.background = '#000';
+                preview.style.color = '#FFF';
+                preview.style.borderColor = '#FFD700';
+            } else if (theme === 'light') {
+                preview.style.background = '#FFF';
+                preview.style.color = '#111';
+                preview.style.borderColor = '#111';
+            } else {
+                preview.style.background = 'var(--paper)';
+                preview.style.color = 'var(--ink)';
+                preview.style.borderColor = 'var(--ink)';
+            }
+
+            localStorage.setItem('accessed_theme', theme);
+        }
+
+        function toggleUnderlineLinks(checked) {
+            const previewLinks = document.querySelectorAll('#live-preview-box a');
+            previewLinks.forEach(l => l.style.textDecoration = checked ? 'underline' : 'none');
+        }
+    </script>
+}

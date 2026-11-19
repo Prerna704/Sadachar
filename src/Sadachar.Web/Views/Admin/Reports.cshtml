@@ -1,0 +1,147 @@
+@model Sadachar.Web.ViewModels.ReportsSummaryViewModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "Reports & Analytics";
+}
+
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="h2 fw-black mb-1 font-headline">Statutory <span class="retro-accent">reports</span></h1>
+        <p class="text-muted mb-0 fw-semibold" style="font-size: 1rem;">Export-ready summaries for regulatory compliance audits</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <a asp-action="ExportCsv" class="btn-retro-primary text-decoration-none">
+            <i class="bi bi-filetype-csv me-1" aria-hidden="true"></i> CSV Export
+        </a>
+        <button type="button" class="btn-retro-secondary" onclick="window.print()">
+            <i class="bi bi-printer me-1" aria-hidden="true"></i> Print / PDF
+        </button>
+    </div>
+</div>
+
+<!-- Filters Bar -->
+<div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+    <span class="pill-chip pill-chip-sage py-1 px-3">
+        <i class="bi bi-calendar3 me-1" aria-hidden="true"></i> @Model.Period
+    </span>
+    <span class="pill-chip pill-chip-sage py-1 px-3">
+        <i class="bi bi-building me-1" aria-hidden="true"></i> @Model.Department
+    </span>
+    <span class="pill-chip pill-chip-teal py-1 px-3">
+        <i class="bi bi-patch-check-fill me-1" aria-hidden="true"></i> Statutory RPwD Act 2016 Compliant
+    </span>
+</div>
+
+<!-- 2 Metric KPI Summary Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="retro-card p-4 h-100" style="background: var(--paper-card); border-left: 8px solid var(--teal);">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted fw-bold">Issues resolved within SLA</span>
+                <span class="pill-chip pill-chip-teal py-0 px-2" style="font-size: 0.75rem;">@Model.ResolvedSlaChange</span>
+            </div>
+            <div class="display-4 fw-black mb-2 font-headline" style="color: var(--teal);">
+                @Model.ResolvedWithinSlaPercent%
+            </div>
+            <small class="text-muted fw-semibold">Statutory 72-hour turnaround enforcement by Ombudsman daemon.</small>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="retro-card p-4 h-100" style="background: var(--paper-card); border-left: 8px solid var(--rust);">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted fw-bold">Captioned media coverage</span>
+                <span class="pill-chip pill-chip-mustard py-0 px-2" style="font-size: 0.75rem;">@Model.CaptionedCoverageChange</span>
+            </div>
+            <div class="display-4 fw-black mb-2 font-headline" style="color: var(--rust);">
+                @Model.CaptionedCoveragePercent%
+            </div>
+            <small class="text-muted fw-semibold">Multi-format lecture video recordings with verified synchronized subtitles.</small>
+        </div>
+    </div>
+</div>
+
+<!-- Visual Trend Bars -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="retro-card h-100" style="background: var(--paper-card);">
+            <h2 class="h5 fw-black mb-3 font-headline">Resources made accessible</h2>
+            <div class="d-flex align-items-end gap-3 pt-3" style="height: 160px; border-bottom: 2.5px solid var(--ink);">
+                <div class="text-center flex-grow-1">
+                    <div style="height: 60px; background: var(--sage); border: 2px solid var(--ink); border-radius: 6px 6px 0 0; box-shadow: 2px 0 0 var(--ink);"></div>
+                    <small class="fw-bold mt-1 d-block font-headline">Jul</small>
+                </div>
+                <div class="text-center flex-grow-1">
+                    <div style="height: 90px; background: var(--sage); border: 2px solid var(--ink); border-radius: 6px 6px 0 0; box-shadow: 2px 0 0 var(--ink);"></div>
+                    <small class="fw-bold mt-1 d-block font-headline">Aug</small>
+                </div>
+                <div class="text-center flex-grow-1">
+                    <div style="height: 120px; background: var(--sage); border: 2px solid var(--ink); border-radius: 6px 6px 0 0; box-shadow: 2px 0 0 var(--ink);"></div>
+                    <small class="fw-bold mt-1 d-block font-headline">Sep</small>
+                </div>
+                <div class="text-center flex-grow-1">
+                    <div style="height: 150px; background: var(--teal); border: 2px solid var(--ink); border-radius: 6px 6px 0 0; box-shadow: 2px 0 0 var(--ink);"></div>
+                    <small class="fw-bold mt-1 d-block font-headline">Oct</small>
+                </div>
+            </div>
+            <div class="text-center text-muted fw-semibold mt-2" style="font-size: 0.8rem;">Cumulative multi-format library additions</div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="retro-card h-100" style="background: var(--paper-card);">
+            <h2 class="h5 fw-black mb-3 font-headline">Average resolution turnaround (days)</h2>
+            <div class="d-flex align-items-end gap-3 pt-3" style="height: 160px; border-bottom: 2.5px solid var(--ink);">
+                <div class="text-center flex-grow-1">
+                    <div style="height: 140px; background: var(--blush); border: 2px solid var(--ink); border-radius: 6px 6px 0 0; box-shadow: 2px 0 0 var(--ink);"></div>
+                    <small class="fw-bold mt-1 d-block font-headline">Jul (4.2d)</small>
+                </div>
+                <div class="text-center flex-grow-1">
+                    <div style="height: 110px; background: var(--blush); border: 2px solid var(--ink); border-radius: 6px 6px 0 0; box-shadow: 2px 0 0 var(--ink);"></div>
+                    <small class="fw-bold mt-1 d-block font-headline">Aug (3.1d)</small>
+                </div>
+                <div class="text-center flex-grow-1">
+                    <div style="height: 80px; background: var(--blush); border: 2px solid var(--ink); border-radius: 6px 6px 0 0; box-shadow: 2px 0 0 var(--ink);"></div>
+                    <small class="fw-bold mt-1 d-block font-headline">Sep (2.4d)</small>
+                </div>
+                <div class="text-center flex-grow-1">
+                    <div style="height: 50px; background: var(--rust); border: 2px solid var(--ink); border-radius: 6px 6px 0 0; box-shadow: 2px 0 0 var(--ink);"></div>
+                    <small class="fw-bold mt-1 d-block font-headline">Oct (1.8d)</small>
+                </div>
+            </div>
+            <div class="text-center text-muted fw-semibold mt-2" style="font-size: 0.8rem;">Resolution turnaround time dropping strictly under 72h SLA</div>
+        </div>
+    </div>
+</div>
+
+<!-- Audit Activity Log Table -->
+<div class="retro-card" style="background: var(--paper-card);">
+    <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 3px solid var(--ink);">
+        <h2 class="h5 fw-black mb-0 font-headline">Institutional statutory audit log</h2>
+        <span class="pill-chip pill-chip-mustard">Immutable Ledger</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle" style="font-size: 0.88rem;">
+            <thead>
+                <tr style="border-bottom: 2.5px solid var(--ink);">
+                    <th scope="col" class="fw-black font-headline">Timestamp</th>
+                    <th scope="col" class="fw-black font-headline">Action</th>
+                    <th scope="col" class="fw-black font-headline">Actor</th>
+                    <th scope="col" class="fw-black font-headline">Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var log in Model.AuditLogs)
+                {
+                    <tr style="border-bottom: 1.5px solid var(--ink);">
+                        <td class="text-muted fw-semibold">@log.Timestamp.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="fw-black font-headline">@log.Action</td>
+                        <td class="fw-bold">@log.ActorName</td>
+                        <td><span class="pill-chip pill-chip-sage py-0 px-2" style="font-size: 0.75rem;">@log.Details</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

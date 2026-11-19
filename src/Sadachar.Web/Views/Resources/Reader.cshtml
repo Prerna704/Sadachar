@@ -1,0 +1,320 @@
+@model Sadachar.Web.ViewModels.TtsReaderViewModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "Reader Mode (TTS)";
+}
+
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1" style="font-size: 0.85rem;">
+                <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none fw-bold" style="color: var(--rust);">Library</a></li>
+                <li class="breadcrumb-item active fw-semibold" aria-current="page">@Model.Module</li>
+            </ol>
+        </nav>
+        <h1 class="h2 fw-black mb-0 font-headline">@Model.Title</h1>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Details" asp-route-id="@Model.MaterialId" class="btn-retro-secondary text-decoration-none">
+            <i class="bi bi-file-text me-1" aria-hidden="true"></i> Standard view
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Reader Text Display Area with Sentence Highlighting -->
+    <div class="col-lg-8">
+        <div class="retro-card p-4 p-md-5" style="background: var(--paper-card); min-height: 480px;">
+            <div class="d-flex align-items-center justify-content-between mb-4 pb-2" style="border-bottom: 3px solid var(--ink);">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="pill-chip pill-chip-sky"><i class="bi bi-volume-up" aria-hidden="true"></i> TTS active</span>
+                    <span class="pill-chip pill-chip-teal"><i class="bi bi-badge-cc" aria-hidden="true"></i> Synchronized</span>
+                </div>
+                <span class="pill-chip pill-chip-mustard" id="sentence-counter" style="font-size: 0.85rem;">Sentence 1 of @Model.Sentences.Count</span>
+            </div>
+
+            <!-- Sentences with Clickable & Spoken Highlighting -->
+            <div id="tts-content-body" class="reader-text" style="font-size: 1.25rem; line-height: 2.1; font-family: var(--font-heading);">
+                @for (int i = 0; i < Model.Sentences.Count; i++)
+                {
+                    <span class="tts-sentence" id="sentence-@i" onclick="jumpToSentence(@i)" tabindex="0" role="button" aria-label="Read sentence @(i + 1)" style="cursor: pointer; padding: 2px 6px; border-radius: 6px; transition: background 0.15s ease;">
+                        @Model.Sentences[i]
+                    </span>
+                    @(" ")
+                }
+            </div>
+
+            <div class="mt-5 pt-3 d-flex justify-content-between align-items-center text-muted" style="border-top: 3px solid var(--ink); font-size: 0.88rem;">
+                <span id="tts-status-text" class="fw-bold"><i class="bi bi-info-circle me-1" aria-hidden="true"></i> Click any sentence or press Space to read.</span>
+                <span id="tts-playback-timer" class="fw-bold font-headline">00:00 / 02:30</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Full TTS Audio Control Panel & Shortcut Hints -->
+    <div class="col-lg-4">
+        <div class="retro-card sticky-top" style="top: 24px; background: var(--paper-card);">
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 3px solid var(--ink);">
+                <h2 class="h5 fw-black mb-0 font-headline">
+                    <i class="bi bi-sliders me-1" aria-hidden="true"></i> Audio controls
+                </h2>
+                <div style="width: 32px; height: 32px;">
+                    @await Html.PartialAsync("_Avatar", "Echo")
+                </div>
+            </div>
+
+            <!-- Primary Playback Action Controls with Key-Like Buttons -->
+            <div class="d-flex align-items-center justify-content-center gap-3 mb-4">
+                <button type="button" class="btn-retro-secondary" id="btn-prev" onclick="previousSentence()" style="width: 48px; height: 48px; border-radius: 50%; padding: 0;" title="Previous sentence (Left Arrow)" aria-label="Previous sentence">
+                    <i class="bi bi-skip-start-fill fs-5" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="btn-retro-primary" id="btn-play-pause" onclick="togglePlayPause()" style="width: 60px; height: 60px; border-radius: 50%; padding: 0;" title="Play or Pause (Space)" aria-label="Play or pause speech">
+                    <i class="bi bi-play-fill fs-2" id="icon-play-pause" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="btn-retro-secondary" id="btn-next" onclick="nextSentence()" style="width: 48px; height: 48px; border-radius: 50%; padding: 0;" title="Next sentence (Right Arrow)" aria-label="Next sentence">
+                    <i class="bi bi-skip-end-fill fs-5" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="btn-retro-secondary" id="btn-stop" onclick="stopSpeech()" style="width: 48px; height: 48px; border-radius: 50%; padding: 0; color: var(--coral);" title="Stop speech" aria-label="Stop speech">
+                    <i class="bi bi-stop-fill fs-5" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <!-- Voice Selection -->
+            <div class="mb-3">
+                <label for="voice-select" class="form-label fw-bold">Voice selection</label>
+                <select id="voice-select" class="accessed-select" aria-label="Select text to speech voice">
+                    <option value="">Detecting available voices...</option>
+                </select>
+            </div>
+
+            <!-- Speed Slider -->
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label for="speed-slider" class="form-label fw-bold mb-0">Speed</label>
+                    <span id="speed-label" class="pill-chip pill-chip-mustard py-0 px-2">1.0×</span>
+                </div>
+                <input type="range" class="form-range" id="speed-slider" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateSpeed(this.value)" style="accent-color: var(--rust);" aria-label="Speech speed" />
+                <div class="d-flex justify-content-between text-muted fw-bold" style="font-size: 0.75rem;">
+                    <span>0.5×</span>
+                    <span>1.0×</span>
+                    <span>1.5×</span>
+                    <span>2.0×</span>
+                </div>
+            </div>
+
+            <!-- Pitch Slider -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label for="pitch-slider" class="form-label fw-bold mb-0">Pitch</label>
+                    <span id="pitch-label" class="pill-chip pill-chip-sage py-0 px-2">1.0</span>
+                </div>
+                <input type="range" class="form-range" id="pitch-slider" min="0.5" max="1.5" step="0.1" value="1.0" oninput="updatePitch(this.value)" style="accent-color: var(--teal);" aria-label="Speech pitch" />
+            </div>
+
+            <!-- Shortcut Hints Box -->
+            <div class="p-3" style="background: var(--paper); border: 2.5px solid var(--ink); border-radius: 12px; box-shadow: 2px 2px 0 var(--ink);">
+                <div class="fw-bold mb-2 font-headline" style="font-size: 0.88rem;"><i class="bi bi-keyboard me-1" aria-hidden="true"></i> Keyboard Shortcuts</div>
+                <div class="d-flex flex-column gap-1" style="font-size: 0.8rem;">
+                    <div><kbd style="background: var(--ink); color: #FFF; border-radius: 6px; padding: 2px 8px; border: 1px solid var(--ink);">Space</kbd> : play / pause</div>
+                    <div><kbd style="background: var(--ink); color: #FFF; border-radius: 6px; padding: 2px 8px; border: 1px solid var(--ink);">←</kbd> <kbd style="background: var(--ink); color: #FFF; border-radius: 6px; padding: 2px 8px; border: 1px solid var(--ink);">→</kbd> : previous / next sentence</div>
+                    <div><kbd style="background: var(--ink); color: #FFF; border-radius: 6px; padding: 2px 8px; border: 1px solid var(--ink);">+</kbd> <kbd style="background: var(--ink); color: #FFF; border-radius: 6px; padding: 2px 8px; border: 1px solid var(--ink);">-</kbd> : speed up / slow down</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .tts-sentence.active-sentence {
+            background-color: var(--mustard) !important;
+            color: var(--ink) !important;
+            outline: 3px solid var(--ink) !important;
+            box-shadow: 3px 3px 0 var(--ink) !important;
+            border-radius: 6px;
+        }
+        body.theme-high-contrast .tts-sentence.active-sentence {
+            background-color: #FFD700 !important;
+            color: #000 !important;
+            outline: 3px solid #FFF !important;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        const sentences = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Sentences));
+        let currentIndex = 0;
+        let isSpeaking = false;
+        let speechRate = @Model.Speed;
+        let speechPitch = 1.0;
+        let selectedVoice = null;
+
+        // Load voices
+        function populateVoices() {
+            if (!('speechSynthesis' in window)) return;
+            const voices = window.speechSynthesis.getVoices();
+            const select = document.getElementById('voice-select');
+            select.innerHTML = '';
+
+            voices.forEach((v, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.textContent = `${v.name} (${v.lang})${v.default ? ' [Default]' : ''}`;
+                if (v.lang.includes('en') && (v.name.includes('India') || v.name.includes('Aria') || v.default)) {
+                    opt.selected = true;
+                    selectedVoice = v;
+                }
+                select.appendChild(opt);
+            });
+
+            if (!selectedVoice && voices.length > 0) {
+                selectedVoice = voices[0];
+            }
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = populateVoices;
+            populateVoices();
+        }
+
+        document.getElementById('voice-select').addEventListener('change', function() {
+            const voices = window.speechSynthesis.getVoices();
+            selectedVoice = voices[this.value];
+            if (isSpeaking) {
+                speakSentence(currentIndex);
+            }
+        });
+
+        function highlightSentence(index) {
+            document.querySelectorAll('.tts-sentence').forEach(el => el.classList.remove('active-sentence'));
+            const target = document.getElementById('sentence-' + index);
+            if (target) {
+                target.classList.add('active-sentence');
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            document.getElementById('sentence-counter').innerText = `Sentence ${index + 1} of ${sentences.length}`;
+        }
+
+        function speakSentence(index) {
+            if (!('speechSynthesis' in window)) {
+                alert("Speech synthesis is not supported on this browser.");
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+
+            if (index < 0 || index >= sentences.length) {
+                isSpeaking = false;
+                updatePlayPauseIcon();
+                return;
+            }
+
+            currentIndex = index;
+            highlightSentence(index);
+
+            const text = sentences[index];
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = speechRate;
+            utterance.pitch = speechPitch;
+            if (selectedVoice) utterance.voice = selectedVoice;
+
+            utterance.onend = function() {
+                if (isSpeaking && currentIndex + 1 < sentences.length) {
+                    speakSentence(currentIndex + 1);
+                } else {
+                    isSpeaking = false;
+                    updatePlayPauseIcon();
+                }
+            };
+
+            utterance.onerror = function() {
+                isSpeaking = false;
+                updatePlayPauseIcon();
+            };
+
+            window.speechSynthesis.speak(utterance);
+            isSpeaking = true;
+            updatePlayPauseIcon();
+        }
+
+        function togglePlayPause() {
+            if (isSpeaking) {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                updatePlayPauseIcon();
+            } else {
+                speakSentence(currentIndex);
+            }
+        }
+
+        function previousSentence() {
+            if (currentIndex > 0) {
+                speakSentence(currentIndex - 1);
+            }
+        }
+
+        function nextSentence() {
+            if (currentIndex + 1 < sentences.length) {
+                speakSentence(currentIndex + 1);
+            }
+        }
+
+        function stopSpeech() {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            currentIndex = 0;
+            highlightSentence(0);
+            updatePlayPauseIcon();
+        }
+
+        function jumpToSentence(index) {
+            speakSentence(index);
+        }
+
+        function updateSpeed(val) {
+            speechRate = parseFloat(val);
+            document.getElementById('speed-label').innerText = val + '×';
+            if (isSpeaking) speakSentence(currentIndex);
+        }
+
+        function updatePitch(val) {
+            speechPitch = parseFloat(val);
+            document.getElementById('pitch-label').innerText = val;
+            if (isSpeaking) speakSentence(currentIndex);
+        }
+
+        function updatePlayPauseIcon() {
+            const icon = document.getElementById('icon-play-pause');
+            if (icon) {
+                icon.className = isSpeaking ? 'bi bi-pause-fill fs-2' : 'bi bi-play-fill fs-2';
+            }
+        }
+
+        // Global shortcuts for TTS
+        document.addEventListener('keydown', function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlayPause();
+            } else if (e.code === 'ArrowLeft') {
+                e.preventDefault();
+                previousSentence();
+            } else if (e.code === 'ArrowRight') {
+                e.preventDefault();
+                nextSentence();
+            } else if (e.key === '+') {
+                e.preventDefault();
+                const slider = document.getElementById('speed-slider');
+                slider.value = Math.min(2.0, parseFloat(slider.value) + 0.1);
+                updateSpeed(slider.value);
+            } else if (e.key === '-') {
+                e.preventDefault();
+                const slider = document.getElementById('speed-slider');
+                slider.value = Math.max(0.5, parseFloat(slider.value) - 0.1);
+                updateSpeed(slider.value);
+            }
+        });
+    </script>
+}

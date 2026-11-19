@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Runtime.InteropServices;
 using Sadachar.Core.Entities;
 using Sadachar.Core.Enums;
 using Sadachar.Core.Interfaces;
@@ -12,8 +13,7 @@ using Sadachar.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Allow deployments and restricted local environments to choose a writable,
-// persistent key-ring location for authentication cookies and antiforgery tokens.
+// Data Protection
 var dataProtectionKeysDirectory = builder.Configuration["DataProtection:KeysDirectory"];
 if (!string.IsNullOrWhiteSpace(dataProtectionKeysDirectory))
 {
@@ -21,19 +21,25 @@ if (!string.IsNullOrWhiteSpace(dataProtectionKeysDirectory))
     builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysDirectory));
 }
 
-// 1. Flexible Database Configuration (In-Memory for zero-friction demo / SQL Server for production)
-var useInMemory = builder.Configuration.GetValue<bool>("UseInMemoryDatabase", true);
+// 1. Database Configuration: SQL Server LocalDB with SQLite/InMemory fallback for cross-platform (macOS/Linux)
+var useInMemory = builder.Configuration.GetValue<bool>("UseInMemoryDatabase", false);
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? "Server=(localdb)\\mssqllocaldb;Database=AccessEdDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
 
 if (useInMemory)
 {
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseInMemoryDatabase("SadacharDb"));
+        options.UseInMemoryDatabase("AccessEdDb"));
+}
+else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && connectionString.Contains("(localdb)", StringComparison.OrdinalIgnoreCase))
+{
+    // LocalDB is Windows-only; use SQLite file on macOS/Linux for zero-friction local run
+    var dbPath = Path.Combine(builder.Environment.ContentRootPath, "accessed.db");
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite($"Data Source={dbPath}"));
 }
 else
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-        ?? "Server=(localdb)\\mssqllocaldb;Database=SadacharDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
-
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(connectionString, sqlOptions =>
         {
@@ -44,7 +50,7 @@ else
         }));
 }
 
-// 2. ASP.NET Core Identity with Custom User & Roles
+// 2. ASP.NET Core Identity with Roles, Lockout & Security
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
         options.Password.RequireDigit = true;
@@ -56,13 +62,35 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         options.Lockout.MaxFailedAccessAttempts = 5;
         options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     })
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
-builder.Services.Configure<Microsoft.AspNetCore.Identity.SecurityStampValidatorOptions>(options => options.ValidationInterval = TimeSpan.Zero);
+
+builder.Services.Configure<SecurityStampValidatorOptions>(options => options.ValidationInterval = TimeSpan.Zero);
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireStudent", policy =>
+        policy.RequireRole(AppRoles.Student, AppRoles.Administrator, "Admin"));
+    options.AddPolicy("RequireTeacher", policy =>
+        policy.RequireRole(AppRoles.Teacher, AppRoles.Administrator, "Educator", "Admin"));
+    options.AddPolicy("RequireAdmin", policy =>
+        policy.RequireRole(AppRoles.Administrator, "Admin"));
+    options.AddPolicy("TeacherOrAdmin", policy =>
+        policy.RequireRole(AppRoles.Teacher, AppRoles.Administrator, "Educator", "Admin"));
+});
 
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/Login";
+    options.Cookie.Name = "AccessEd.Auth";
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+    options.SlidingExpiration = true;
+
     options.Events.OnRedirectToLogin = context =>
     {
         if (context.Request.Path.StartsWithSegments("/api"))
@@ -87,79 +115,88 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 
-// 3. Register Domain Repositories & Services
+// 3. Domain Repositories & Background Service
 builder.Services.AddScoped<IComplianceRepository, ComplianceRepository>();
 builder.Services.AddScoped<IGrievanceRepository, GrievanceRepository>();
 builder.Services.AddScoped<IConductRepository, ConductRepository>();
 builder.Services.AddScoped<ISlaEscalationService, SlaEscalationService>();
-
-// 4. Register Continuous Autonomous Background SLA Daemon
 builder.Services.AddHostedService<SlaEscalationBackgroundService>();
 
-// 5. Web APIs & OpenAPI / Swagger
-builder.Services.AddControllersWithViews(options => options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()));
-builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
+// 4. Controllers, Views & Antiforgery
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
+});
+
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "RequestVerificationToken";
+    options.Cookie.Name = "AccessEd.Antiforgery";
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
-        Title = "Sadachar API",
+        Title = "AccessEd Web API",
         Version = "v1",
-        Description = "Education Without Barriers — Enterprise Digital Ecosystem for Specially-Abled Students (RPwD Act 2016, WCAG 2.2, 72-Hour Grievance SLA, DPDP Act 2023)."
+        Description = "AccessEd — Education Ecosystem for Specially-Abled Students. RESTful APIs for Resources, Profiles, Tickets, Compliance Audits, and Reports Summary."
     });
+    c.DocInclusionPredicate((docName, apiDesc) => 
+        apiDesc.HttpMethod != null && (apiDesc.RelativePath?.StartsWith("api", StringComparison.OrdinalIgnoreCase) == true));
 });
 
 var app = builder.Build();
 
-// Apply database schema. LMS content and learner activity are created through authenticated workflows.
+// Database auto-migrate on startup and seed mockup data
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    if (useInMemory) await context.Database.EnsureCreatedAsync();
-    else await context.Database.MigrateAsync();
-    await ResourceCatalogSeeder.SeedAsync(context);
-
-    var bootstrapEmail = builder.Configuration["BootstrapAdmin:Email"];
-    var bootstrapPassword = builder.Configuration["BootstrapAdmin:Password"];
-    if (!string.IsNullOrWhiteSpace(bootstrapEmail) && !string.IsNullOrWhiteSpace(bootstrapPassword))
+    if (context.Database.IsSqlServer())
     {
-        var users = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        if (await users.FindByEmailAsync(bootstrapEmail) is null)
-        {
-            var bootstrapAdmin = new ApplicationUser
-            {
-                UserName = bootstrapEmail.Trim(), Email = bootstrapEmail.Trim(),
-                FullName = builder.Configuration["BootstrapAdmin:FullName"]?.Trim() ?? "Administrator",
-                Role = UserRole.Admin, CreatedAtUtc = DateTime.UtcNow
-            };
-            var result = await users.CreateAsync(bootstrapAdmin, bootstrapPassword);
-            if (!result.Succeeded) throw new InvalidOperationException($"Could not create the configured administrator: {string.Join("; ", result.Errors.Select(e => e.Description))}");
-        }
+        try { await context.Database.MigrateAsync(); }
+        catch { await context.Database.EnsureCreatedAsync(); }
     }
+    else
+    {
+        await context.Database.EnsureCreatedAsync();
+    }
+
+    await ResourceCatalogSeeder.SeedAsync(context);
+    await AccessEdSeeder.SeedAsync(scope.ServiceProvider);
 }
 
-// Configure the HTTP Pipeline
+// HTTP Pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sadachar API v1");
-    });
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
 
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "AccessEd API v1");
+    c.RoutePrefix = "swagger";
+});
+
 app.UseHttpsRedirection();
-app.UseDefaultFiles();
 app.UseStaticFiles();
+
+app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
 app.MapControllerRoute(
-    name: "mvc",
-    pattern: "Home/{action=Index}/{id?}",
-    defaults: new { controller = "Home" });
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapControllers();
 
 app.Run();

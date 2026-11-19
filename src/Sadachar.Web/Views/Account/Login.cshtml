@@ -1,108 +1,251 @@
-@model LoginViewModel
+@model Sadachar.Web.ViewModels.LoginViewModel
 @{
-    ViewData["Title"] = "Sign in";
+    Layout = "_Layout";
+    ViewData["Title"] = "Sign In & Register";
+    var activeTab = (string?)ViewBag.ActiveTab ?? "login";
+    var regModel = (Sadachar.Web.ViewModels.StudentRegistrationViewModel?)ViewBag.RegisterModel ?? new Sadachar.Web.ViewModels.StudentRegistrationViewModel();
 }
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f7f5ff" />
-    <title>@ViewData["Title"] · Sadachar</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/auth.css" />
-</head>
-<body class="auth-page">
-    <a class="skip-link" href="#auth-form">Skip to sign in</a>
-    <main class="auth-shell">
-        <section class="welcome-panel" aria-labelledby="welcome-title">
-            <a class="brand" href="/" aria-label="Sadachar home">
-                <span class="brand-mark" aria-hidden="true">s</span>
-                <span>sadachar</span>
-            </a>
-            <div class="welcome-copy">
-                <span class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span> LEARNING, WITHOUT LIMITS</span>
-                <h1 id="welcome-title">Every mind has a place to <span>flourish.</span></h1>
-                <p>A more welcoming world of learning starts with belonging. Pick up where you left off and keep growing.</p>
-            </div>
-            <div class="illustration-wrap">
-                <div class="orbit orbit-one" aria-hidden="true"></div>
-                <div class="orbit orbit-two" aria-hidden="true"></div>
-                <span class="sparkle sparkle-one" aria-hidden="true">✦</span>
-                <span class="sparkle sparkle-two" aria-hidden="true">✳</span>
-                <div class="illustration-card">
-                    <svg class="learning-art" viewBox="0 0 520 350" role="img" aria-labelledby="art-title art-desc">
-                        <title id="art-title">Students learning together</title>
-                        <desc id="art-desc">Three diverse students share an open book, with a wheelchair user included in the group.</desc>
-                        <ellipse cx="262" cy="311" rx="190" ry="17" fill="#ded6f7" />
-                        <path d="M137 276c9-43 49-70 95-65l28 4 19 92H138z" fill="#8f72d8" />
-                        <path d="M145 280c5-44 42-72 86-68l22 4 20 90H143z" fill="#9679df" />
-                        <path d="M180 176c0-27 20-48 46-48s46 21 46 48v14h-92z" fill="#34294e" />
-                        <ellipse cx="226" cy="181" rx="35" ry="41" fill="#c78362" />
-                        <path d="M190 176c4-32 23-48 46-48 21 0 37 14 41 41-18-8-28-20-35-31-11 17-29 28-52 32z" fill="#302743" />
-                        <path d="M211 187c5 4 10 4 15 0" fill="none" stroke="#603d38" stroke-width="3" stroke-linecap="round" />
-                        <path d="M239 187c5 4 10 4 15 0" fill="none" stroke="#603d38" stroke-width="3" stroke-linecap="round" />
-                        <path d="M228 204c7 6 15 6 22 0" fill="none" stroke="#fff0e8" stroke-width="3" stroke-linecap="round" />
-                        <path d="M118 286c-3-42 25-73 61-77 20-3 38 5 50 17l-4 91H125z" fill="#f1bd58" />
-                        <circle cx="151" cy="189" r="31" fill="#e0a17c" />
-                        <path d="M119 185c2-28 18-43 39-43 18 0 30 12 33 31-20 2-34-5-44-18-6 13-16 23-28 30z" fill="#493953" />
-                        <path d="M130 194c4 3 8 3 12 0m18 0c4 3 8 3 12 0" fill="none" stroke="#6b4740" stroke-width="2.5" stroke-linecap="round" />
-                        <path d="M142 208c6 5 12 5 18 0" fill="none" stroke="#fff5eb" stroke-width="2.5" stroke-linecap="round" />
-                        <path d="M304 282c-7-46 17-77 52-84l41 8 16 92H301z" fill="#6eb7b1" />
-                        <circle cx="365" cy="185" r="32" fill="#8c563f" />
-                        <path d="M333 185c0-27 12-43 34-43 18 0 30 13 30 32-21 0-37-7-47-21-2 12-7 23-17 32z" fill="#25283b" />
-                        <path d="M345 191c4 3 8 3 12 0m17 0c4 3 8 3 12 0" fill="none" stroke="#4c302b" stroke-width="2.5" stroke-linecap="round" />
-                        <path d="M354 205c6 5 12 5 18 0" fill="none" stroke="#f3dfcf" stroke-width="2.5" stroke-linecap="round" />
-                        <circle cx="372" cy="280" r="46" fill="none" stroke="#53657c" stroke-width="6" />
-                        <circle cx="372" cy="280" r="7" fill="#53657c" />
-                        <path d="M345 241h-34l-14 39m29-38 20 45h43m-43-45h27l13 38" fill="none" stroke="#53657c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M214 249c16-15 38-15 54-1l35 31c5 4 7 11 3 16-4 5-10 6-16 2l-37-24v25c0 8-6 13-13 13h-70c-8 0-12-8-7-14l51-48z" fill="#fffdf9" stroke="#6f5c9d" stroke-width="3" />
-                        <path d="M250 248v46" stroke="#c7bee0" stroke-width="3" />
-                        <path d="M227 262h13m-13 9h13m28-9h13m-13 9h13" stroke="#a79bc7" stroke-width="3" stroke-linecap="round" />
-                        <circle cx="405" cy="108" r="28" fill="#fff" />
-                        <path d="m405 92 4 11 11 4-11 4-4 11-4-11-11-4 11-4z" fill="#9a7bdb" />
-                    </svg>
-                    <div class="art-caption"><span class="caption-icon" aria-hidden="true">✦</span><span><strong>Different strengths. One community.</strong><small>Room to learn, grow and belong.</small></span></div>
-                </div>
-            </div>
-            <div class="welcome-footer"><span>Thoughtfully designed for every learner</span><span aria-hidden="true">·</span><span>Accessible by nature</span></div>
-        </section>
 
-        <section class="form-panel" aria-labelledby="login-heading">
-            <div class="mobile-brand"><span class="brand-mark" aria-hidden="true">s</span><span>sadachar</span></div>
-            <div class="auth-card">
-                <div class="form-heading">
-                    <span class="form-kicker">YOUR LEARNING SPACE</span>
-                    <h2 id="login-heading">Welcome back</h2>
-                    <p>Sign in to continue your journey.</p>
+<div class="container-xl py-5">
+    <div class="row g-5 align-items-center justify-content-center">
+        <!-- Left Side: Welcome & Assistive Preview Controls -->
+        <div class="col-lg-5">
+            <span class="pill-chip pill-chip-teal mb-3"><i class="bi bi-person-badge" aria-hidden="true"></i> Personal Workspace</span>
+            <h1 class="display-6 fw-black mb-3 font-headline" style="color: var(--ink);">
+                Welcome back to a learning space that <span class="retro-accent">fits</span> you.
+            </h1>
+            <p class="lead mb-4" style="color: var(--muted); font-size: 1.05rem; line-height: 1.625;">
+                Sign in to continue with your saved accessibility profile, customized contrast, fonts, and assistive speech tools.
+            </p>
+
+            <!-- Preview Settings Box Before Login -->
+            <div class="retro-card p-4 mb-4" style="background: var(--paper-card);">
+                <div class="fw-bold mb-3 d-flex align-items-center gap-2 font-headline fs-5">
+                    <i class="bi bi-eye" aria-hidden="true"></i> Preview settings before you sign in
                 </div>
-                <form asp-action="Login" method="post" id="auth-form" novalidate>
-                    <input asp-for="ReturnUrl" type="hidden" />
-                    <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert" tabindex="-1"></div>
-                    <div class="field-group">
-                        <label asp-for="Email" class="field-label"></label>
-                        <input asp-for="Email" class="auth-input" type="email" autocomplete="username" placeholder="you@example.com" aria-describedby="Email-error" required />
-                        <span asp-validation-for="Email" class="field-error" id="Email-error"></span>
-                    </div>
-                    <div class="field-group">
-                        <div class="label-row"><label asp-for="Password" class="field-label"></label><a asp-action="ForgotPassword" class="text-link forgot-link">Forgot password?</a></div>
-                        <div class="password-wrap">
-                            <input asp-for="Password" class="auth-input password-input" autocomplete="current-password" placeholder="Enter your password" aria-describedby="Password-error" required />
-                            <button class="password-toggle" type="button" data-password-toggle="Password" aria-controls="Password" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg><span class="toggle-label">Show</span></button>
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="fw-bold d-block">High-contrast mode</span>
+                            <small class="text-muted">Pure black & gold palette for low vision</small>
                         </div>
-                        <span asp-validation-for="Password" class="field-error" id="Password-error"></span>
+                        <button type="button" class="btn-retro-secondary py-1 px-3" id="btn-toggle-contrast" onclick="toggleContrastMode()" style="font-size: 0.85rem;">
+                            Toggle
+                        </button>
                     </div>
-                    <div class="form-options"><label class="check-label"><input asp-for="RememberMe" /><span class="custom-check" aria-hidden="true"></span><span>Remember me</span></label></div>
-                    <button class="submit-button" type="submit"><span>Sign in</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
-                </form>
-                <p class="auth-switch">New to Sadachar? <a asp-action="Register" class="text-link">Create an account <span aria-hidden="true">→</span></a></p>
-                <div class="secure-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.9 8.2 7 10 4.1-1.8 7-5.4 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg><span>Your information is private and secure</span></div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="fw-bold d-block">Large text</span>
+                            <small class="text-muted">Scale font size up by 125%</small>
+                        </div>
+                        <button type="button" class="btn-retro-secondary py-1 px-3" id="btn-toggle-large-text" onclick="toggleLargeText()" style="font-size: 0.85rem;">
+                            Toggle
+                        </button>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="fw-bold d-block">Read aloud sample</span>
+                            <small class="text-muted">Test browser speech synthesis</small>
+                        </div>
+                        <button type="button" class="btn-retro-secondary py-1 px-3" onclick="testReadAloud()" style="font-size: 0.85rem;">
+                            <i class="bi bi-volume-up" aria-hidden="true"></i> Play
+                        </button>
+                    </div>
+                </div>
             </div>
-            <footer class="form-footer"><a href="/" class="text-link">← Back to Sadachar</a><span>Made for learning without limits</span></footer>
-        </section>
-    </main>
-    <script src="/js/auth.js" defer></script>
-</body>
-</html>
+
+            <!-- Pre-seeded accounts quick fill with Avatars -->
+            <div class="p-3" style="background: var(--paper-card); border: 3px solid var(--ink); border-radius: 16px; box-shadow: 4px 4px 0 var(--ink);">
+                <strong class="d-block mb-2 font-headline" style="font-size: 0.92rem;"><i class="bi bi-key-fill text-warning"></i> Demo Accounts (Password: <code>Access@123</code>):</strong>
+                <div class="d-flex flex-wrap gap-2 pt-1">
+                    <button type="button" class="btn-retro-secondary py-1 px-2 d-inline-flex align-items-center gap-1" style="font-size: 0.82rem;" onclick="fillLogin('student@accessed.local')">
+                        <span style="width: 20px; height: 20px; display: inline-block;">@await Html.PartialAsync("_Avatar", "Echo")</span>
+                        Student
+                    </button>
+                    <button type="button" class="btn-retro-secondary py-1 px-2 d-inline-flex align-items-center gap-1" style="font-size: 0.82rem;" onclick="fillLogin('teacher@accessed.local')">
+                        <span style="width: 20px; height: 20px; display: inline-block;">@await Html.PartialAsync("_Avatar", "Pip")</span>
+                        Teacher
+                    </button>
+                    <button type="button" class="btn-retro-secondary py-1 px-2 d-inline-flex align-items-center gap-1" style="font-size: 0.82rem;" onclick="fillLogin('admin@accessed.local')">
+                        <span style="width: 20px; height: 20px; display: inline-block;">@await Html.PartialAsync("_Avatar", "Lumo")</span>
+                        Admin
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Tabbed Sign In / Register Form -->
+        <div class="col-lg-6 col-xl-5">
+            <div class="retro-card p-4" style="background: var(--paper-card);">
+                <!-- Segmented Tabs -->
+                <ul class="nav nav-pills nav-fill mb-4 p-1" style="background: var(--paper); border: 3px solid var(--ink); border-radius: 14px;" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link @(activeTab == "login" ? "active" : "") fw-bold" id="login-tab" data-bs-toggle="pill" data-bs-target="#tab-pane-login" type="button" role="tab" aria-controls="tab-pane-login" aria-selected="@(activeTab == "login" ? "true" : "false")" style="border-radius: 10px; color: var(--ink);">
+                            Sign in
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link @(activeTab == "register" ? "active" : "") fw-bold" id="register-tab" data-bs-toggle="pill" data-bs-target="#tab-pane-register" type="button" role="tab" aria-controls="tab-pane-register" aria-selected="@(activeTab == "register" ? "true" : "false")" style="border-radius: 10px; color: var(--ink);">
+                            Register
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="authTabContent">
+                    <!-- Tab Pane: Sign In -->
+                    <div class="tab-pane fade @(activeTab == "login" ? "show active" : "")" id="tab-pane-login" role="tabpanel" aria-labelledby="login-tab">
+                        <form asp-controller="Account" asp-action="Login" method="post" novalidate>
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" asp-for="ReturnUrl" />
+
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" style="border: 3px solid var(--ink); border-radius: 10px; font-size: 0.88rem;" role="alert"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label fw-bold">Email address</label>
+                                <input asp-for="Email" id="login-email-input" class="accessed-input" placeholder="student@accessed.local" autocomplete="email" required />
+                                <span asp-validation-for="Email" class="text-danger fw-bold" style="font-size: 0.85rem;"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <label asp-for="Password" class="form-label fw-bold">Password</label>
+                                    <a asp-action="ForgotPassword" class="text-decoration-none fw-bold" style="font-size: 0.85rem; color: var(--rust);">Forgot password?</a>
+                                </div>
+                                <input asp-for="Password" id="login-password-input" class="accessed-input" placeholder="••••••••" autocomplete="current-password" required />
+                                <span asp-validation-for="Password" class="text-danger fw-bold" style="font-size: 0.85rem;"></span>
+                            </div>
+
+                            <div class="mb-4 form-check">
+                                <input asp-for="RememberMe" class="form-check-input" style="border: 2px solid var(--ink);" />
+                                <label asp-for="RememberMe" class="form-check-label fw-bold" style="font-size: 0.9rem;">Remember me</label>
+                            </div>
+
+                            <button type="submit" class="btn-retro-primary w-100 py-2">
+                                Sign in <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tab Pane: Register -->
+                    <div class="tab-pane fade @(activeTab == "register" ? "show active" : "")" id="tab-pane-register" role="tabpanel" aria-labelledby="register-tab">
+                        <form asp-controller="Account" asp-action="Register" method="post" novalidate>
+                            @Html.AntiForgeryToken()
+
+                            <div class="mb-3">
+                                <label for="reg-fullname" class="form-label fw-bold">Full name</label>
+                                <input id="reg-fullname" name="FullName" value="@regModel.FullName" class="accessed-input" placeholder="Aarav Sharma" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="reg-email" class="form-label fw-bold">Email address</label>
+                                <input id="reg-email" name="Email" type="email" value="@regModel.Email" class="accessed-input" placeholder="aarav.sharma@college.edu" required />
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-sm-6">
+                                    <label for="reg-pwd" class="form-label fw-bold">Password</label>
+                                    <input id="reg-pwd" name="Password" type="password" class="accessed-input" placeholder="At least 8 chars" required />
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="reg-confirm" class="form-label fw-bold">Confirm password</label>
+                                    <input id="reg-confirm" name="ConfirmPassword" type="password" class="accessed-input" placeholder="Repeat password" required />
+                                </div>
+                            </div>
+
+                            <!-- Role Selector (Student or Teacher) with Avatar preview -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold d-block">Register as</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check d-flex align-items-center gap-1">
+                                        <input class="form-check-input" type="radio" name="Role" id="role-student" value="1" checked style="border: 2px solid var(--ink);">
+                                        <label class="form-check-label fw-bold d-flex align-items-center gap-1" for="role-student">
+                                            <span style="width: 22px; height: 22px; display: inline-block;">@await Html.PartialAsync("_Avatar", "Echo")</span>
+                                            Student
+                                        </label>
+                                    </div>
+                                    <div class="form-check d-flex align-items-center gap-1">
+                                        <input class="form-check-input" type="radio" name="Role" id="role-teacher" value="2" style="border: 2px solid var(--ink);">
+                                        <label class="form-check-label fw-bold d-flex align-items-center gap-1" for="role-teacher">
+                                            <span style="width: 22px; height: 22px; display: inline-block;">@await Html.PartialAsync("_Avatar", "Pip")</span>
+                                            Teacher
+                                        </label>
+                                    </div>
+                                    <div class="form-check text-muted" title="Admin registration is not public">
+                                        <input class="form-check-input" type="radio" id="role-admin" disabled style="border: 2px solid #ccc;">
+                                        <label class="form-check-label" for="role-admin">Admin</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Accessibility Needs (Optional) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold d-block mb-1">Accessibility guide match (optional)</label>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="AccessibilityNeeds" value="Visual" id="need-visual" style="border: 2px solid var(--ink);">
+                                        <label class="form-check-label fw-bold" for="need-visual">Visual (Lumo)</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="AccessibilityNeeds" value="Hearing" id="need-hearing" style="border: 2px solid var(--ink);">
+                                        <label class="form-check-label fw-bold" for="need-hearing">Hearing (Echo)</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="AccessibilityNeeds" value="Motor" id="need-motor" style="border: 2px solid var(--ink);">
+                                        <label class="form-check-label fw-bold" for="need-motor">Mobility (Roly)</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="AccessibilityNeeds" value="Learning" id="need-learning" style="border: 2px solid var(--ink);">
+                                        <label class="form-check-label fw-bold" for="need-learning">Dyslexic (Dot)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-retro-primary w-100 py-2">
+                                Create account <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function fillLogin(email) {
+            document.getElementById('login-email-input').value = email;
+            document.getElementById('login-password-input').value = 'Access@123';
+            const tabBtn = document.getElementById('login-tab');
+            if (tabBtn) {
+                const tab = new bootstrap.Tab(tabBtn);
+                tab.show();
+            }
+        }
+
+        function toggleContrastMode() {
+            document.body.classList.toggle('theme-high-contrast');
+            const isHigh = document.body.classList.contains('theme-high-contrast');
+            localStorage.setItem('accessed_theme', isHigh ? 'high-contrast' : 'paper');
+        }
+
+        function toggleLargeText() {
+            if (document.documentElement.style.fontSize === '20px') {
+                document.documentElement.style.fontSize = '16px';
+            } else {
+                document.documentElement.style.fontSize = '20px';
+            }
+        }
+
+        function testReadAloud() {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance("Welcome to AccessEd. Accessibility is active.");
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Web Speech API is not supported in this browser.");
+            }
+        }
+    </script>
+}

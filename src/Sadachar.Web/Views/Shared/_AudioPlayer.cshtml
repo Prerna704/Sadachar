@@ -1,0 +1,37 @@
+@model (string Title, string AudioUrl, string Duration)
+
+<div class="retro-card retro-audio-player p-3 mb-3" style="background: var(--paper-card); border: 3px solid var(--ink); border-radius: 16px; box-shadow: 5px 5px 0 var(--ink);" role="region" aria-label="Accessible Audio Player for @Model.Title">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="d-flex align-items-center gap-2">
+            <span class="pill-chip pill-chip-sky">
+                <i class="bi bi-soundwave" aria-hidden="true"></i> Audio Narration
+            </span>
+            <span class="fw-bold" style="font-size: 0.92rem; color: var(--ink);">@Model.Title</span>
+        </div>
+        <span class="text-muted fw-bold" style="font-size: 0.8rem;">@Model.Duration</span>
+    </div>
+
+    <div class="d-flex flex-wrap align-items-center gap-3">
+        <!-- Play / Pause Button -->
+        <button type="button" class="btn-retro-primary audio-play-btn" style="min-width: 44px; min-height: 44px; padding: 6px 16px;" aria-label="Play audio narration" data-playing="false">
+            <i class="bi bi-play-fill fs-5" aria-hidden="true"></i>
+            <span class="play-label">Play</span>
+        </button>
+
+        <!-- Progress track -->
+        <div class="flex-grow-1" style="min-width: 140px;">
+            <label for="audio-seek-@Model.Title.GetHashCode()" class="visually-hidden">Audio timeline</label>
+            <input type="range" id="audio-seek-@Model.Title.GetHashCode()" class="form-range" min="0" max="100" value="0" style="accent-color: var(--rust);" />
+        </div>
+
+        <!-- Speed Selector -->
+        <div class="btn-group" role="group" aria-label="Playback speed">
+            <button type="button" class="btn btn-sm btn-outline-dark fw-bold" style="border: 2px solid var(--ink); min-height: 44px; min-width: 44px;">1.0x</button>
+        </div>
+
+        <!-- Volume icon -->
+        <div class="d-flex align-items-center gap-1 text-muted" aria-hidden="true">
+            <i class="bi bi-volume-up-fill fs-5"></i>
+        </div>
+    </div>
+</div>

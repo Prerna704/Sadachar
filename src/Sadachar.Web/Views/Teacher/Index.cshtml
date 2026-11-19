@@ -1,0 +1,204 @@
+@model Sadachar.Web.ViewModels.TeacherDashboardViewModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "Teacher Dashboard";
+}
+
+<!-- Welcome Header with Pip Avatar -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 p-4 retro-card" style="background: var(--paper-card);">
+    <div class="d-flex align-items-center gap-3">
+        <div class="brush-blob brush-blob-teal" style="width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <div style="width: 56px; height: 56px;">
+                @await Html.PartialAsync("_Avatar", "Pip")
+            </div>
+        </div>
+        <div>
+            <span class="pill-chip pill-chip-teal mb-1"><i class="bi bi-mortarboard-fill"></i> Faculty Workspace</span>
+            <h1 class="h2 fw-black mb-1 font-headline" style="color: var(--ink);">Teacher <span class="retro-accent">dashboard</span></h1>
+            <p class="text-muted mb-0 fw-semibold" style="font-size: 0.95rem;">@Model.DepartmentInfo</p>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn-retro-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+            <i class="bi bi-upload me-1" aria-hidden="true"></i> Upload material
+        </button>
+    </div>
+</div>
+
+<!-- 4 Stat Cards Row using _StatCard Partial -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        @await Html.PartialAsync("_StatCard", ("Courses", Model.ActiveCoursesCount.ToString(), "Faculty catalog", "bi-journal-bookmark", "teal"))
+    </div>
+    <div class="col-6 col-lg-3">
+        @await Html.PartialAsync("_StatCard", ("Students", Model.EnrolledStudentsCount.ToString(), "Enrolled active", "bi-people", "rust"))
+    </div>
+    <div class="col-6 col-lg-3">
+        @await Html.PartialAsync("_StatCard", ("Avg. Score", Model.AvgAccessibilityScore.ToString() + "%", "WCAG 2.2 verified", "bi-patch-check", "mustard"))
+    </div>
+    <div class="col-6 col-lg-3">
+        @await Html.PartialAsync("_StatCard", ("To Fix", Model.ItemsToFixCount.ToString(), "Remediations pending", "bi-exclamation-triangle", "coral"))
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Course Accessibility List -->
+    <div class="col-lg-7">
+        <div class="retro-card mb-4" style="background: var(--paper-card);">
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 3px solid var(--ink);">
+                <h2 class="h5 fw-black mb-0 font-headline">Course accessibility status</h2>
+                <button type="button" class="btn-retro-secondary py-1 px-3" data-bs-toggle="modal" data-bs-target="#uploadModal" style="font-size: 0.85rem;">
+                    Upload material
+                </button>
+            </div>
+
+            <div class="d-flex flex-column gap-3">
+                @foreach (var c in Model.Courses)
+                {
+                    var isCompliant = c.AccessibilityScore >= 80;
+                    var chipVariant = isCompliant ? "teal" : "mustard";
+
+                    <div class="p-3 d-flex align-items-center justify-content-between" style="background: var(--paper); border: 2.5px solid var(--ink); border-radius: 14px; box-shadow: 3px 3px 0 var(--ink);">
+                        <div>
+                            <span class="fw-black font-headline d-block" style="font-size: 1rem;">@c.Title</span>
+                            <small class="text-muted fw-semibold">@c.Department · @c.ActiveTerm</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="pill-chip pill-chip-@chipVariant py-1 px-3">
+                                <i class="bi bi-shield-check me-1"></i> @c.AccessibilityScore%
+                            </span>
+                            <a asp-controller="Resources" asp-action="Index" class="btn-retro-secondary py-1 px-2" style="font-size: 0.85rem;" title="View materials">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Students Who May Need Support -->
+        <div id="students" class="retro-card" style="background: var(--paper-card);">
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 3px solid var(--ink);">
+                <h2 class="h5 fw-black mb-0 font-headline">Accommodation requests</h2>
+                <span class="pill-chip pill-chip-mustard">2 pending</span>
+            </div>
+
+            <div class="d-flex flex-column gap-3">
+                @foreach (var s in Model.StudentSupportQueue)
+                {
+                    <div class="p-3 d-flex align-items-center justify-content-between" style="background: var(--paper); border: 2.5px solid var(--ink); border-radius: 12px; box-shadow: 2px 2px 0 var(--ink);">
+                        <div>
+                            <span class="fw-black font-headline d-block">@s.StudentName</span>
+                            <small class="text-muted fw-semibold">@s.RequestDescription</small>
+                        </div>
+                        <div>
+                            <span class="pill-chip @(s.Status == "Approved" ? "pill-chip-teal" : "pill-chip-mustard") py-0 px-2" style="font-size: 0.75rem;">
+                                @s.Status
+                            </span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Upload Checklist Card -->
+    <div class="col-lg-5">
+        <div class="retro-card sticky-top" style="top: 24px; background: var(--paper-card);">
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 3px solid var(--ink);">
+                <h2 class="h5 fw-black mb-0 font-headline">Upload checklist</h2>
+                <span class="pill-chip pill-chip-sky py-0 px-2" style="font-size: 0.75rem;">Pre-flight</span>
+            </div>
+            <p class="text-muted mb-4 fw-semibold" style="font-size: 0.88rem;">
+                Standard accessibility verification automatically performed on every uploaded learning artifact:
+            </p>
+
+            <ul class="list-unstyled d-flex flex-column gap-3 mb-4">
+                <li class="p-3 d-flex align-items-center justify-content-between" style="background: var(--paper); border: 2px solid var(--ink); border-radius: 10px; box-shadow: 2px 2px 0 var(--ink);">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-check-circle-fill text-success fs-5" aria-hidden="true"></i>
+                        <span class="fw-bold" style="font-size: 0.95rem;">Alt text on visuals</span>
+                    </div>
+                    <span class="pill-chip pill-chip-teal py-0 px-2" style="font-size: 0.72rem;">Passed</span>
+                </li>
+                <li class="p-3 d-flex align-items-center justify-content-between" style="background: var(--paper); border: 2px solid var(--ink); border-radius: 10px; box-shadow: 2px 2px 0 var(--ink);">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-check-circle-fill text-success fs-5" aria-hidden="true"></i>
+                        <span class="fw-bold" style="font-size: 0.95rem;">Captions & subtitles</span>
+                    </div>
+                    <span class="pill-chip pill-chip-teal py-0 px-2" style="font-size: 0.72rem;">Passed</span>
+                </li>
+                <li class="p-3 d-flex align-items-center justify-content-between" style="background: var(--paper); border: 2px solid var(--ink); border-radius: 10px; box-shadow: 2px 2px 0 var(--ink);">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-check-circle-fill text-success fs-5" aria-hidden="true"></i>
+                        <span class="fw-bold" style="font-size: 0.95rem;">Semantic heading hierarchy</span>
+                    </div>
+                    <span class="pill-chip pill-chip-teal py-0 px-2" style="font-size: 0.72rem;">Passed</span>
+                </li>
+                <li class="p-3 d-flex align-items-center justify-content-between" style="background: var(--paper); border: 2px solid var(--ink); border-radius: 10px; box-shadow: 2px 2px 0 var(--ink);">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-triangle-fill text-warning fs-5" aria-hidden="true"></i>
+                        <span class="fw-bold" style="font-size: 0.95rem;">Contrast verified</span>
+                    </div>
+                    <span class="pill-chip pill-chip-mustard py-0 px-2" style="font-size: 0.72rem;">Review</span>
+                </li>
+            </ul>
+
+            <div class="p-3" style="background: var(--paper); border: 2.5px solid var(--ink); border-radius: 12px;">
+                <span class="fw-bold d-block mb-1 font-headline" style="font-size: 0.88rem;"><i class="bi bi-shield-lock-fill text-primary"></i> RPwD Statutory Audit:</span>
+                <small class="text-muted d-block fw-semibold" style="font-size: 0.8rem;">
+                    Uploads with contrast below 4.5:1 generate a mandatory remediation task before publishing to students.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Material Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content retro-card" style="border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); border-radius: 18px; background: var(--paper-card);">
+            <div class="modal-header" style="border-bottom: 3px solid var(--ink);">
+                <h2 class="modal-title fs-5 fw-black font-headline" id="uploadModalLabel">Upload accessible material</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="UploadMaterial" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label for="up-title" class="form-label fw-bold">Material title</label>
+                        <input id="up-title" name="title" class="accessed-input" placeholder="e.g. Graph Traversal Algorithms" required />
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label for="up-subject" class="form-label fw-bold">Subject</label>
+                            <input id="up-subject" name="subject" class="accessed-input" value="Computer Science" required />
+                        </div>
+                        <div class="col-6">
+                            <label for="up-module" class="form-label fw-bold">Module</label>
+                            <input id="up-module" name="module" class="accessed-input" value="Module 5 › Lesson 1" required />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="up-format" class="form-label fw-bold">Primary format</label>
+                        <select id="up-format" name="format" class="accessed-select">
+                            <option value="Audio">Audio narration</option>
+                            <option value="Captioned video">Captioned video</option>
+                            <option value="Easy-read">Easy-read simplified version</option>
+                            <option value="Large print">Large print formatted</option>
+                            <option value="Braille-ready">Braille-ready file (.BRF)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="up-content" class="form-label fw-bold">Text content (for TTS Reader & Transcription)</label>
+                        <textarea id="up-content" name="content" rows="4" class="accessed-textarea" placeholder="Paste the reading text here so sentence-level TTS highlighting and screen readers can access it..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 3px solid var(--ink);">
+                    <button type="button" class="btn-retro-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-retro-primary">Validate & Publish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
