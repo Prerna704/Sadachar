@@ -1,0 +1,179 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Education that adapts to every learner";
+}
+
+<!-- Hero Section -->
+<section class="py-5 halftone-bg" style="border-bottom: 3px solid var(--ink); position: relative;">
+    <div class="container-xl">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <span class="pill-chip pill-chip-teal mb-3">
+                    <i class="bi bi-shield-check" aria-hidden="true"></i> Built around WCAG 2.2 AA principles
+                </span>
+                <h1 class="display-4 fw-black mb-3 font-headline" style="color: var(--ink); line-height: 1.15;">
+                    Education that <span class="retro-accent">adapts</span> to every learner.
+                </h1>
+                <p class="lead mb-4" style="color: var(--muted); font-size: 1.15rem; line-height: 1.625;">
+                    AccessEd brings accessible learning resources, assistive speech tools, and transparent statutory compliance together for specially-abled students and inclusive institutions.
+                </p>
+                <div class="d-flex flex-wrap gap-3 mb-5">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a asp-controller="Dashboard" asp-action="Index" class="btn-retro-primary text-decoration-none">
+                            Go to your workspace <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Register" class="btn-retro-primary text-decoration-none">
+                            Start learning <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                        </a>
+                        <a href="#features" class="btn-retro-secondary text-decoration-none">
+                            <i class="bi bi-play-circle" aria-hidden="true"></i> Explore features
+                        </a>
+                    }
+                </div>
+
+                <!-- 3 Retro Stat Cards Row -->
+                <div class="row g-3 pt-3" style="border-top: 3px solid var(--ink);">
+                    <div class="col-4">
+                        <div class="font-headline fs-2 fw-black" style="color: var(--rust);">4</div>
+                        <div class="text-muted fw-bold" style="font-size: 0.82rem;">Needs supported</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="font-headline fs-2 fw-black" style="color: var(--teal);">3</div>
+                        <div class="text-muted fw-bold" style="font-size: 0.82rem;">Role workspaces</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="font-headline fs-2 fw-black" style="color: var(--mustard);">100%</div>
+                        <div class="text-muted fw-bold" style="font-size: 0.82rem;">WCAG 2.2 compliant</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Art with Painted Brush Blob & Fluffy Avatars Showcase -->
+            <div class="col-lg-6">
+                <div class="retro-card p-4" style="background: var(--paper-card); position: relative;">
+                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 3px solid var(--ink);">
+                        <div class="d-flex gap-2">
+                            <span class="pill-chip pill-chip-sky"><i class="bi bi-volume-up" aria-hidden="true"></i> TTS active</span>
+                            <span class="pill-chip pill-chip-teal"><i class="bi bi-badge-cc" aria-hidden="true"></i> Captions on</span>
+                        </div>
+                        <span class="pill-chip pill-chip-mustard">Interactive Preview</span>
+                    </div>
+
+                    <!-- Avatars Showcase Grid inside Hero -->
+                    <div class="d-flex justify-content-around align-items-center py-3 mb-3" style="background: var(--paper); border: 3px solid var(--ink); border-radius: 14px; box-shadow: 3px 3px 0 var(--ink);">
+                        <div class="text-center brush-blob brush-blob-sage" style="width: 70px; height: 70px;" title="Lumo (Low Vision)">
+                            <div style="width: 58px; height: 58px; margin: 0 auto;">
+                                @await Html.PartialAsync("_Avatar", "Lumo")
+                            </div>
+                            <span class="fw-bold d-block mt-1" style="font-size: 0.72rem;">Lumo</span>
+                        </div>
+                        <div class="text-center brush-blob brush-blob-coral" style="width: 70px; height: 70px;" title="Roly (Mobility)">
+                            <div style="width: 58px; height: 58px; margin: 0 auto;">
+                                @await Html.PartialAsync("_Avatar", "Roly")
+                            </div>
+                            <span class="fw-bold d-block mt-1" style="font-size: 0.72rem;">Roly</span>
+                        </div>
+                        <div class="text-center brush-blob brush-blob-mustard" style="width: 70px; height: 70px;" title="Dot (Dyslexia)">
+                            <div style="width: 58px; height: 58px; margin: 0 auto;">
+                                @await Html.PartialAsync("_Avatar", "Dot")
+                            </div>
+                            <span class="fw-bold d-block mt-1" style="font-size: 0.72rem;">Dot</span>
+                        </div>
+                        <div class="text-center brush-blob brush-blob-teal" style="width: 70px; height: 70px;" title="Brailly (Blind)">
+                            <div style="width: 58px; height: 58px; margin: 0 auto;">
+                                @await Html.PartialAsync("_Avatar", "Brailly")
+                            </div>
+                            <span class="fw-bold d-block mt-1" style="font-size: 0.72rem;">Brailly</span>
+                        </div>
+                    </div>
+
+                    <h2 class="fs-4 fw-black mb-2 font-headline">Linked Lists: Head Insertion</h2>
+                    <p class="mb-4" style="line-height: 1.625; font-size: 0.98rem;">
+                        A node stores data and a pointer to the next node. To insert at the head,
+                        <mark class="tts-sentence active-sentence" style="padding: 2px 8px;">create a new node and point it to the old head.</mark>
+                        Then update the head pointer.
+                    </p>
+
+                    <!-- Interactive Audio Bar Partial -->
+                    @await Html.PartialAsync("_AudioPlayer", ("Data Structures: Lecture 04", "#", "04:12"))
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3 Feature Pillars -->
+<section id="features" class="py-5">
+    <div class="container-xl">
+        <div class="text-center mb-5">
+            <span class="pill-chip pill-chip-mustard mb-2">Core Pillars</span>
+            <h2 class="display-6 fw-black font-headline">Designed for access from the ground up</h2>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="retro-card h-100">
+                    <div class="brush-blob brush-blob-mustard mb-3" style="width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
+                        <div style="width: 50px; height: 50px;">
+                            @await Html.PartialAsync("_Avatar", "Dot")
+                        </div>
+                    </div>
+                    <h3 class="fs-4 fw-black mb-2 font-headline">Adaptive reading</h3>
+                    <p class="text-muted mb-0" style="line-height: 1.6;">
+                        Font scaling, spacing, high-contrast themes and dyslexia typography (Lexend) that remember each learner across devices.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="retro-card h-100">
+                    <div class="brush-blob brush-blob-rust mb-3" style="width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
+                        <div style="width: 50px; height: 50px;">
+                            @await Html.PartialAsync("_Avatar", "Echo")
+                        </div>
+                    </div>
+                    <h3 class="fs-4 fw-black mb-2 font-headline">Listen & caption</h3>
+                    <p class="text-muted mb-0" style="line-height: 1.6;">
+                        Text-to-speech with sentence highlighting, captioned video transcripts, speed adjustments, and instant keyboard shortcuts.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="retro-card h-100">
+                    <div class="brush-blob brush-blob-teal mb-3" style="width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
+                        <div style="width: 50px; height: 50px;">
+                            @await Html.PartialAsync("_Avatar", "Pip")
+                        </div>
+                    </div>
+                    <h3 class="fs-4 fw-black mb-2 font-headline">Governed support</h3>
+                    <p class="text-muted mb-0" style="line-height: 1.6;">
+                        Complaints, barrier reports, audits and statutory compliance tracked with clear ownership, confidential submissions, and 72h SLA.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Compliance & Institutions Banner -->
+<section id="compliance" class="py-5" style="background: var(--paper-card); border-top: 3px solid var(--ink); border-bottom: 3px solid var(--ink);">
+    <div class="container-xl">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <span class="pill-chip pill-chip-teal mb-2">Statutory Compliance</span>
+                <h2 class="fs-2 fw-black mb-2 font-headline">Aligned with WCAG 2.2 AA & RPwD Act 2016</h2>
+                <p class="text-muted mb-0" style="line-height: 1.6;">
+                    Educational institutions get an autonomous governance engine that monitors learning resources, computes contrast scores, tracks barrier resolution within 72 hours, and pseudonymizes user data in compliance with DPDP Act 2023.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a asp-controller="Resources" asp-action="Index" class="btn-retro-primary text-decoration-none">
+                    Explore learning library <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

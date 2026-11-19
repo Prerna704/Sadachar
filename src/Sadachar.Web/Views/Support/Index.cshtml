@@ -1,0 +1,169 @@
+@model Sadachar.Web.ViewModels.SupportPortalViewModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "Support and Complaints Portal";
+}
+
+<div class="mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <div class="brush-blob brush-blob-coral" style="width: 54px; height: 54px; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 44px; height: 44px;">
+                @await Html.PartialAsync("_Avatar", "Roly")
+            </div>
+        </div>
+        <div>
+            <h1 class="h2 fw-black mb-1 font-headline">Support & <span class="retro-accent">grievance</span></h1>
+            <p class="text-muted mb-0 fw-semibold" style="font-size: 1rem;">Report access barriers, accommodation needs, and track resolution under 72h SLA</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: New Request Form -->
+    <div class="col-lg-6">
+        <div class="retro-card" style="background: var(--paper-card);">
+            <h2 class="h5 fw-black mb-3 pb-2 font-headline" style="border-bottom: 3px solid var(--ink);">
+                <i class="bi bi-plus-circle me-1" aria-hidden="true"></i> Submit barrier report
+            </h2>
+
+            <form asp-action="Create" method="post" novalidate>
+                @Html.AntiForgeryToken()
+
+                <div class="row g-2 mb-3">
+                    <div class="col-sm-6">
+                        <label asp-for="NewTicket.Category" class="form-label fw-bold">Category</label>
+                        <select asp-for="NewTicket.Category" class="accessed-select" required>
+                            <option value="Inaccessible material">Inaccessible material</option>
+                            <option value="Facilities / Physical barrier">Facilities / Physical barrier</option>
+                            <option value="Media captions & transcripts">Media captions & transcripts</option>
+                            <option value="Exam accommodation">Exam accommodation</option>
+                            <option value="Ableist conduct / Harassment">Ableist conduct / Harassment</option>
+                        </select>
+                        <span asp-validation-for="NewTicket.Category" class="text-danger fw-bold" style="font-size: 0.82rem;"></span>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label asp-for="NewTicket.Priority" class="form-label fw-bold">Urgency</label>
+                        <select asp-for="NewTicket.Priority" class="accessed-select" required>
+                            <option value="High">High (Immediate barrier)</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                        <span asp-validation-for="NewTicket.Priority" class="text-danger fw-bold" style="font-size: 0.82rem;"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="NewTicket.Subject" class="form-label fw-bold">Subject</label>
+                    <input asp-for="NewTicket.Subject" class="accessed-input" placeholder="e.g. PDF not screen-reader friendly" required />
+                    <span asp-validation-for="NewTicket.Subject" class="text-danger fw-bold" style="font-size: 0.82rem;"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="NewTicket.Description" class="form-label fw-bold">Describe the barrier</label>
+                    <textarea asp-for="NewTicket.Description" rows="4" class="accessed-textarea" placeholder="The PDF for Module 3 cannot be read by my screen reader..." required></textarea>
+                    <span asp-validation-for="NewTicket.Description" class="text-danger fw-bold" style="font-size: 0.82rem;"></span>
+                </div>
+
+                <!-- Confidential Option (DPDP Compliant) -->
+                <div class="mb-4 p-3" style="background: var(--paper); border: 2.5px solid var(--ink); border-radius: 12px;">
+                    <div class="form-check">
+                        <input asp-for="NewTicket.IsConfidential" class="form-check-input" style="border: 2px solid var(--ink);" />
+                        <label asp-for="NewTicket.IsConfidential" class="form-check-label fw-bold">
+                            Submit confidentially
+                        </label>
+                    </div>
+                    <small class="text-muted d-block mt-1 fw-semibold" style="font-size: 0.8rem;">
+                        Your identity will be pseudonymized under DPDP Act 2023 regulations and handled exclusively by the Ombudsman.
+                    </small>
+                </div>
+
+                <button type="submit" class="btn-retro-primary w-100 py-2">
+                    Submit request <i class="bi bi-send-fill ms-1" aria-hidden="true"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Column: Help Centre & My Requests -->
+    <div class="col-lg-6">
+        <!-- Help Centre -->
+        <div class="retro-card mb-4" style="background: var(--paper-card);">
+            <h2 class="h5 fw-black mb-3 font-headline">Help centre & resources</h2>
+            <div class="row g-2">
+                <div class="col-sm-6">
+                    <div class="p-3 h-100" style="background: var(--paper); border: 2.5px solid var(--ink); border-radius: 12px; box-shadow: 3px 3px 0 var(--ink);">
+                        <span class="fw-black font-headline d-block mb-1">Reporting guide</span>
+                        <small class="text-muted d-block mb-2 fw-semibold">2 min read</small>
+                        <a href="#" onclick="alert('Help Guide: You can report digital barriers like lack of alt-text, missing captions, or physical access issues like blocked ramps.'); return false;" class="fw-bold text-decoration-none" style="font-size: 0.85rem; color: var(--rust);">Read guide &rarr;</a>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 h-100" style="background: var(--paper); border: 2.5px solid var(--ink); border-radius: 12px; box-shadow: 3px 3px 0 var(--ink);">
+                        <span class="fw-black font-headline d-block mb-1">Statutory rights</span>
+                        <small class="text-muted d-block mb-2 fw-semibold">5 min read</small>
+                        <a href="#" onclick="alert('Rights Guide: Institutional policy guarantees 72-hour turnaround for accommodation requests under the RPwD Act 2016.'); return false;" class="fw-bold text-decoration-none" style="font-size: 0.85rem; color: var(--rust);">Read policies &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Requests Table -->
+        <div class="retro-card" style="background: var(--paper-card);">
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 3px solid var(--ink);">
+                <h2 class="h5 fw-black mb-0 font-headline">My requests</h2>
+                <span class="pill-chip pill-chip-mustard">@Model.MyTickets.Count logged</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle" style="font-size: 0.88rem;">
+                    <thead>
+                        <tr style="border-bottom: 2.5px solid var(--ink);">
+                            <th scope="col" class="fw-black font-headline">ID</th>
+                            <th scope="col" class="fw-black font-headline">Subject</th>
+                            <th scope="col" class="fw-black font-headline">Opened</th>
+                            <th scope="col" class="fw-black font-headline">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.MyTickets.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center py-4">
+                                    <div class="text-muted fw-bold">No barrier reports logged yet.</div>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var t in Model.MyTickets)
+                            {
+                                var chipVariant = t.Status.ToLower() switch
+                                {
+                                    "resolved" or "closed" => "teal",
+                                    "in review" => "mustard",
+                                    "open" => "coral",
+                                    _ => "sage"
+                                };
+
+                                <tr style="border-bottom: 1.5px solid var(--ink);">
+                                    <td><span class="fw-black font-headline">@t.TicketNumber</span></td>
+                                    <td>
+                                        <div class="fw-bold font-headline">@t.Subject</div>
+                                        <small class="text-muted fw-semibold">@t.Category</small>
+                                    </td>
+                                    <td class="fw-semibold">@t.CreatedAtUtc.ToString("dd MMM")</td>
+                                    <td>
+                                        <span class="pill-chip pill-chip-@chipVariant py-0 px-2" style="font-size: 0.75rem;">
+                                            @t.Status
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

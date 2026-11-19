@@ -11,3 +11,7 @@
 # Local configuration and logs
 appsettings.Local.json
 *.log
+*.db
+*.db-shm
+*.db-wal
+

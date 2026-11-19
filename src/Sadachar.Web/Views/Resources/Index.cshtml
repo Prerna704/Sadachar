@@ -1,0 +1,128 @@
+@model Sadachar.Web.ViewModels.ResourcesCatalogViewModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "Accessible Learning Resources";
+}
+
+<div class="mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <div class="brush-blob brush-blob-teal" style="width: 54px; height: 54px; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 44px; height: 44px;">
+                @await Html.PartialAsync("_Avatar", "Echo")
+            </div>
+        </div>
+        <div>
+            <h1 class="h2 fw-black mb-1 font-headline">Accessible <span class="retro-accent">library</span></h1>
+            <p class="text-muted mb-0 fw-semibold" style="font-size: 1rem;">Find materials crafted in the format that empowers you</p>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Sort Controls -->
+<form asp-action="Index" method="get" class="mb-4">
+    <input type="hidden" name="format" value="@Model.SelectedFormat" />
+    <div class="row g-3 align-items-center">
+        <div class="col-md-8">
+            <div class="position-relative">
+                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" aria-hidden="true"></i>
+                <label for="resource-search" class="visually-hidden">Search resources</label>
+                <input id="resource-search" type="search" name="search" value="@Model.SearchQuery" class="accessed-input ps-5" placeholder="Search by title, subject or format..." aria-label="Search by title, subject or format" />
+            </div>
+        </div>
+        <div class="col-md-4 d-flex justify-content-md-end gap-2">
+            <label for="sort-select" class="visually-hidden">Sort by</label>
+            <select id="sort-select" name="sort" class="accessed-select" onchange="this.form.submit()" style="max-width: 200px;">
+                <option value="recent" selected="@(Model.SortOrder == "recent")">Recently added</option>
+                <option value="title" selected="@(Model.SortOrder == "title")">Title (A-Z)</option>
+                <option value="score" selected="@(Model.SortOrder == "score")">WCAG score</option>
+            </select>
+            <button type="submit" class="btn-retro-secondary py-2 px-3">Filter</button>
+        </div>
+    </div>
+</form>
+
+<!-- Format Filter Pills -->
+<div class="d-flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Format filter tabs">
+    @foreach (var fmt in Model.AvailableFormats)
+    {
+        var isActive = string.Equals(Model.SelectedFormat, fmt, StringComparison.OrdinalIgnoreCase)
+            || (string.IsNullOrWhiteSpace(Model.SelectedFormat) && fmt == "All");
+
+        <a asp-action="Index" asp-route-format="@fmt" asp-route-search="@Model.SearchQuery" asp-route-sort="@Model.SortOrder"
+           class="pill-chip @(isActive ? "pill-chip-mustard" : "pill-chip-sage") text-decoration-none" role="tab" aria-selected="@(isActive ? "true" : "false")" style="font-size: 0.9rem; padding: 6px 16px;">
+            @fmt
+        </a>
+    }
+</div>
+
+<!-- Material Cards Grid -->
+<div class="row g-4">
+    @if (Model.Materials == null || Model.Materials.Count == 0)
+    {
+        <div class="col-12">
+            @await Html.PartialAsync("_EmptyState", ("No resources found", "Try clearing your format filter or search keywords to discover more accessible content.", "Dot", "Reset filters", "/Resources"))
+        </div>
+    }
+    else
+    {
+        @foreach (var item in Model.Materials)
+        {
+            var primaryFormat = item.Formats.FirstOrDefault()?.FormatType ?? "Text";
+            var badgeVariant = primaryFormat.ToLower() switch
+            {
+                "audio" => "sky",
+                "easy-read" => "mustard",
+                "captioned" or "captioned video" => "teal",
+                "sign video" => "sage",
+                "large print" => "coral",
+                "braille-ready" => "rust",
+                _ => "sage"
+            };
+
+            <div class="col-md-6 col-lg-4">
+                <div class="retro-card h-100 d-flex flex-column justify-content-between p-4" style="background: var(--paper-card);">
+                    <div>
+                        <!-- Header Format Badge & Duration -->
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="pill-chip pill-chip-@badgeVariant">
+                                <i class="bi bi-tag-fill me-1" aria-hidden="true"></i> @primaryFormat
+                            </span>
+                            <span class="text-muted fw-bold" style="font-size: 0.85rem;">
+                                <i class="bi bi-clock me-1" aria-hidden="true"></i> @item.EstimatedMinutes min
+                            </span>
+                        </div>
+
+                        <!-- Title and Subject -->
+                        <h2 class="h5 fw-black mb-1 font-headline">@item.Title</h2>
+                        <span class="text-muted fw-semibold d-block mb-3" style="font-size: 0.88rem;">@item.Subject</span>
+
+                        <!-- Formats Pill List -->
+                        <div class="d-flex flex-wrap gap-1 mb-3">
+                            @foreach (var f in item.Formats)
+                            {
+                                <span class="pill-chip pill-chip-sage" style="font-size: 0.72rem; padding: 2px 8px;">@f.FormatType</span>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Bottom Bar: Score & Action Links -->
+                    <div class="pt-3" style="border-top: 2px solid var(--ink);">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="pill-chip pill-chip-teal py-0 px-2" style="font-size: 0.75rem;">
+                                <i class="bi bi-shield-check me-1"></i> @item.AccessibilityScore% Accessible
+                            </span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a asp-action="Details" asp-route-id="@item.MaterialId" class="btn-retro-secondary flex-grow-1 text-center py-1 px-2" style="font-size: 0.85rem;">
+                                Details
+                            </a>
+                            <a asp-action="Reader" asp-route-id="@item.MaterialId" class="btn-retro-primary text-center py-1 px-3" style="font-size: 0.85rem;" title="Listen in TTS Reader">
+                                <i class="bi bi-volume-up" aria-hidden="true"></i> Read
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

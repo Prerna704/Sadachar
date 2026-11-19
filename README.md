@@ -1,151 +1,72 @@
-# Sadachar (सदाचार) — Education Without Barriers.
-
-<p align="center">
-ar   <img src="src/Sadachar.Web/wwwroot/images/logo.jpg" alt="Sadachar: Inclusive Education Ecosystem - Education Without Barriers" width="460" />
-</p>
+# AccessEd — Education for Every Learner
 
 > **Inclusive Education Ecosystem for Specially-Abled Students**  
-> *Education Without Barriers. Automating Compliance (RPwD Act 2016, WCAG 2.2), Enforcing Governance (72-Hour Grievance SLAs), and Monitoring Safe Digital Conduct (DPDP Act 2023).*
+> Modern Web Programming project implementing accessibility tools, RPwD Act 2016 / WCAG 2.2 Level AA compliance, 72-Hour grievance SLAs, and DPDP Act 2023 privacy governance.
 
 ---
 
-## 🏛️ Project Overview (Smart India Hackathon)
-
-Educational institutions frequently struggle with three systemic governance gaps regarding Persons with Disabilities (PwD / Divyangjan):
-1. **Compliance Blindspots**: Learning materials and institutional portals are uploaded without validating against **WCAG 2.2 Level AA** or India's **RPwD Act 2016** (Sections 40 & 42).
-2. **Administrative Inertia**: Grievances filed by specially-abled students regarding physical or digital barriers often languish without accountability.
-3. **Privacy & Safe Conduct Risks**: Inappropriate ableist conduct or harassment goes unmonitored, or monitoring systems violate privacy norms under India's **Digital Personal Data Protection (DPDP) Act 2023**.
-
-**Sadachar** solves all three with an integrated .NET Clean Architecture ecosystem, turning the mission of **"Education Without Barriers."** into an enforceable, transparent reality.
-
----
-
-## 🏗️ Architecture & Tech Stack
-
-```text
-Sadachar/
-├── Sadachar.slnx
-└── src/
-    ├── Sadachar.Core/                     # Domain Entities, Enums, Interfaces
-    │   ├── Entities/                      # ApplicationUser, ComplianceLog, GrievanceTicket, ConductLog
-    │   ├── Enums/                         # UserRole, DisabilityType, TicketStatus, IncidentType
-    │   └── Interfaces/                    # IComplianceRepository, IGrievanceRepository, ISlaEscalationService, ...
-    ├── Sadachar.Infrastructure/           # EF Core, SQL Server, Repositories, Background Daemon
-    │   ├── Data/                          # ApplicationDbContext
-    │   ├── Repositories/                  # ComplianceRepository, GrievanceRepository, ConductRepository
-    │   └── Services/                      # SlaEscalationService, SlaEscalationBackgroundService
-    └── Sadachar.Web/                      # ASP.NET Core Web API + Accessible Frontend
-        ├── Controllers/                   # ComplianceController, GovernanceController, ConductController
-        ├── DTOs/                          # Strictly-typed API Request & Response Contracts
-        └── wwwroot/                       # Accessible Web Portal (High Contrast, Font Resizing, WCAG 2.2 AAA)
-```
-
-The solution, source folders, project files, C# namespaces, output assemblies, and database use the **Sadachar** name.
-
-- **Backend**: C# 14, .NET 10 / ASP.NET Core MVC and Web API, Entity Framework Core 10.
-- **Database**: Microsoft SQL Server / LocalDB.
-- **Security & Identity**: ASP.NET Core Identity with Role-Based Access Control (RBAC).
-- **Background Automation**: Autonomous `BackgroundService` with `PeriodicTimer` for statutory 72-Hour SLA audits.
-- **Accessible UI**: Razor views for MVC pages and a static portal built with semantic HTML5, Bootstrap 5.3, WCAG 2.2 keyboard navigation, high-contrast mode, and dynamic text scaling.
-
----
-
-## 📜 Regulatory Alignment
-
-### 1. RPwD Act 2016 & WCAG 2.2 Level AA
-- Automatically computes weighted scores across:
-  - Color Contrast (25%)
-  - Alt-Text / Captions (25%)
-  - Keyboard Navigability (25%)
-  - ARIA Screen Reader Compatibility (25%)
-- Scores $\ge 80.00\%$ receive institutional certification; scores below trigger remediation flags.
-
-### 2. Statutory 72-Hour Grievance SLA
-- Every grievance logged initializes `SLAExpiryDateTime = CreatedAt.AddHours(72)`.
-- The autonomous background daemon (`SlaEscalationBackgroundService`) runs every 15 minutes.
-- If $DateTime.UtcNow > SLAExpiryDateTime$ and status is `Open` or `InProgress`, the ticket transitions immediately to `Escalated` for Ombudsman intervention.
-
-### 3. DPDP Act 2023 (Digital Personal Data Protection)
-- **Pseudonymization (Section 4)**: Actor IDs are hashed using SHA-256 with an institutional salt before persistence.
-- **Data Minimization (Section 8)**: Text snippets are sanitized to scrub PII (phone numbers, email addresses).
-- **Storage Limitation**: Records carry a strict retention timestamp (`DataRetentionExpiryUtc`), purgeable via automated job.
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- [.NET SDK](https://dotnet.microsoft.com/download) (.NET 10)
-- SQL Server (or LocalDB installed with Visual Studio / VS Code)
-
-### Run the Application
+## 🚀 Quick Start
 
 ```bash
-# 1. Restore & Build Solution
+# 1. Build the solution
 dotnet build Sadachar.slnx
 
-# 2. Run the Web Application
+# 2. Run the application
 dotnet run --project src/Sadachar.Web/Sadachar.Web.csproj
 ```
 
-Once running:
-- **Interactive Accessible Portal**: Open `http://localhost:5024` in your browser.
-- **Swagger OpenAPI Documentation**: Open `http://localhost:5024/swagger`.
-- **ASP.NET Core MVC / Razor example**: Open `https://localhost:7053/Home/Index` or `http://localhost:5024/Home/Index`.
-- **Sign in / student registration**: Open `http://localhost:5024/Account/Login` or `/Account/Register`.
-
-The existing API controllers remain available under `/api`. SQL Server LocalDB is configured by default for persistent local development. Set `UseInMemoryDatabase` to `true` only when you want temporary demo data.
-
-### Local SQL Server database and accounts
-
-The Development configuration uses SQL Server LocalDB with Windows authentication and the database name `SadacharDb`. `Trusted_Connection=True` connects as the Windows user running the app; no separate SQL password is stored. Start/inspect LocalDB with `sqllocaldb info MSSQLLocalDB`; the connection string is in `appsettings.json`. On first run, EF Core applies the checked-in migrations and creates the database and Identity tables.
-
-To confirm which Windows account SQL Server is using and that the Sadachar database exists:
-
-```powershell
-sqlcmd -S "(localdb)\MSSQLLocalDB" -E -Q "SELECT SUSER_SNAME() AS WindowsLogin, DB_NAME() AS CurrentDatabase; SELECT name, state_desc FROM sys.databases WHERE name = 'SadacharDb';"
-```
-
-In SQL Server Management Studio, connect to `(localdb)\MSSQLLocalDB` using **Windows Authentication** under the Windows account you use to run the app, then expand **Databases > SadacharDb > Tables**. The `AspNetUsers` table contains application sign-in accounts; use `/Account/Login` to sign in with the email and password you registered there. These are separate from the Windows account used to connect to LocalDB.
-
-```powershell
-# From the repository root; install the EF command once if it is not already installed
-dotnet tool install --global dotnet-ef --version 10.0.0
-dotnet ef database update --project src/Sadachar.Infrastructure/Sadachar.Infrastructure.csproj --startup-project src/Sadachar.Web/Sadachar.Web.csproj
-dotnet run --project src/Sadachar.Web/Sadachar.Web.csproj
-```
-
-Sign in at `/Account/Login`; create a student account at `/Account/Register`. Passwords are hashed by ASP.NET Core Identity and are never stored as plain text. New self-registered accounts have student access only; an administrator must provision educator accounts. The LMS starts without seeded student accounts or sample course content.
-
-The login cookie protects the account profile and APIs. Students can create and view only their own grievances; educator, administrator, and auditor access is checked from the account role stored in `AspNetUsers`.
-
-The LMS applies checked-in EF Core migrations on startup. To provision the first administrator, set `BootstrapAdmin:Email`, `BootstrapAdmin:Password`, and optionally `BootstrapAdmin:FullName` through .NET User Secrets or environment variables. For example, use `dotnet user-secrets set` for each value; do not put administrator credentials in `appsettings.json` or source control. The bootstrap runs only when the configured email does not already exist.
-
-For a different local database, keep connection strings out of source control and use .NET User Secrets:
-
-```powershell
-dotnet user-secrets init --project src/Sadachar.Web/Sadachar.Web.csproj
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "YOUR_LOCAL_SQL_SERVER_CONNECTION_STRING" --project src/Sadachar.Web/Sadachar.Web.csproj
-```
-
-Do not post database passwords or secret connection strings in chat or commit them to GitHub.
+- **Web Application**: Open [http://localhost:5024](http://localhost:5024) in your browser.
+- **Swagger / OpenAPI Documentation**: Open [http://localhost:5024/swagger](http://localhost:5024/swagger).
 
 ---
 
-## 📡 Core API Endpoints
+## 👥 Seed Accounts
 
-### Compliance (`/api/compliance`)
-- `POST /api/compliance/evaluate`: Submit accessibility scores for educational materials.
-- `GET /api/compliance/material/{materialId}`: Audit history for specific course material.
-- `GET /api/compliance/all`: Institutional compliance logs.
+All accounts use the password: **`Access@123`**
 
-### Governance & SLA (`/api/governance`)
-- `POST /api/governance/grievance`: File a grievance and activate 72-hour SLA clock.
-- `GET /api/governance/grievance/{ticketId}`: Retrieve grievance status with real-time breach check.
-- `GET /api/governance/grievances`: View all student grievances.
-- `POST /api/governance/grievance/trigger-sla-check`: Manual trigger for the SLA escalation engine.
+| Role | Email | Persona | Key Features |
+|---|---|---|---|
+| **Student** | `student@accessed.local` | Aarav Sharma | Enrolled courses, TTS reader, accessibility settings, barrier reporting |
+| **Teacher** | `teacher@accessed.local` | Dr. Meera Iyer | Course accessibility monitoring, multi-format upload checklist, student support queue |
+| **Administrator** | `admin@accessed.local` | Rohan Kapoor | Campus-wide overview, compliance audits, issue tracking Kanban board, CSV reports |
 
-### Conduct & Privacy (`/api/conduct`)
-- `POST /api/conduct/log-incident`: Anonymized incident logging with DPDP compliance.
-- `GET /api/conduct/incidents`: Audit flagged harassment/ableist language incidents.
-- `POST /api/conduct/purge-expired`: Enforce storage limitation and delete expired records.
+*(Public registration permits Student and Teacher sign-ups; Administrator accounts are restricted).*
+
+---
+
+## 🖥️ 14 Implemented Screens (Razor Views)
+
+1. **Landing Page** (`/`): Value proposition, stat counters, live feature preview with audio snippet.
+2. **Sign In & Register** (`/Account/Login`): Role-based registration with optional accessibility needs and live preview toggles.
+3. **Student Dashboard** (`/Dashboard`): Continue learning progress bar, reading streak, schedule notes, and profile toggles.
+4. **Accessible Resources** (`/Resources`): Format filter pills (Audio, Large print, Braille-ready, Captioned, Easy-read) and search.
+5. **Material Details** (`/Resources/Details/{id}`): Multi-format switcher, inline audio playback, and WCAG verification checklist.
+6. **Accessibility Settings** (`/Accessibility`): Font size slider (100–160%), Dyslexia-friendly/Mono typefaces, line spacing (1.4/1.8/2.2), themes (Paper, Light, High-contrast), saved to database and synchronized site-wide.
+7. **TTS Reader Mode** (`/Reader`): Web Speech API synthesizer with sentence-level highlighting, voice selection, speed/pitch controls, and keyboard shortcuts (`Space`: play/pause, `←`/`→`: sentence, `+`/`-`: speed).
+8. **Support & Complaints Portal** (`/Support`): Barrier logging with confidential submission option under DPDP Act 2023.
+9. **Teacher Dashboard** (`/Teacher`): Per-course accessibility scores, pre-flight upload checklist (alt-text, captions, headings, contrast), student accommodation queue.
+10. **Admin Dashboard** (`/Admin`): Registered users, active courses, compliance trend line, and category breakdown.
+11. **Compliance Monitoring** (`/Admin/Compliance`): Standard score cards (WCAG 2.2 AA, Institutional policy, Data protection) and department audit rankings.
+12. **Issue Tracking Kanban** (`/Admin/Issues`): Three-column interactive board (`Open`, `In review`, `Resolved`) with 72-hour statutory SLA tracking.
+13. **Reports & Exports** (`/Admin/Reports`): Audit trend analytics and one-click RFC 4180 CSV export (`/Admin/ExportCsv`).
+14. **Profile & Settings** (`/Profile`): User details, accessibility needs tag, notification toggles, and consent settings.
+
+---
+
+## 🎨 Design System & Accessibility (WCAG 2.2 AA)
+
+- **Palette**: Paper (`#F6EEDF`), Ink (`#2A2320`), Terracotta (`#C4452B`), Mustard (`#F0B429`), Forest (`#1F6F5C`), Plum (`#6B2D5C`), Sage (`#A9C7AE`), Blush (`#F4C7B3`).
+- **Typography**: Lora (headings) + Poppins (body) + Lexend (dyslexia-friendly).
+- **Neo-Brutalist Craft**: 2px ink borders, 4px hard offset shadows, pill chips.
+- **Layouts**: `_Layout.cshtml` (public) and `_AppLayout.cshtml` (fixed 240px sidebar on desktop, bottom tab bar on mobile `< 640px`).
+- **Accessibility**: Semantic HTML landmarks (`<header>`, `<nav>`, `<main>`, `<footer>`), visible 3px focus rings, accessible skip links, ARIA live announcer, high-contrast gold/black theme.
+
+---
+
+## 📡 RESTful Web API
+
+- `GET /api/resources` & `GET /api/resources/{id}`: Resource catalog and format alternatives.
+- `GET /api/profile` & `POST /api/profile/accessibility`: User profile and synchronized settings.
+- `GET /api/tickets`, `POST /api/tickets`, `PATCH /api/tickets/{id}/status`: Issue tracking.
+- `GET /api/compliance`: WCAG and departmental compliance scores.
+- `GET /api/reports/summary` & `GET /api/reports/export`: Analytics metrics and CSV export.

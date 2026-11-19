@@ -620,6 +620,7 @@ public class LearningController(ApplicationDbContext db, IWebHostEnvironment env
         db.ResourceCategories.Remove(category); await db.SaveChangesAsync(ct); return NoContent();
     }
 
+    [ApiExplorerSettings(IgnoreApi = true)]
     [HttpPost("admin/resources/upload")]
     [Authorize(Roles = "Admin,Educator")]
     [RequestSizeLimit(25 * 1024 * 1024)]

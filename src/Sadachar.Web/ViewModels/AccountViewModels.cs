@@ -5,12 +5,12 @@ namespace Sadachar.Web.ViewModels;
 
 public class LoginViewModel
 {
-    [Required]
-    [EmailAddress]
+    [Required(ErrorMessage = "Email address is required.")]
+    [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
     [Display(Name = "Email address")]
     public string Email { get; set; } = string.Empty;
 
-    [Required]
+    [Required(ErrorMessage = "Password is required.")]
     [DataType(DataType.Password)]
     public string Password { get; set; } = string.Empty;
 
@@ -22,41 +22,43 @@ public class LoginViewModel
 
 public class StudentRegistrationViewModel
 {
-    [Required]
+    [Required(ErrorMessage = "Full name is required.")]
     [StringLength(150)]
     [Display(Name = "Full name")]
     public string FullName { get; set; } = string.Empty;
 
-    [Required]
-    [EmailAddress]
+    [Required(ErrorMessage = "Email address is required.")]
+    [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
     [Display(Name = "Email address")]
     public string Email { get; set; } = string.Empty;
 
-    [Required]
-    [StringLength(100, MinimumLength = 8)]
+    [Required(ErrorMessage = "Password is required.")]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters long.")]
     [DataType(DataType.Password)]
     [Display(Name = "Password")]
     public string Password { get; set; } = string.Empty;
 
-    [Required]
+    [Required(ErrorMessage = "Please confirm your password.")]
     [DataType(DataType.Password)]
-    [Compare(nameof(Password))]
+    [Compare(nameof(Password), ErrorMessage = "Passwords do not match.")]
     [Display(Name = "Confirm password")]
     public string ConfirmPassword { get; set; } = string.Empty;
 
     [Required]
-    [EnumDataType(typeof(RegistrationRole))]
-    [Display(Name = "I’m joining as")]
+    [Display(Name = "Register as")]
     public RegistrationRole Role { get; set; } = RegistrationRole.Student;
 
-    [Range(typeof(bool), "true", "true", ErrorMessage = "Please accept the terms to create an account.")]
-    [Display(Name = "I agree to the Terms and Conditions")]
-    public bool AcceptTerms { get; set; }
+    [Display(Name = "Accessibility needs (optional)")]
+    public List<string> AccessibilityNeeds { get; set; } = [];
+
+    [Display(Name = "Department / Course")]
+    public string? Department { get; set; }
 }
 
 public enum RegistrationRole
 {
     Student = 1,
+    Teacher = 2,
     Parent = 5,
     Volunteer = 6
 }

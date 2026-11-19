@@ -1,0 +1,304 @@
+@using Sadachar.Core.Entities
+@using Sadachar.Core.Enums
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+    var isTeacher = User.IsInRole(AppRoles.Teacher) || currentUser?.Role == UserRole.Teacher;
+    var isAdmin = User.IsInRole(AppRoles.Administrator) || currentUser?.Role == UserRole.Administrator;
+    var isStudent = !isTeacher && !isAdmin;
+
+    var fullName = currentUser?.FullName ?? (isAdmin ? "Rohan Kapoor" : isTeacher ? "Dr. Meera Iyer" : "Aarav Sharma");
+    var initials = string.Concat(fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => s[0])).ToUpper();
+    if (string.IsNullOrEmpty(initials)) initials = isStudent ? "AS" : isTeacher ? "MI" : "RK";
+
+    var roleLabel = isAdmin ? "Administrator" : isTeacher ? "Faculty" : "Student";
+    var currentPath = Context.Request.Path.Value?.ToLower() ?? "";
+    var avatarName = isTeacher ? "Pip" : isAdmin ? "Lumo" : "Echo";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] != null ? $"{ViewData["Title"]} — AccessEd" : "AccessEd Workspace")</title>
+
+    <!-- Google Fonts: Playfair Display 900, Yellowtail, DM Sans 16/26, Lexend -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400;1,9..40,700&family=Lexend:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,900;1,900&family=Yellowtail&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5.3 & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <!-- AccessEd Retro Fuzzy Stylesheet -->
+    <link rel="stylesheet" href="/css/accessed.css?v=2.0" />
+    <link rel="stylesheet" href="/css/site.css?v=3.0" />
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="theme-paper app-body">
+    <!-- Accessible Skip Link (WCAG 2.2 AA) -->
+    <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
+    <!-- ARIA Live Announcer -->
+    <div id="screen-announcer" class="visually-hidden" aria-live="polite"></div>
+
+    <div class="app-wrapper">
+        <!-- ======================================================================
+             Sidebar Navigation (232px Desktop, Icon Sidebar 640-1024px)
+             ====================================================================== -->
+        <aside class="app-sidebar" role="navigation" aria-label="Application Navigation">
+            <div>
+                <!-- Brand Header -->
+                <a asp-controller="Home" asp-action="Index" class="sidebar-brand">
+                    <span class="d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px; background: var(--rust); color: #FAF4EA; border: 3px solid var(--ink); border-radius: 12px; box-shadow: 2px 2px 0 var(--ink); font-family: var(--font-heading); font-size: 1.3rem;">A</span>
+                    <div>
+                        <div class="fw-black fs-5 brand-title font-headline" style="letter-spacing: -0.5px; line-height: 1.1;">Access<span class="retro-accent">Ed</span></div>
+                        <small class="text-muted d-block brand-text" style="font-size: 0.72rem; font-weight: 500;">Education for all</small>
+                    </div>
+                </a>
+
+                <!-- Nav Items based on Role -->
+                <ul class="sidebar-nav-list">
+                    @if (isStudent)
+                    {
+                        <li class="sidebar-nav-item @(currentPath.Contains("/dashboard") ? "active" : "")">
+                            <a asp-controller="Dashboard" asp-action="Index">
+                                <i class="bi bi-speedometer2" aria-hidden="true"></i> <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-nav-item @(currentPath.Contains("/resources") && !currentPath.Contains("/reader") ? "active" : "")">
+                            <a asp-controller="Resources" asp-action="Index">
+                                <i class="bi bi-collection-play" aria-hidden="true"></i> <span>Resources</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-nav-item @(currentPath.Contains("/accessibility") ? "active" : "")">
+                            <a asp-controller="Accessibility" asp-action="Index">
+                                <i class="bi bi-sliders" aria-hidden="true"></i> <span>Accessibility</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-nav-item @(currentPath.Contains("/reader") ? "active" : "")">
+                            <a asp-controller="Resources" asp-action="Reader">
+                                <i class="bi bi-volume-up" aria-hidden="true"></i> <span>Reader (TTS)</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-nav-item @(currentPath.Contains("/support") ? "active" : "")">
+                            <a asp-controller="Support" asp-action="Index" class="d-flex justify-content-between align-items-center">
+                                <div><i class="bi bi-shield-exclamation" aria-hidden="true"></i> <span>Support</span></div>
+                                <span class="pill-chip pill-chip-coral px-2 py-0" style="font-size: 0.72rem;">1</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-nav-item @(currentPath.Contains("/profile") ? "active" : "")">
+                            <a asp-controller="Account" asp-action="Profile">
+                                <i class="bi bi-person-gear" aria-hidden="true"></i> <span>Profile</span>
+                            </a>
+                        </li>
+                    }
+                    else if (isTeacher)
+                    {
+                        <li class="sidebar-nav-item @(currentPath.Contains("/teacher") ? "active" : "")">
+                            <a asp-controller="Teacher" asp-action="Index">
+                                <i class="bi bi-speedometer2" aria-hidden="true"></i> <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-nav-item @(currentPath.Contains("/resources") ? "active" : "")">
+                            <a asp-controller="Resources" asp-action="Index">
+                                <i class="bi bi-collection-play" aria-hidden="true"></i> <span>Materials</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-nav-item">
+                            <a href="/Teacher#students">
+                                <i class="bi bi-people" aria-hidden="true"></i> <span>Students</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-nav-item @(currentPath.Contains("/support") ? "active" : "")">
+                            <a asp-controller="Support" asp-action="Index">
+                                <i class="bi bi-shield-exclamation" aria-hidden="true"></i> <span>Support</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-nav-item @(currentPath.Contains("/profile") ? "active" : "")">
+                            <a asp-controller="Account" asp-action="Profile">
+                                <i class="bi bi-person-gear" aria-hidden="true"></i> <span>Profile</span>
+                            </a>
+                        </li>
+                    }
+                    else if (isAdmin)
+                    {
+                        <li class="sidebar-nav-item @(currentPath == "/admin" || currentPath == "/admin/index" ? "active" : "")">
+                            <a asp-controller="Admin" asp-action="Index">
+                                <i class="bi bi-grid-1x2" aria-hidden="true"></i> <span>Overview</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-nav-item @(currentPath.Contains("/compliance") ? "active" : "")">
+                            <a asp-controller="Admin" asp-action="Compliance">
+                                <i class="bi bi-patch-check" aria-hidden="true"></i> <span>Compliance</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-nav-item @(currentPath.Contains("/issues") ? "active" : "")">
+                            <a asp-controller="Admin" asp-action="Issues">
+                                <i class="bi bi-kanban" aria-hidden="true"></i> <span>Issues</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-nav-item @(currentPath.Contains("/reports") ? "active" : "")">
+                            <a asp-controller="Admin" asp-action="Reports">
+                                <i class="bi bi-bar-chart-line" aria-hidden="true"></i> <span>Reports</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-nav-item @(currentPath.Contains("/profile") ? "active" : "")">
+                            <a asp-controller="Account" asp-action="Profile">
+                                <i class="bi bi-gear" aria-hidden="true"></i> <span>Settings</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <!-- User Status Pill & Sign Out -->
+            <div class="sidebar-user-pill">
+                <div style="width: 38px; height: 38px; flex-shrink: 0;">
+                    @await Html.PartialAsync("_Avatar", avatarName)
+                </div>
+                <div class="user-info flex-grow-1" style="min-width: 0;">
+                    <strong class="d-block text-truncate" style="font-size: 0.85rem; color: var(--ink);">@fullName</strong>
+                    <small class="text-muted d-block" style="font-size: 0.72rem;">@roleLabel</small>
+                </div>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-sm btn-link p-0 text-dark" title="Sign out" aria-label="Sign out">
+                        <i class="bi bi-box-arrow-right fs-5" aria-hidden="true"></i>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- ======================================================================
+             Main App View Area (Header Topbar + View Content)
+             ====================================================================== -->
+        <div class="app-main">
+            <!-- Topbar -->
+            <header class="app-topbar" role="banner">
+                <div class="d-flex align-items-center gap-3 flex-grow-1" style="max-width: 480px;">
+                    <form asp-controller="Resources" asp-action="Index" method="get" class="w-100" role="search">
+                        <div class="position-relative">
+                            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" aria-hidden="true"></i>
+                            <label for="topbar-search" class="visually-hidden">Search resources</label>
+                            <input id="topbar-search" type="search" name="search" class="accessed-input ps-5 py-1" style="font-size: 0.88rem; min-height: 42px;" placeholder="Search resources…" aria-label="Search resources" />
+                        </div>
+                    </form>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <a asp-controller="Accessibility" asp-action="Index" class="btn-retro-secondary py-1 px-3 d-none d-sm-inline-flex" style="font-size: 0.82rem;" title="Accessibility Quick Controls">
+                        <i class="bi bi-universal-access" aria-hidden="true"></i> Accessibility
+                    </a>
+
+                    <a asp-controller="Account" asp-action="Profile" class="text-decoration-none" title="@fullName · @roleLabel">
+                        <div style="width: 42px; height: 42px; border: 2.5px solid var(--ink); border-radius: 50%; overflow: hidden; background: var(--mustard); box-shadow: 2px 2px 0 var(--ink);">
+                            @await Html.PartialAsync("_Avatar", avatarName)
+                        </div>
+                    </a>
+                </div>
+            </header>
+
+            <!-- Main Landmark -->
+            <main id="main-content" class="app-content" role="main">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success d-flex align-items-center gap-2 mb-4" role="alert" style="border: 3px solid var(--ink); background-color: #E8F5E9; color: var(--ink); box-shadow: 4px 4px 0 var(--ink); border-radius: 14px;">
+                        <i class="bi bi-check-circle-fill fs-5" style="color: var(--teal);" aria-hidden="true"></i>
+                        <div class="fw-bold">@TempData["SuccessMessage"]</div>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" role="alert" style="border: 3px solid var(--ink); background-color: #FDEDEC; color: var(--ink); box-shadow: 4px 4px 0 var(--ink); border-radius: 14px;">
+                        <i class="bi bi-exclamation-triangle-fill fs-5" style="color: var(--coral);" aria-hidden="true"></i>
+                        <div class="fw-bold">@TempData["ErrorMessage"]</div>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <!-- ======================================================================
+         Mobile Bottom Tab Bar (< 640px)
+         ====================================================================== -->
+    <nav class="mobile-tab-bar" role="navigation" aria-label="Mobile Navigation">
+        @if (isStudent)
+        {
+            <a asp-controller="Dashboard" asp-action="Index" class="mobile-tab-btn @(currentPath.Contains("/dashboard") ? "active" : "")">
+                <i class="bi bi-speedometer2 fs-5" aria-hidden="true"></i>
+                <span>Dashboard</span>
+            </a>
+            <a asp-controller="Resources" asp-action="Index" class="mobile-tab-btn @(currentPath.Contains("/resources") && !currentPath.Contains("/reader") ? "active" : "")">
+                <i class="bi bi-collection-play fs-5" aria-hidden="true"></i>
+                <span>Resources</span>
+            </a>
+            <a asp-controller="Accessibility" asp-action="Index" class="mobile-tab-btn @(currentPath.Contains("/accessibility") ? "active" : "")">
+                <i class="bi bi-sliders fs-5" aria-hidden="true"></i>
+                <span>Access</span>
+            </a>
+            <a asp-controller="Support" asp-action="Index" class="mobile-tab-btn @(currentPath.Contains("/support") ? "active" : "")">
+                <i class="bi bi-shield-exclamation fs-5" aria-hidden="true"></i>
+                <span>Support</span>
+            </a>
+            <a asp-controller="Account" asp-action="Profile" class="mobile-tab-btn @(currentPath.Contains("/profile") ? "active" : "")">
+                <i class="bi bi-person fs-5" aria-hidden="true"></i>
+                <span>Profile</span>
+            </a>
+        }
+        else if (isTeacher)
+        {
+            <a asp-controller="Teacher" asp-action="Index" class="mobile-tab-btn @(currentPath.Contains("/teacher") ? "active" : "")">
+                <i class="bi bi-speedometer2 fs-5" aria-hidden="true"></i>
+                <span>Dashboard</span>
+            </a>
+            <a asp-controller="Resources" asp-action="Index" class="mobile-tab-btn @(currentPath.Contains("/resources") ? "active" : "")">
+                <i class="bi bi-collection-play fs-5" aria-hidden="true"></i>
+                <span>Materials</span>
+            </a>
+            <a asp-controller="Support" asp-action="Index" class="mobile-tab-btn @(currentPath.Contains("/support") ? "active" : "")">
+                <i class="bi bi-shield-exclamation fs-5" aria-hidden="true"></i>
+                <span>Support</span>
+            </a>
+            <a asp-controller="Account" asp-action="Profile" class="mobile-tab-btn @(currentPath.Contains("/profile") ? "active" : "")">
+                <i class="bi bi-person fs-5" aria-hidden="true"></i>
+                <span>Profile</span>
+            </a>
+        }
+        else if (isAdmin)
+        {
+            <a asp-controller="Admin" asp-action="Index" class="mobile-tab-btn @(currentPath == "/admin" || currentPath == "/admin/index" ? "active" : "")">
+                <i class="bi bi-grid-1x2 fs-5" aria-hidden="true"></i>
+                <span>Overview</span>
+            </a>
+            <a asp-controller="Admin" asp-action="Compliance" class="mobile-tab-btn @(currentPath.Contains("/compliance") ? "active" : "")">
+                <i class="bi bi-patch-check fs-5" aria-hidden="true"></i>
+                <span>Compliance</span>
+            </a>
+            <a asp-controller="Admin" asp-action="Issues" class="mobile-tab-btn @(currentPath.Contains("/issues") ? "active" : "")">
+                <i class="bi bi-kanban fs-5" aria-hidden="true"></i>
+                <span>Issues</span>
+            </a>
+            <a asp-controller="Admin" asp-action="Reports" class="mobile-tab-btn @(currentPath.Contains("/reports") ? "active" : "")">
+                <i class="bi bi-bar-chart-line fs-5" aria-hidden="true"></i>
+                <span>Reports</span>
+            </a>
+            <a asp-controller="Account" asp-action="Profile" class="mobile-tab-btn @(currentPath.Contains("/profile") ? "active" : "")">
+                <i class="bi bi-gear fs-5" aria-hidden="true"></i>
+                <span>Settings</span>
+            </a>
+        }
+    </nav>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/site.js?v=3.0"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

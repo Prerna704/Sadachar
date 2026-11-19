@@ -1,0 +1,156 @@
+@model Sadachar.Web.ViewModels.StudentDashboardViewModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<!-- Welcome Header with Fluffy Avatar Guide -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 p-4 retro-card" style="background: var(--paper-card);">
+    <div class="d-flex align-items-center gap-3">
+        <div class="brush-blob brush-blob-mustard" style="width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <div style="width: 56px; height: 56px;">
+                @await Html.PartialAsync("_Avatar", "Dot")
+            </div>
+        </div>
+        <div>
+            <span class="pill-chip pill-chip-teal mb-1"><i class="bi bi-stars"></i> Workspace Ready</span>
+            <h1 class="h2 fw-black mb-1 font-headline" style="color: var(--ink);">Good morning, @Model.StudentName!</h1>
+            <p class="text-muted mb-0 fw-semibold" style="font-size: 0.95rem;">@Model.TermInfo</p>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <a asp-controller="Resources" asp-action="Index" class="btn-retro-secondary text-decoration-none">
+            <i class="bi bi-search" aria-hidden="true"></i> Browse library
+        </a>
+        <a asp-controller="Support" asp-action="Index" class="btn-retro-primary text-decoration-none">
+            <i class="bi bi-plus-circle" aria-hidden="true"></i> Report barrier
+        </a>
+    </div>
+</div>
+
+<!-- 4 Stat Cards Row using _StatCard partial -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        @await Html.PartialAsync("_StatCard", ("Courses", Model.EnrolledCoursesCount.ToString(), "Active learning", "bi-mortarboard", "rust"))
+    </div>
+    <div class="col-6 col-lg-3">
+        @await Html.PartialAsync("_StatCard", ("Resources", Model.AccessibleResourcesCount.ToString(), "Multi-format", "bi-collection-play", "teal"))
+    </div>
+    <div class="col-6 col-lg-3">
+        @await Html.PartialAsync("_StatCard", ("Streak", Model.ReadingStreak.ToString() + " days", "Keep going!", "bi-fire", "mustard"))
+    </div>
+    <div class="col-6 col-lg-3">
+        @await Html.PartialAsync("_StatCard", ("Support", Model.OpenTicketsCount.ToString(), "Resolved < 72h", "bi-shield-check", "sage"))
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Continue Learning & Schedule -->
+    <div class="col-lg-8">
+        <!-- Continue Learning Section -->
+        <div class="retro-card mb-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 class="h4 fw-black mb-0 font-headline">Continue <span class="retro-accent">learning</span></h2>
+                <a asp-controller="Resources" asp-action="Index" class="fw-bold text-decoration-none" style="color: var(--rust); font-size: 0.9rem;">View all</a>
+            </div>
+
+            <!-- Primary Highlight Item: Linked Lists -->
+            <div class="p-3 mb-3" style="background: var(--paper); border: 3px solid var(--ink); border-radius: 14px; box-shadow: 4px 4px 0 var(--ink);">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="pill-chip pill-chip-mustard mb-1" style="font-size: 0.75rem;">68% Completed</span>
+                        <h3 class="h5 fw-black mb-1 font-headline">Data Structures: Linked Lists</h3>
+                        <p class="text-muted mb-0 fw-semibold" style="font-size: 0.85rem;">Module 3 · Audio + large print available</p>
+                    </div>
+                </div>
+                <div class="progress mb-3" style="height: 10px; border: 2.5px solid var(--ink); border-radius: 9999px; background: #FFF;">
+                    <div class="progress-bar" role="progressbar" style="width: 68%; background-color: var(--rust);" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a asp-controller="Resources" asp-action="Details" asp-route-id="@(Model.ContinueLearning.FirstOrDefault()?.MaterialId)" class="btn-retro-primary py-1 px-3" style="font-size: 0.85rem;">
+                        Resume
+                    </a>
+                    <a asp-controller="Resources" asp-action="Reader" asp-route-id="@(Model.ContinueLearning.FirstOrDefault()?.MaterialId)" class="btn-retro-secondary py-1 px-3" style="font-size: 0.85rem;">
+                        <i class="bi bi-headphones" aria-hidden="true"></i> Listen
+                    </a>
+                </div>
+            </div>
+
+            <!-- Next Secondary Items using _ListItem Partial -->
+            @await Html.PartialAsync("_ListItem", ("Digital Literacy · Week 5 video", "Captions and interactive transcripts ready", "Captions", "bi-camera-video", "/Resources"))
+            @await Html.PartialAsync("_ListItem", ("Assistive Tech Basics · Reading", "Easy-read summary and dyslexia typography applied", "Easy-Read", "bi-book", "/Resources"))
+        </div>
+
+        <!-- This Week Schedule -->
+        <div class="retro-card">
+            <h2 class="h4 fw-black mb-3 font-headline">This week</h2>
+            <div class="d-flex flex-column gap-3">
+                <div class="p-3 d-flex align-items-start justify-content-between" style="background: var(--paper); border: 3px solid var(--ink); border-radius: 12px; box-shadow: 3px 3px 0 var(--ink);">
+                    <div>
+                        <span class="fw-bold d-block font-headline">Lab: Linked List practice</span>
+                        <span class="text-muted fw-semibold" style="font-size: 0.85rem;">Thu 10:00 · Room 204</span>
+                        <span class="pill-chip pill-chip-teal ms-2 py-0 px-2" style="font-size: 0.72rem;">Ramp access verified</span>
+                    </div>
+                    <span class="pill-chip pill-chip-mustard">Thu</span>
+                </div>
+                <div class="p-3 d-flex align-items-start justify-content-between" style="background: var(--paper); border: 3px solid var(--ink); border-radius: 12px; box-shadow: 3px 3px 0 var(--ink);">
+                    <div>
+                        <span class="fw-bold d-block font-headline">Quiz: Digital Literacy</span>
+                        <span class="text-muted fw-semibold" style="font-size: 0.85rem;">Fri · Assistive accommodation applied</span>
+                        <span class="pill-chip pill-chip-sky ms-2 py-0 px-2" style="font-size: 0.72rem;">Extra time approved +25%</span>
+                    </div>
+                    <span class="pill-chip pill-chip-rust">Fri</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Accessibility Profile & Announcements -->
+    <div class="col-lg-4">
+        <!-- Quick Accessibility Profile Card -->
+        <div class="retro-card mb-4" style="background: var(--paper-card);">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 class="h5 fw-black mb-0 font-headline">Accessibility profile</h2>
+                <div style="width: 32px; height: 32px;">
+                    @await Html.PartialAsync("_Avatar", "Brailly")
+                </div>
+            </div>
+            <div class="d-flex flex-column gap-3 mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold" style="font-size: 0.9rem;">Dyslexia font</span>
+                    <span class="pill-chip pill-chip-teal py-0 px-2" style="font-size: 0.75rem;">Active</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold" style="font-size: 0.9rem;">High contrast</span>
+                    <span class="pill-chip pill-chip-sage py-0 px-2" style="font-size: 0.75rem;">Default</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold" style="font-size: 0.9rem;">Read aloud</span>
+                    <span class="pill-chip pill-chip-teal py-0 px-2" style="font-size: 0.75rem;">1.0× Voice</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold" style="font-size: 0.9rem;">Reduce motion</span>
+                    <span class="pill-chip pill-chip-sage py-0 px-2" style="font-size: 0.75rem;">Off</span>
+                </div>
+            </div>
+            <a asp-controller="Accessibility" asp-action="Index" class="btn-retro-secondary w-100 text-center text-decoration-none py-2" style="font-size: 0.88rem;">
+                Open settings <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+
+        <!-- Announcements -->
+        <div class="retro-card">
+            <h2 class="h5 fw-black mb-3 font-headline">Announcements</h2>
+            <div class="d-flex flex-column gap-3">
+                <div class="pb-2" style="border-bottom: 2px solid var(--ink);">
+                    <span class="fw-bold d-block font-headline" style="font-size: 0.92rem;">Captioned lecture archive updated</span>
+                    <small class="text-muted fw-semibold">Computer Science · 2 h ago</small>
+                </div>
+                <div>
+                    <span class="fw-bold d-block font-headline" style="font-size: 0.92rem;">Accessibility audit published</span>
+                    <small class="text-muted fw-semibold">Administration · Yesterday</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

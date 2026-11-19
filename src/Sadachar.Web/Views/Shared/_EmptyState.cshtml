@@ -1,0 +1,17 @@
+@model (string Title, string Message, string AvatarName, string ActionText, string ActionUrl)
+
+<div class="retro-card empty-state text-center p-5 my-4" style="background: var(--paper-card); border: 3px solid var(--ink); border-radius: 20px; box-shadow: 6px 6px 0 var(--ink);">
+    <div class="brush-blob brush-blob-mustard mb-4" style="width: 110px; height: 110px; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+        <div style="width: 80px; height: 80px;">
+            @await Html.PartialAsync("_Avatar", Model.AvatarName ?? "Lumo")
+        </div>
+    </div>
+    <h3 class="font-headline fs-3 fw-black mb-2" style="color: var(--ink);">@Model.Title</h3>
+    <p class="text-muted mx-auto mb-4" style="max-width: 440px; font-size: 0.95rem;">@Model.Message</p>
+    @if (!string.IsNullOrEmpty(Model.ActionText) && !string.IsNullOrEmpty(Model.ActionUrl))
+    {
+        <a href="@Model.ActionUrl" class="btn-retro-primary">
+            @Model.ActionText <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+        </a>
+    }
+</div>

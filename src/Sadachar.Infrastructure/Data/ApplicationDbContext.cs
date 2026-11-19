@@ -14,6 +14,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ComplianceLog> ComplianceLogs => Set<ComplianceLog>();
     public DbSet<GrievanceTicket> GrievanceTickets => Set<GrievanceTicket>();
     public DbSet<ConductLog> ConductLogs => Set<ConductLog>();
+    public DbSet<AccessibilityProfile> AccessibilityProfiles => Set<AccessibilityProfile>();
+    public DbSet<Material> Materials => Set<Material>();
+    public DbSet<MaterialFormat> MaterialFormats => Set<MaterialFormat>();
+    public DbSet<ComplianceAudit> ComplianceAudits => Set<ComplianceAudit>();
+    public DbSet<Ticket> Tickets => Set<Ticket>();
+    public DbSet<TicketComment> TicketComments => Set<TicketComment>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<Course> Courses => Set<Course>();
     public DbSet<Lesson> Lessons => Set<Lesson>();
     public DbSet<LearningResource> LearningResources => Set<LearningResource>();
@@ -103,6 +110,84 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<QuizAttempt>().HasIndex(x => new { x.UserId, x.AttemptedAtUtc });
         builder.Entity<QuizAttempt>().HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.Entity<QuizAttempt>().HasOne<Quiz>().WithMany().HasForeignKey(x => x.QuizId).OnDelete(DeleteBehavior.Cascade);
+
+        // AccessEd ER Configurations
+        builder.Entity<AccessibilityProfile>(entity =>
+        {
+            entity.HasKey(e => e.ProfileId);
+            entity.HasOne(e => e.User)
+                  .WithOne(u => u.AccessibilityProfile)
+                  .HasForeignKey<AccessibilityProfile>(e => e.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<Course>(entity =>
+        {
+            entity.HasOne(e => e.Teacher)
+                  .WithMany(u => u.TaughtCourses)
+                  .HasForeignKey(e => e.TeacherId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        builder.Entity<Material>(entity =>
+        {
+            entity.HasKey(e => e.MaterialId);
+            entity.HasOne(e => e.Course)
+                  .WithMany(c => c.Materials)
+                  .HasForeignKey(e => e.CourseId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<MaterialFormat>(entity =>
+        {
+            entity.HasKey(e => e.FormatId);
+            entity.HasOne(e => e.Material)
+                  .WithMany(m => m.Formats)
+                  .HasForeignKey(e => e.MaterialId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<ComplianceAudit>(entity =>
+        {
+            entity.HasKey(e => e.AuditId);
+            entity.HasIndex(e => e.Department);
+            entity.HasIndex(e => e.Standard);
+        });
+
+        builder.Entity<Ticket>(entity =>
+        {
+            entity.HasKey(e => e.TicketId);
+            entity.HasIndex(e => e.TicketNumber).IsUnique();
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.Priority);
+            entity.HasOne(e => e.User)
+                  .WithMany(u => u.Tickets)
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Assignee)
+                  .WithMany()
+                  .HasForeignKey(e => e.AssigneeId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        builder.Entity<TicketComment>(entity =>
+        {
+            entity.HasKey(e => e.CommentId);
+            entity.HasOne(e => e.Ticket)
+                  .WithMany(t => t.Comments)
+                  .HasForeignKey(e => e.TicketId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Author)
+                  .WithMany(u => u.TicketComments)
+                  .HasForeignKey(e => e.AuthorId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<AuditLog>(entity =>
+        {
+            entity.HasKey(e => e.LogId);
+            entity.HasIndex(e => e.Timestamp);
+        });
     }
 }
 

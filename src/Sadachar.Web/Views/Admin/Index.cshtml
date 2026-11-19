@@ -1,0 +1,156 @@
+@model Sadachar.Web.ViewModels.AdminDashboardViewModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "Administration Overview";
+}
+
+<!-- Welcome Header with Admin Avatar -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 p-4 retro-card" style="background: var(--paper-card);">
+    <div class="d-flex align-items-center gap-3">
+        <div class="brush-blob brush-blob-sage" style="width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <div style="width: 56px; height: 56px;">
+                @await Html.PartialAsync("_Avatar", "Lumo")
+            </div>
+        </div>
+        <div>
+            <span class="pill-chip pill-chip-teal mb-1"><i class="bi bi-shield-lock-fill"></i> System Governance</span>
+            <h1 class="h2 fw-black mb-1 font-headline" style="color: var(--ink);">Administration <span class="retro-accent">overview</span></h1>
+            <p class="text-muted mb-0 fw-semibold" style="font-size: 0.95rem;">Institution-wide accessibility monitoring & regulatory compliance</p>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <a asp-action="Compliance" class="btn-retro-secondary text-decoration-none">
+            <i class="bi bi-patch-check me-1" aria-hidden="true"></i> Compliance monitoring
+        </a>
+        <a asp-action="Issues" class="btn-retro-primary text-decoration-none">
+            <i class="bi bi-kanban me-1" aria-hidden="true"></i> Issue tracking board
+        </a>
+    </div>
+</div>
+
+<!-- 4 KPI Cards Row using _StatCard Partial -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        @await Html.PartialAsync("_StatCard", ("Users", Model.RegisteredUsersCount.ToString("N0"), "Students & Faculty", "bi-people", "teal"))
+    </div>
+    <div class="col-6 col-lg-3">
+        @await Html.PartialAsync("_StatCard", ("Courses", Model.ActiveCoursesCount.ToString(), "Campus catalog", "bi-journal-check", "mustard"))
+    </div>
+    <div class="col-6 col-lg-3">
+        @await Html.PartialAsync("_StatCard", ("Compliance", Model.ComplianceScorePercent.ToString() + "%", "Statutory audit", "bi-shield-check", "sage"))
+    </div>
+    <div class="col-6 col-lg-3">
+        @await Html.PartialAsync("_StatCard", ("Open Issues", Model.OpenIssuesCount.ToString(), "Active remediation", "bi-exclamation-octagon", "coral"))
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Compliance Trend & Recent Audit Activity -->
+    <div class="col-lg-7">
+        <!-- Compliance Trend Card -->
+        <div class="retro-card mb-4" style="background: var(--paper-card);">
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 3px solid var(--ink);">
+                <h2 class="h5 fw-black mb-0 font-headline">Compliance trend</h2>
+                <span class="pill-chip pill-chip-teal py-0 px-2" style="font-size: 0.75rem;">+4% this term</span>
+            </div>
+            <p class="text-muted mb-3 fw-semibold" style="font-size: 0.88rem;">
+                Monthly audit scores across WCAG 2.2 AA checkpoints, caption coverage, and physical barrier resolution:
+            </p>
+
+            <!-- Trend Bars with Retro Borders -->
+            <div class="d-flex flex-column gap-3 mb-2">
+                <div>
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.85rem; font-weight: 700;">
+                        <span>WCAG 2.2 Level AA</span>
+                        <span class="font-headline">91%</span>
+                    </div>
+                    <div class="progress" style="height: 14px; border: 2.5px solid var(--ink); border-radius: 9999px; background: #FFF;">
+                        <div class="progress-bar" style="width: 91%; background-color: var(--teal);" role="progressbar" aria-valuenow="91" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.85rem; font-weight: 700;">
+                        <span>Institutional RPwD Policy</span>
+                        <span class="font-headline">84%</span>
+                    </div>
+                    <div class="progress" style="height: 14px; border: 2.5px solid var(--ink); border-radius: 9999px; background: #FFF;">
+                        <div class="progress-bar" style="width: 84%; background-color: var(--mustard);" role="progressbar" aria-valuenow="84" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.85rem; font-weight: 700;">
+                        <span>Data Protection & Privacy (DPDP)</span>
+                        <span class="font-headline">79%</span>
+                    </div>
+                    <div class="progress" style="height: 14px; border: 2.5px solid var(--ink); border-radius: 9999px; background: #FFF;">
+                        <div class="progress-bar" style="width: 79%; background-color: var(--rust);" role="progressbar" aria-valuenow="79" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Audit Activity -->
+        <div class="retro-card" style="background: var(--paper-card);">
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 3px solid var(--ink);">
+                <h2 class="h5 fw-black mb-0 font-headline">Recent statutory audit activity</h2>
+                <a asp-action="Reports" class="fw-bold text-decoration-none" style="font-size: 0.85rem; color: var(--rust);">View reports</a>
+            </div>
+
+            <div class="d-flex flex-column gap-2">
+                @foreach (var log in Model.RecentAudits)
+                {
+                    <div class="p-3 d-flex align-items-start justify-content-between" style="background: var(--paper); border: 2.5px solid var(--ink); border-radius: 12px; box-shadow: 2px 2px 0 var(--ink);">
+                        <div>
+                            <span class="fw-bold font-headline d-block" style="font-size: 0.92rem;">@log.Action</span>
+                            <small class="text-muted fw-semibold">@log.Details</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="pill-chip pill-chip-sage py-0 px-2" style="font-size: 0.72rem;">@log.Timestamp.ToString("dd MMM HH:mm")</span>
+                            <small class="text-muted d-block mt-1">@log.ActorName</small>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Quick Actions & Ombudsman Panel -->
+    <div class="col-lg-5">
+        <div class="retro-card mb-4" style="background: var(--paper-card);">
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 3px solid var(--ink);">
+                <h2 class="h5 fw-black mb-0 font-headline">Quick management</h2>
+                <div style="width: 32px; height: 32px;">
+                    @await Html.PartialAsync("_Avatar", "Pip")
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mb-3">
+                <a asp-action="Compliance" class="btn-retro-secondary d-flex align-items-center justify-content-between text-decoration-none py-2 px-3">
+                    <span><i class="bi bi-patch-check me-2 text-success"></i> Run statutory audit</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                <a asp-action="Issues" class="btn-retro-secondary d-flex align-items-center justify-content-between text-decoration-none py-2 px-3">
+                    <span><i class="bi bi-kanban me-2 text-warning"></i> Open barrier kanban</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                <a asp-action="Reports" class="btn-retro-secondary d-flex align-items-center justify-content-between text-decoration-none py-2 px-3">
+                    <span><i class="bi bi-download me-2 text-primary"></i> Export compliance CSV</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="retro-card" style="background: var(--paper-card);">
+            <h2 class="h5 fw-black mb-3 font-headline"><i class="bi bi-shield-check text-success me-1"></i> Ombudsman & DPDP</h2>
+            <p class="text-muted fw-semibold mb-3" style="font-size: 0.88rem;">
+                Confidential complaints submitted under DPDP Act 2023 are encrypted and accessible strictly by authorized grievance officers.
+            </p>
+            <div class="p-3" style="background: var(--paper); border: 2.5px solid var(--ink); border-radius: 12px; box-shadow: 2px 2px 0 var(--ink);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold font-headline" style="font-size: 0.85rem;">Confidential Tickets</span>
+                    <span class="pill-chip pill-chip-teal py-0 px-2" style="font-size: 0.72rem;">Encrypted</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

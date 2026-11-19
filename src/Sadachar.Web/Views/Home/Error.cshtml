@@ -1,0 +1,8 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Error";
+}
+
+<div class="container py-5 text-center">
+    @await Html.PartialAsync("_EmptyState", ("Something went wrong", "An unexpected error occurred while processing your request. Please return to the homepage or report the barrier to our support team.", "Lumo", "Return home", "/"))
+</div>
